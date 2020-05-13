@@ -1,5 +1,5 @@
 # API-Key (keep secret at all times)
-api-key.py
+key.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
