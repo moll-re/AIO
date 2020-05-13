@@ -66,8 +66,9 @@ class ChatBot():
         """"""
         update_url = self.base_url + "getUpdates"
         data = {"offset":self.offset}
-        result = requests.post(update_url,data=data)
+
         try:
+            result = requests.post(update_url,data=data)
             result = result.json()["result"]
         except:
             result = ""
