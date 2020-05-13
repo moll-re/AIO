@@ -2,7 +2,7 @@
 
 if pgrep -x "python3" > /dev/null
 then
-    python3 main.py
+    echo "Already running"
 else
-    echo "Not running"
+    python3 main.py
 fi
