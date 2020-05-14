@@ -89,10 +89,16 @@ class ChatBot():
 
             chat_members = self.persistence.read("chat_members")
             if str(author["id"]) not in chat_members:
-                name = author["first_name"] + " " + author["last_name"]
+                name = ""
+                if "first_name" in author:
+                    name += author["first_name"]
+                if "last_name" in author:
+                    name += author["last_name"]
+                if len(name) == 0:
+                    name += "anonymous"
                 chat_members[author["id"]] = name
                 self.persistence.write("chat_members", chat_members)
-                self.send_message("Welcome to this chat " + name + " !")
+                self.send_message("Welcome to this chat " + name + "!")
 
             if "text" in message:
                 print("Chat said: ", emoji.demojize(message["text"]))
@@ -178,11 +184,11 @@ class ChatBot():
         now = weather["current"]
         print(now)
         message = "<b>Now:</b> " + categories[now["weather"][0]["main"]] + "\n"
-        message += ":thermometer: " + str(now["temp"]) + "°\n\n"
+        message += ":thermometer: " + str(int(now["temp"])) + "°\n\n"
         for i, day in enumerate(weather["daily"]):
-             message += "<b>+" + str(i) + ":</b> " + categories[day["weather"][0]["main"]] + "\n"
+             message += "<b>+" + str(i+1) + ":</b> " + categories[day["weather"][0]["main"]] + "\n"
              print(day["temp"]["min"])
-             message += ":thermometer: :fast_down_button:" + str(day["temp"]["min"]) + "° , :thermometer: :fast_up_button: " + str(day["temp"]["max"]) + "°\n\n"
+             message += ":thermometer: :fast_down_button: " + str(int(day["temp"]["min"])) + "° , :thermometer: :fast_up_button: " + str(int(day["temp"]["max"])) + "°\n\n"
         # print(weather)
         self.send_message(message)
 
@@ -213,11 +219,11 @@ class ChatBot():
     def bot_print_events(self, params):
         """Shows a list of couple-related events and a countdown"""
         events = {
-            "anniversary :heart:" : datetime.date(datetime.datetime.now().year,12,7),
+            "anniversary :red_heart:" : datetime.date(datetime.datetime.now().year,12,7),
             "valentine's day :rose:": datetime.date(datetime.datetime.now().year,2,14),
-            "Marine's birthday :tada:": datetime.date(datetime.datetime.now().year,8,31),
-            "Remy's birthday :tada:": datetime.date(datetime.datetime.now().year,3,25),
-            "Christmas :gift:" : datetime.date(datetime.datetime.now().year,12,24),
+            "Marine's birthday :party_popper:": datetime.date(datetime.datetime.now().year,8,31),
+            "Remy's birthday :party_popper:": datetime.date(datetime.datetime.now().year,3,25),
+            "Christmas :wrapped_gift:" : datetime.date(datetime.datetime.now().year,12,24),
         }
 
         send_string = "Upcoming events: \n"
