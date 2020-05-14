@@ -8,6 +8,7 @@ import datetime
 import googlesearch
 import emoji
 
+from persistence import PersistentVars
 
 class ChatBot():
 
@@ -22,18 +23,18 @@ class ChatBot():
         self.version = version
         self.name = name
 
-        # Counters
+        # Persisten variable
+        self.persistence = PersistentVars("permanent_vars.json")
+
+        # Uptime counter
         self.start_time = datetime.datetime.now()
-        self.message_read = 0
-        self.message_sent = 0
-        self.log = []
+        self.persistence.write("reboots", self.persistence.read("reboots")+1)
+
 
         # Dynamic variables for answering
         self.chat_id = ""
         self.offset = 0
 
-        # People in use
-        self.chat_members = {}
 
         # Available commands
         self.commands = {
@@ -46,6 +47,7 @@ class ChatBot():
             "events" : self.bot_print_events,
             "emojify" : self.bot_emojify,
             "wikipedia" : self.bot_show_wikipedia,
+            "bot_do_all" : self.bot_do_all,
         }
 
         self.message_loop()
@@ -78,15 +80,19 @@ class ChatBot():
     def handle_result(self, result):
         """Inspects the message and reacts accordingly. Can easily be extended"""
         for message_data in result:
-            self.message_read += 1
+            message_read = self.persistence.read("message_read")
+            self.persistence.write("message_read", message_read + 1)
             self.offset = message_data["update_id"] + 1
             message = message_data["message"]
             self.chat_id = message["chat"]["id"]
             author = message["from"]
 
-            if author["id"] not in self.chat_members:
-                self.chat_members[author["id"]] = author["first_name"] + " " + author["last_name"]
-                self.send_message("Welcome to this chat " + self.chat_members[author["id"]] + " !")
+            chat_members = self.persistence.read("chat_members")
+            if str(author["id"]) not in chat_members:
+                name = author["first_name"] + " " + author["last_name"]
+                chat_members[author["id"]] = name
+                self.persistence.write("chat_members", chat_members)
+                self.send_message("Welcome to this chat " + name + " !")
 
             if "text" in message:
                 print("Chat said: ", emoji.demojize(message["text"]))
@@ -114,13 +120,19 @@ class ChatBot():
     def send_message(self, message):
         print("SENDING: " + emoji.demojize(message))
 
-        data = {'chat_id': self.chat_id, 'text': message, "parse_mode": "HTML"}
+        data = {'chat_id': self.chat_id, 'text': emoji.emojize(message), "parse_mode": "HTML"}
         send_url = self.base_url + "sendMessage"
         try:
             r = requests.post(send_url, data=data)
         except:
-            self.log.append(str(datetime.datetime.now()) + " - did not send:\n" + message)
-        self.message_sent += 1
+            log = self.persistence.read("log")
+            log.append(str(datetime.datetime.now()) + " - did not send:\n" + message)
+            self.persistence.write("log", log)
+        message_sent = self.persistence.read("message_sent")
+        self.persistence.write("message_sent", message_sent + 1)
+
+
+
 
     ############################################################################
     """Command-implementation"""
@@ -133,11 +145,14 @@ class ChatBot():
     def bot_print_status(self, params):
         """Prints the bots current status and relevant information"""
         delta = str(datetime.datetime.now() - self.start_time)
-        message = "<pre>Status: Running \n"
+        message = "<pre>Status: Running :green_circle:\n"
         message += "Uptime: " + delta + "\n"
-        message += "Messages read: " + str(self.message_read) + "\n"
-        message += "Messages sent: " + str(self.message_sent) + "</pre>"
+        message += "Reboots: " + str(self.persistence.read("reboots")) + "\n"
+        message += "Messages read: " + str(self.persistence.read("message_read")) + "\n"
+        message += "Messages sent: " + str(self.persistence.read("message_sent")) + "</pre>"
         self.send_message(message)
+        if "full" in params:
+            self.bot_print_log([])
 
 
     def bot_show_weather(self, params):
@@ -206,7 +221,7 @@ class ChatBot():
                 out_string += emoji_dict[i] + " "
             else:
                 out_string += i
-        self.send_message(emoji.emojize(out_string))
+        self.send_message(out_string)
 
 
     def bot_show_help(self, params):
@@ -218,16 +233,22 @@ class ChatBot():
             send_text += self.commands[entry].__doc__ + "\n\n"
         self.send_message(send_text)
 
+
     def bot_print_log(self, params):
         """Shows an error-log, mostly of bad api-requests"""
+        if "clear" in params:
+            self.persistence.write("log",[])
+            self.send_message("Log cleared")
+            return
         send_text = ""
-        for event in self.log:
+        for event in self.persistence.read("log"):
             send_text += event + "\n"
         if send_text == "":
             send_text += "No errors up to now"
         self.send_message(send_text)
 
-    def bot_show_wikipedia(self,params):
+
+    def bot_show_wikipedia(self, params):
         """Shows the wikipedia entry for a given therm"""
         if len(params) > 2 or len(params) == 0:
             self.send_message("Please only search for one word at a time. 1rst param is for language (de or fr or en or ...)")
@@ -247,6 +268,13 @@ class ChatBot():
                 self.send_message("No result found for query")
                 return
         self.send_message(url)
+
+
+    def bot_do_all(self,params):
+        """Executes every single command with random params"""
+        for key in self.commands:
+            if key != "bot_do_all":
+                	self.commands[key](["en","Freiburg"])
 
 
 bot = ChatBot("ChatterBot", telegram_api, version="1.0")
