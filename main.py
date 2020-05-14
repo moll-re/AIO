@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from key import *
+import key
 import requests
 import time
 import json
@@ -160,7 +160,31 @@ class ChatBot():
         if len(params) != 1:
             self.send_message("Invalid Syntax, please give one parameter, the location")
             return
-        self.send_message("Probably sunny I guess? Yes yes I'm still learning")
+
+        locations = {"freiburg": [47.9990, 7.8421], "zurich": [47.3769, 8.5417], "mulhouse": [47.7508, 7.3359]}
+        if params[0].lower().replace("ü","u") in locations:
+            city = locations[params[0].lower().replace("ü","u")]
+        else:
+            self.send_message("Couldn't find city, it might be added later though.")
+            return
+        url = "https://api.openweathermap.org/data/2.5/onecall?"
+        data = {"lat" : city[0], "lon" : city[1], "exclude" : "minutely,hourly", "appid" : key.weather_api, "units" : "metric"}
+        try:
+            weather = requests.get(url,params=data).json()
+        except:
+            self.send_message("Query failed, it's my fault, I'm sorry :sad:")
+            return
+        categories = {"Clouds": ":cloud:", "Rain": ":cloud_with_rain:", "Thunderstorm": "thunder_cloud_rain", "Drizzle": ":droplet:", "Snow": ":cloud_snow:", "Clear": ":sun:", "Mist": "Mist", "Smoke": "Smoke", "Haze": "Haze", "Dust": "Dust", "Fog": "Fog", "Sand": "Sand", "Dust": "Dust", "Ash": "Ash", "Squall": "Squall", "Tornado": "Tornado",}
+        now = weather["current"]
+        print(now)
+        message = "<b>Now:</b> " + categories[now["weather"][0]["main"]] + "\n"
+        message += ":thermometer: " + str(now["temp"]) + "°\n\n"
+        for i, day in enumerate(weather["daily"]):
+             message += "<b>+" + str(i) + ":</b> " + categories[day["weather"][0]["main"]] + "\n"
+             print(day["temp"]["min"])
+             message += ":thermometer: :fast_down_button:" + str(day["temp"]["min"]) + "° , :thermometer: :fast_up_button: " + str(day["temp"]["max"]) + "°\n\n"
+        # print(weather)
+        self.send_message(message)
 
 
     def bot_google_search(self, params):
@@ -189,11 +213,13 @@ class ChatBot():
     def bot_print_events(self, params):
         """Shows a list of couple-related events and a countdown"""
         events = {
-            "anniversary" : datetime.date(datetime.datetime.now().year,12,7),
-            "valentine's day": datetime.date(datetime.datetime.now().year,2,14),
-            "Marine's birthday": datetime.date(datetime.datetime.now().year,8,31),
-            "Remy's birthday": datetime.date(datetime.datetime.now().year,3,25),
+            "anniversary :heart:" : datetime.date(datetime.datetime.now().year,12,7),
+            "valentine's day :rose:": datetime.date(datetime.datetime.now().year,2,14),
+            "Marine's birthday :tada:": datetime.date(datetime.datetime.now().year,8,31),
+            "Remy's birthday :tada:": datetime.date(datetime.datetime.now().year,3,25),
+            "Christmas :gift:" : datetime.date(datetime.datetime.now().year,12,24),
         }
+
         send_string = "Upcoming events: \n"
         for key in events:
             delta = events[key] - datetime.date.today()
@@ -229,8 +255,8 @@ class ChatBot():
         send_text = "Hello, this is " + self.name + ", V." + self.version + "\n"
         send_text += "Here is a list of the available commands:\n"
         for entry in self.commands:
-            send_text += "<code>" + entry + "</code> - "
-            send_text += self.commands[entry].__doc__ + "\n\n"
+            send_text += "<b>" + entry + "</b> - "
+            send_text += "<code>" + self.commands[entry].__doc__ + "</code>\n\n"
         self.send_message(send_text)
 
 
@@ -277,4 +303,6 @@ class ChatBot():
                 	self.commands[key](["en","Freiburg"])
 
 
-bot = ChatBot("ChatterBot", telegram_api, version="1.0")
+
+
+bot = ChatBot("ChatterBot", key.telegram_api, version="1.0")
