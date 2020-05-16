@@ -34,6 +34,7 @@ class ChatBot():
         # Dynamic variables for answering
         self.chat_id = ""
         self.offset = 0
+        self.message_id = ""
 
 
         # Available commands
@@ -48,6 +49,7 @@ class ChatBot():
             "emojify" : self.bot_emojify,
             "wikipedia" : self.bot_show_wikipedia,
             "bot_do_all" : self.bot_do_all,
+            "zvv" : self.bot_zvv,
         }
 
         self.message_loop()
@@ -57,11 +59,9 @@ class ChatBot():
         """"""
         while(True):
             result = self.fetch_updates()
-            if len(result) == 0:
-                time.sleep(5)
-            else:
+            if len(result) != 0:
                 self.handle_result(result)
-                time.sleep(5)
+            time.sleep(5)
 
 
     def fetch_updates(self):
@@ -74,6 +74,7 @@ class ChatBot():
             result = result.json()["result"]
         except:
             result = ""
+
         return result
 
 
@@ -84,6 +85,7 @@ class ChatBot():
             self.persistence.write("message_read", message_read + 1)
             self.offset = message_data["update_id"] + 1
             message = message_data["message"]
+            self.message_id = message["message_id"]
             self.chat_id = message["chat"]["id"]
             author = message["from"]
 
@@ -91,7 +93,7 @@ class ChatBot():
             if str(author["id"]) not in chat_members:
                 name = ""
                 if "first_name" in author:
-                    name += author["first_name"]
+                    name += author["first_name"] + " "
                 if "last_name" in author:
                     name += author["last_name"]
                 if len(name) == 0:
@@ -122,11 +124,26 @@ class ChatBot():
         else:
             self.send_message("Command <code>" + full[0] + "</code> not found. Please try again.")
 
+    def send_thinking_note(self):
+        data = {
+            "chat_id" : self.chat_id,
+            "action" : "typing",
+        }
+        send_url = self.base_url + "sendChatAction"
+        try:
+            r = requests.post(send_url, data=data)
+        except:
+            print("Could not show that I'm thinking =(")
 
     def send_message(self, message):
         print("SENDING: " + emoji.demojize(message))
 
-        data = {'chat_id': self.chat_id, 'text': emoji.emojize(message), "parse_mode": "HTML"}
+        data = {
+            'chat_id': self.chat_id,
+            'text': emoji.emojize(message),
+            "parse_mode": "HTML",
+            "reply_to_message_id" : self.message_id,
+        }
         send_url = self.base_url + "sendMessage"
         try:
             r = requests.post(send_url, data=data)
@@ -144,8 +161,12 @@ class ChatBot():
     """Command-implementation"""
 
     def bot_print_lorem(self, params):
-        """Prints a placeholder text"""
-        self.send_message("Lorem ipsum dolor sit amet....")
+        """Prints a placeholder text."""
+        if "full" in params:
+            message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. At tellus at urna condimentum mattis pellentesque id nibh. Convallis aenean et tortor at risus viverra adipiscing at in. Aliquet risus feugiat in ante metus dictum. Tincidunt augue interdum velit euismod in pellentesque massa placerat duis. Tincidunt vitae semper quis lectus nulla at. Quam nulla porttitor massa id neque aliquam vestibulum morbi blandit. Phasellus egestas tellus rutrum tellus pellentesque eu tincidunt. Gravida rutrum quisque non tellus orci. Adipiscing at in tellus integer feugiat. Integer quis auctor elit sed vulputate mi sit amet mauris. Risus pretium quam vulputate dignissim suspendisse in est. Cras fermentum odio eu feugiat pretium. Ut etiam sit amet nisl purus in mollis nunc sed. Elementum tempus egestas sed sed risus pretium quam. Massa ultricies mi quis hendrerit dolor magna eget."
+        else:
+            message = "Lorem ipsum dolor sit amet, bla bla bla..."
+        self.send_message(message)
 
 
     def bot_print_status(self, params):
@@ -175,21 +196,21 @@ class ChatBot():
             return
         url = "https://api.openweathermap.org/data/2.5/onecall?"
         data = {"lat" : city[0], "lon" : city[1], "exclude" : "minutely,hourly", "appid" : key.weather_api, "units" : "metric"}
+
         try:
             weather = requests.get(url,params=data).json()
         except:
             self.send_message("Query failed, it's my fault, I'm sorry :sad:")
             return
+
         categories = {"Clouds": ":cloud:", "Rain": ":cloud_with_rain:", "Thunderstorm": "thunder_cloud_rain", "Drizzle": ":droplet:", "Snow": ":cloud_snow:", "Clear": ":sun:", "Mist": "Mist", "Smoke": "Smoke", "Haze": "Haze", "Dust": "Dust", "Fog": "Fog", "Sand": "Sand", "Dust": "Dust", "Ash": "Ash", "Squall": "Squall", "Tornado": "Tornado",}
         now = weather["current"]
-        print(now)
         message = "<b>Now:</b> " + categories[now["weather"][0]["main"]] + "\n"
         message += ":thermometer: " + str(int(now["temp"])) + "°\n\n"
         for i, day in enumerate(weather["daily"]):
              message += "<b>+" + str(i+1) + ":</b> " + categories[day["weather"][0]["main"]] + "\n"
-             print(day["temp"]["min"])
              message += ":thermometer: :fast_down_button: " + str(int(day["temp"]["min"])) + "° , :thermometer: :fast_up_button: " + str(int(day["temp"]["max"])) + "°\n\n"
-        # print(weather)
+
         self.send_message(message)
 
 
@@ -310,5 +331,37 @@ class ChatBot():
 
 
 
+    def bot_zvv(self,params):
+        """Uses the swiss travel api to return the best route between a start- and endpoint in Zurich (actually whole Switzerland, but I haven't tested that)"""
+        if len(params) != 2:
+            self.send_message("Please give me your start and endpoint")
+            return
 
-bot = ChatBot("ChatterBot", key.telegram_api, version="1.0")
+        url = "http://transport.opendata.ch/v1/connections"
+        data = {"from" : params[0], "to" : params[1], "limit" : 2}
+        try:
+            routes = requests.get(url, params=data).json()
+            result = routes["connections"]
+            text = result[0]["from"]["station"]["name"] + " :fast-forward_button: " + result[0]["to"]["station"]["name"] + "\n\n"
+            for con in result:
+                text += "Start: " + datetime.datetime.fromtimestamp(int(con["from"]["departureTimestamp"])).strftime("%d/%m - %H:%M") + "\n"
+                text += ":chequered_flag: " + datetime.datetime.fromtimestamp(int(con["to"]["arrivalTimestamp"])).strftime("%d/%m - %H:%M") + "\n"
+                text += ":hourglass_not_done: " + con["duration"] + "\n"
+                text += ":world_map: \n"
+
+                for step in con["sections"]:
+                    if step["journey"] != None:
+                        text += step["journey"]["passList"][0]["station"]["name"] + " (" + datetime.datetime.fromtimestamp(int(step["journey"]["passList"][0]["departureTimestamp"])).strftime("%H:%M") + ")\n"
+                        text += "L. " + step["journey"]["number"] + " :right_arrow: \n"
+                        text += step["journey"]["passList"][-1]["station"]["name"] + " (" + datetime.datetime.fromtimestamp(int(step["journey"]["passList"][-1]["arrivalTimestamp"])).strftime("%H:%M") +")\n"
+                    else:
+                        text += "Api says walking is fastest."
+                text += "\n"
+            self.send_message(text)
+        except:
+            self.send_message("Invalid api call.")
+
+
+
+###########################
+bot = ChatBot("ChatterBot", key.telegram_api, version="1.01")
