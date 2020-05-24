@@ -352,10 +352,10 @@ class ChatBot():
                 for step in con["sections"]:
                     if step["journey"] != None:
                         text += step["journey"]["passList"][0]["station"]["name"] + " (" + datetime.datetime.fromtimestamp(int(step["journey"]["passList"][0]["departureTimestamp"])).strftime("%H:%M") + ")\n"
-                        text += "L. " + step["journey"]["number"] + " :right_arrow: \n"
+                        text += ":right_arrow: L. " + step["journey"]["number"] + " :right_arrow: \n"
                         text += step["journey"]["passList"][-1]["station"]["name"] + " (" + datetime.datetime.fromtimestamp(int(step["journey"]["passList"][-1]["arrivalTimestamp"])).strftime("%H:%M") +")\n"
                     else:
-                        text += "Api says walking is fastest."
+                        text += On foot. \n"
                 text += "\n"
             self.send_message(text)
         except:
