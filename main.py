@@ -355,7 +355,7 @@ class ChatBot():
                         text += "L. " + step["journey"]["number"] + " :right_arrow: \n"
                         text += step["journey"]["passList"][-1]["station"]["name"] + " (" + datetime.datetime.fromtimestamp(int(step["journey"]["passList"][-1]["arrivalTimestamp"])).strftime("%H:%M") +")\n"
                     else:
-                        text += "Api says walking is fastest."
+                        text += "Walk."
                 text += "\n"
             self.send_message(text)
         except:
