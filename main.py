@@ -199,7 +199,10 @@ class ChatBot():
     def emojify_word(self,word):
         string_emoji = ""
         for letter in word:
-            string_emoji += self.emoji_dict[letter]
+            if letter in self.emoji_dict:
+                string_emoji += self.emoji_dict[lower(letter)]
+            else:
+                string_emoji += letter
         return string_emoji
 
     ############################################################################
