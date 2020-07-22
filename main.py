@@ -200,7 +200,7 @@ class ChatBot():
         string_emoji = ""
         for letter in word:
             if letter in self.emoji_dict:
-                string_emoji += self.emoji_dict[lower(letter)]
+                string_emoji += self.emoji_dict[letter.lower()]
             else:
                 string_emoji += letter
         return string_emoji
