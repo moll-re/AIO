@@ -50,6 +50,7 @@ class ChatBot():
             "wikipedia" : self.bot_show_wikipedia,
             "bot_do_all" : self.bot_do_all,
             "zvv" : self.bot_zvv,
+            "cronjob" : self.bot_cronjob,
         }
 
 
@@ -196,7 +197,9 @@ class ChatBot():
         message_sent = self.persistence.read("message_sent")
         self.persistence.write("message_sent", message_sent + 1)
 
+
     def emojify_word(self,word):
+        """"""
         string_emoji = ""
         for letter in word:
             if letter in self.emoji_dict:
@@ -407,6 +410,12 @@ class ChatBot():
             self.send_message("Invalid api call.")
 
 
+    def bot_cronjob(self, params):
+        """Allows you to add a timed command, in a crontab-like syntax. Not implemented yet.
+        Example usage: /cronjob add 0 8 * * * weather Zürich
+        """
+        self.send_message("I'm not functional yet. But when I am, it is gonna be legendary!")
 
-###########################
+
+#######################################################################
 bot = ChatBot("ChatterBot", key.telegram_api, version="1.02")
