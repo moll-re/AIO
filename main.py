@@ -312,12 +312,12 @@ class ChatBot():
             self.send_message(emoji.emojize("Please send a separator as the first argument, and the text afterwards.\nExample:\n/emojify :heart: Example text"))
 
         sep = params[0]
-
+        string_emoji = ""
         for word in params[1:]:
             out_string = self.emojify_word(word)
-            out_string += string_emoji + sep
+            string_emoji += out_string + sep
 
-        self.send_message(out_string)
+        self.send_message(string_emoji)
 
 
     def bot_show_help(self, params):
