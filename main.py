@@ -52,8 +52,50 @@ class ChatBot():
             "zvv" : self.bot_zvv,
         }
 
+
+        self.emoji_dict = {
+            "a" : ":regional_indicator_symbol_letter_a:",
+            "b" : ":regional_indicator_symbol_letter_b:",
+            "c" : ":regional_indicator_symbol_letter_c:",
+            "d" : ":regional_indicator_symbol_letter_d:",
+            "e" : ":regional_indicator_symbol_letter_e:",
+            "f" : ":regional_indicator_symbol_letter_f:",
+            "g" : ":regional_indicator_symbol_letter_g:",
+            "h" : ":regional_indicator_symbol_letter_h:",
+            "i" : ":regional_indicator_symbol_letter_i:",
+            "j" : ":regional_indicator_symbol_letter_j:",
+            "k" : ":regional_indicator_symbol_letter_k:",
+            "l" : ":regional_indicator_symbol_letter_l:",
+            "m" : ":regional_indicator_symbol_letter_m:",
+            "n" : ":regional_indicator_symbol_letter_n:",
+            "o" : ":regional_indicator_symbol_letter_o:",
+            "p" : ":regional_indicator_symbol_letter_p:",
+            "q" : ":regional_indicator_symbol_letter_q:",
+            "r" : ":regional_indicator_symbol_letter_r:",
+            "s" : ":regional_indicator_symbol_letter_s:",
+            "t" : ":regional_indicator_symbol_letter_t:",
+            "u" : ":regional_indicator_symbol_letter_u:",
+            "v" : ":regional_indicator_symbol_letter_v:",
+            "w" : ":regional_indicator_symbol_letter_w:",
+            "x" : ":regional_indicator_symbol_letter_x:",
+            "y" : ":regional_indicator_symbol_letter_y:",
+            "z" : ":regional_indicator_symbol_letter_z:",
+            "0" : ":keycap_digit_zero:",
+            "1" : ":keycap_digit_one:",
+            "2" : ":keycap_digit_two:",
+            "3" : ":keycap_digit_three:",
+            "4" : ":keycap_digit_four:",
+            "5" : ":keycap_digit_five:",
+            "6" : ":keycap_digit_six:",
+            "7" : ":keycap_digit_seven:",
+            "8" : ":keycap_digit_eight:",
+            "9" : ":keycap_digit_nine:",
+        }
+
         self.message_loop()
 
+    ########################################################################
+    """Helper-Functions"""
 
     def message_loop(self):
         """"""
@@ -154,11 +196,14 @@ class ChatBot():
         message_sent = self.persistence.read("message_sent")
         self.persistence.write("message_sent", message_sent + 1)
 
-
-
+    def emojify_word(self,word):
+        string_emoji = ""
+        for letter in word:
+            string_emoji += self.emoji_dict[letter]
+        return string_emoji
 
     ############################################################################
-    """Command-implementation"""
+    """BOT-Commands: implementation"""
 
     def bot_print_lorem(self, params):
         """Prints a placeholder text."""
@@ -262,18 +307,13 @@ class ChatBot():
 
         if len(params) < 2:
             self.send_message(emoji.emojize("Please send a separator as the first argument, and the text afterwards.\nExample:\n/emojify :heart: Example text"))
-        sep = params[0]
-        emoji_dict = {"a" : ":regional_indicator_symbol_letter_a:","b" : ":regional_indicator_symbol_letter_b:","c" : ":regional_indicator_symbol_letter_c:","d" : ":regional_indicator_symbol_letter_d:","e" : ":regional_indicator_symbol_letter_e:","f" : ":regional_indicator_symbol_letter_f:","g" : ":regional_indicator_symbol_letter_g:","h" : ":regional_indicator_symbol_letter_h:","i" : ":regional_indicator_symbol_letter_i:","j" : ":regional_indicator_symbol_letter_j:","k" : ":regional_indicator_symbol_letter_k:","l" : ":regional_indicator_symbol_letter_l:","m" : ":regional_indicator_symbol_letter_m:","n" : ":regional_indicator_symbol_letter_n:","o" : ":regional_indicator_symbol_letter_o:","p" : ":regional_indicator_symbol_letter_p:","q" : ":regional_indicator_symbol_letter_q:","r" : ":regional_indicator_symbol_letter_r:","s" : ":regional_indicator_symbol_letter_s:","t" : ":regional_indicator_symbol_letter_t:","u" : ":regional_indicator_symbol_letter_u:","v" : ":regional_indicator_symbol_letter_v:","w" : ":regional_indicator_symbol_letter_w:","x" : ":regional_indicator_symbol_letter_x:","y" : ":regional_indicator_symbol_letter_y:","z" : ":regional_indicator_symbol_letter_z:"," " : sep}
 
-        prep_string = ""
-        for i in params[1:]:
-            prep_string += i.lower() + " "
-        out_string = ""
-        for i in prep_string[:-1]:
-            if i in emoji_dict:
-                out_string += emoji_dict[i] + " "
-            else:
-                out_string += i
+        sep = params[0]
+
+        for word in params[1:]:
+            out_string = self.emojify_word(word)
+            out_string += string_emoji + sep
+
         self.send_message(out_string)
 
 
@@ -347,12 +387,14 @@ class ChatBot():
                 text += "Start: " + datetime.datetime.fromtimestamp(int(con["from"]["departureTimestamp"])).strftime("%d/%m - %H:%M") + "\n"
                 text += ":chequered_flag: " + datetime.datetime.fromtimestamp(int(con["to"]["arrivalTimestamp"])).strftime("%d/%m - %H:%M") + "\n"
                 text += ":hourglass_not_done: " + con["duration"] + "\n"
-                text += ":world_map: \n"
+                text += ":world_map: Route:\n"
 
                 for step in con["sections"]:
                     if step["journey"] != None:
                         text += step["journey"]["passList"][0]["station"]["name"] + " (" + datetime.datetime.fromtimestamp(int(step["journey"]["passList"][0]["departureTimestamp"])).strftime("%H:%M") + ")\n"
-                        text += ":right_arrow: L. " + step["journey"]["number"] + " :right_arrow: \n"
+
+                        text += ":right_arrow: Linie " + self.emojify_word(step["journey"]["number"]) + "\n"
+
                         text += step["journey"]["passList"][-1]["station"]["name"] + " (" + datetime.datetime.fromtimestamp(int(step["journey"]["passList"][-1]["arrivalTimestamp"])).strftime("%H:%M") +")\n"
                     else:
                         text += "Walk."
@@ -364,4 +406,4 @@ class ChatBot():
 
 
 ###########################
-bot = ChatBot("ChatterBot", key.telegram_api, version="1.01")
+bot = ChatBot("ChatterBot", key.telegram_api, version="1.02")
