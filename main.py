@@ -7,23 +7,25 @@ import json
 import datetime
 import googlesearch
 import emoji
+import Levenshtein as lev
+
 
 from persistence import PersistentVars
 
 class ChatBot():
 
-    def __init__(self, name, api_key, version):
+    def __init__(self, name, version):
         """Inits the Bot with a few conf. vars
         Args:   -> name:str - Name of the bot
                 -> api_key:str - t.me api-key
                 -> version:str - Version number
         """
 
-        self.base_url = "https://api.telegram.org/bot" + api_key + "/"
+        self.base_url = "https://api.telegram.org/bot" + key.telegram_api + "/"
         self.version = version
         self.name = name
 
-        # Persisten variable
+        # Persistent variable
         self.persistence = PersistentVars("permanent_vars.json")
 
         # Uptime counter
@@ -162,10 +164,30 @@ class ChatBot():
         /[command] [argument 1] [argument 2] ...
         """
         full = command.split(" ")
-        if full[0] in self.commands:
-            self.commands[full[0]](full[1:])
+        command = self.fuzzy_match_command(full[0])
+        if len(command) != 1:
+            if command[0] == "EXACT":
+                self.commands[command[1]](full[1:])
+            else:
+                send = "Did you mean <code>" + command[1] + "</code>"
+                for i in range(2,len(command)):
+                    send += " or <code>" + command[1] + "</code>"
+                send += "?"
+                self.send_message(send)
         else:
             self.send_message("Command <code>" + full[0] + "</code> not found. Please try again.")
+
+
+    def fuzzy_match_command(self, input):
+        matches = ["not exact"]
+        for command in self.commands.keys():
+            if lev.ratio(input.lower(),command) > 0.8:
+                matches.append(command)
+                if lev.ratio(input.lower(),command) == 1:
+                    return ["EXACT", command]
+
+        return matches
+
 
     def send_thinking_note(self):
         data = {
@@ -177,6 +199,7 @@ class ChatBot():
             r = requests.post(send_url, data=data)
         except:
             print("Could not show that I'm thinking =(")
+
 
     def send_message(self, message):
         print("SENDING: " + emoji.demojize(message))
@@ -223,9 +246,11 @@ class ChatBot():
     def bot_print_status(self, params):
         """Prints the bots current status and relevant information"""
         delta = str(datetime.datetime.now() - self.start_time)
+        ip = requests.get('https://api.ipify.org').text
         message = "<pre>Status: Running :green_circle:\n"
-        message += "Uptime: " + delta + "\n"
+        message += "Uptime: " + delta[:delta.rfind(".")] + "\n"
         message += "Reboots: " + str(self.persistence.read("reboots")) + "\n"
+        message += "IP-Adress: " + ip + "\n"
         message += "Messages read: " + str(self.persistence.read("message_read")) + "\n"
         message += "Messages sent: " + str(self.persistence.read("message_sent")) + "</pre>"
         self.send_message(message)
@@ -325,9 +350,10 @@ class ChatBot():
 
     def bot_show_help(self, params):
         """Shows a list of all commands and their description"""
-        send_text = "Hello, this is " + self.name + ", V." + self.version + "\n"
-        send_text += "Here is a list of the available commands:\n"
-        for entry in self.commands:
+        send_text = "BeebBop, this is " + self.name + " (V." + self.version + ")\n"
+        send_text += "Here is what I can do up to now: \n"
+        entries = sorted(list(self.commands.keys()))
+        for entry in entries:
             send_text += "<b>" + entry + "</b> - "
             send_text += "<code>" + self.commands[entry].__doc__ + "</code>\n\n"
         self.send_message(send_text)
@@ -371,9 +397,9 @@ class ChatBot():
 
     def bot_do_all(self,params):
         """Executes every single command with random params"""
-        for key in self.commands:
-            if key != "bot_do_all":
-                	self.commands[key](["en","Freiburg"])
+        for command in self.commands:
+            if command != "bot_do_all":
+                	self.commands[command](["en","Freiburg"])
 
 
 
@@ -418,4 +444,4 @@ class ChatBot():
 
 
 #######################################################################
-bot = ChatBot("ChatterBot", key.telegram_api, version="1.02")
+bot = ChatBot("ChatterBot", version="1.03")

@@ -1,2 +1,2 @@
 # chat-bot
-Chat bot for two
+Chat bot for two.
