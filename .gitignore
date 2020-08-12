@@ -1,5 +1,5 @@
 # API-Key (keep secret at all times)
-key.py
+keys.py
 
 # Cookies
 .google-cookie

@@ -1,7 +1,7 @@
 import json
 import time
 
-class PersistentVars():
+class Variables():
     """"""
 
     def __init__(self,savefile_path):
@@ -26,7 +26,6 @@ class PersistentVars():
             print("Config not written - critical")
 
     def read(self, name=""):
-
         if self.last_action == "read":
             vars = self.savefile
         else:
@@ -43,3 +42,18 @@ class PersistentVars():
             vars = vars[name]
 
         return vars
+
+    def increment(self, name=""):
+        if self.last_action == "read":
+            pre = self.savefile
+        else:
+            pre = self.read()
+
+        try:
+            pre[name] += 1
+            file = open(self.path,"w")
+            json.dump(pre, file)
+            file.close()
+            self.last_action = "write"
+        except:
+            print("Config not written - critical")
