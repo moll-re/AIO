@@ -126,7 +126,10 @@ class ChatBot():
     def bot_print_status(self, params):
         """Prints the bots current status and relevant information"""
         delta = str(datetime.datetime.now() - self.start_time)
-        ip = requests.get('https://api.ipify.org').text
+        try:
+            ip = requests.get('https://api.ipify.org').text
+        except:
+            ip = "not fetchable"
         message = "<pre>Status: Running :green_circle:\n"
         message += "Uptime: " + delta[:delta.rfind(".")] + "\n"
         message += "Reboots: " + str(self.persistence.read("reboots")) + "\n"
@@ -311,4 +314,5 @@ class ChatBot():
                 self.telegram.send_message("Meme won't yeet")
 
 #######################################################################
+
 bot = ChatBot("ChatterBot", version="1.03")

@@ -136,6 +136,7 @@ class TelegramIO():
 
         self.persistence.increment("messages_sent")
 
+
     def send_photo(self, url, caption):
         print("SENDING PHOTO: " + url)
         data = {

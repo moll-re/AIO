@@ -10,7 +10,7 @@ def query(params):
 
     try:
         res = googlesearch.search(param_string.replace("+"," ") ,num=5,start=0,stop=5)
-        send_string = "Google search for <b>" + param_string.replace("+"," ") + "</b>:\n"
+        send_string = "Results for <b>" + param_string.replace("+"," ") + "</b>:\n\n"
         for url in res:
             send_string += url + "\n\n"
         send_string += "Search url:\n" + search_url
