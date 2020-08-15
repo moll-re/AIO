@@ -40,8 +40,7 @@ class TelegramIO():
     def handle_result(self, result):
         """Inspects the message and reacts accordingly. Can easily be extended"""
         for message_data in result:
-            message_read = self.persistence.read("messages_read")
-            self.persistence.write("messages_read", message_read + 1)
+            self.persistence.increment("messages_read")
             self.offset = message_data["update_id"] + 1
             message = message_data["message"]
             self.message_id = message["message_id"]

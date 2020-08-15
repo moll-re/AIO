@@ -22,7 +22,7 @@ class ChatBot():
         self.name = name
 
         # Persistent variable
-        self.persistence = pvars.Variables("persistence/permanent_vars.json")
+        self.persistence = pvars.Variables("persistence/persistent_vars.json", "persistence/persistent_init.json")
         # Uptime counter
         self.start_time = datetime.datetime.now()
         self.persistence.increment("reboots")

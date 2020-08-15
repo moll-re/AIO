@@ -1,3 +1,6 @@
+# Persistence
+persistent_vars.json
+
 # API-Key (keep secret at all times)
 keys.py
 
