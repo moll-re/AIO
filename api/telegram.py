@@ -71,6 +71,8 @@ class TelegramIO():
             elif "photo" in message:
                 print("Photo received, what do I do?")
 
+            return "nothing", "happened"
+
 
     def handle_command(self, command):
         """Handles commands and stuff, using a bash-like syntax:
@@ -91,7 +93,7 @@ class TelegramIO():
         else:
             self.send_message("Command <code>" + full[0] + "</code> not found. Please try again.")
 
-        return "nothing", "happened"
+        return "nothing", ["happened"]
 
     def fuzzy_match_command(self, input):
         matches = ["not exact"]
