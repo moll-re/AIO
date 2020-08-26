@@ -43,6 +43,7 @@ class ChatBot():
             "cronjob" : self.bot_cronjob,
             "joke" : self.bot_tell_joke,
             "meme" : self.bot_send_meme,
+            "news" : self.bot_send_news,
         }
 
 
@@ -300,18 +301,79 @@ class ChatBot():
 
     def bot_tell_joke(self, params):
         """Tells you the top joke on r/jokes"""
-        joke = reddit.get_top_text("jokes",3)
+        if len(params) == 0:
+            number = 1
+        elif len(params) == 1:
+            number = int(params[0])
+        else:
+            self.telegram.send_text("Jokes takes only one parameter, the number of jokes.")
+            return
+
+        joke = reddit.get_random_rising("jokes", number, "text")
         self.telegram.send_message(joke)
 
 
     def bot_send_meme(self, params):
-        """Sends a meme from r/memes"""
-        urls = reddit.get_top_image("memes",3)
+        """Sends a meme from r/"""
+        subreddit_name = "memes"
+        subnames = {
+            "physics" : "physicsmemes",
+            "dank" : "dankmemes",
+            "biology" : "biologymemes",
+            "math" : "mathmemes"
+        }
+        number = 1
+
+        if len(params) == 1:
+            try:
+                number = int(params[0])
+            except:
+                try:
+                    subreddit_name = subnames[str(params[0])]
+                except:
+                    self.telegram.send_message("Topic not found")
+        elif len(params) == 2:
+            try:
+                number = int(params[0])
+                subreddit_name = subnames[str(params[1]).lower()]
+            except:
+                number = int(params[1])
+                subreddit_name = subnames[str(params[0]).lower()]
+
+        elif len(params) > 2:
+            self.telegram.send_message("Memes takes 2 parameters: the number of memes, and their topic.")
+            return
+
+        urls = reddit.get_random_rising(subreddit_name, number, "photo")
         for u in urls:
             try:
                 self.telegram.send_photo(u["image"], u["caption"])
             except:
                 self.telegram.send_message("Meme won't yeet")
+
+
+    def bot_send_news(self, params):
+        """Sends the first entries for new from r/"""
+        subreddit_name = "worldnews"
+        subnames = {
+            "germany" : "germannews",
+            "france" : "francenews",
+            "europe" : "eunews",
+            "usa" : "usanews"
+        }
+        if len(params) == 1:
+            try:
+                subreddit_name = subnames[str(params[0]).lower()]
+            except:
+                self.telegram.send_message("Argument not supported")
+                return
+        elif len(params) > 1:
+            self.telegram.send_message("News takes one argument: the location (world, germany, europe, ...)")
+            return
+
+        text = reddit.get_top(subreddit_name, 10, "text")
+        self.telegram.send_message(text)
+
 
 #######################################################################
 
