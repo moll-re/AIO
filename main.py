@@ -306,7 +306,7 @@ class ChatBot():
         elif len(params) == 1:
             number = int(params[0])
         else:
-            self.telegram.send_text("Jokes takes only one parameter, the number of jokes.")
+            self.telegram.send_message("Jokes takes only one parameter, the number of jokes.")
             return
 
         joke = reddit.get_random_rising("jokes", number, "text")
