@@ -299,15 +299,42 @@ class ChatBot():
         self.telegram.send_message("I'm not functional yet. But when I am, it is gonna be legendary!")
 
 
+    def match_reddit_params(self, params):
+        """matches a list of two elements to one int and one string
+        returns int, string or invalid, invalid
+        """
+        if len(params) == 2:
+            p1 = params[0], p2 = params[1]
+            try:
+                try:
+                    r1 = int(p1)
+                    r2 = p2
+                except:
+                    r2 = int(p2)
+                    r1 = p1
+            except:
+                return None
+
+            return [r1, r2]
+        elif len(params) == 1:
+            try:
+                r1 = int(params[0])
+            except:
+                return None
+            return [r1]
+
     def bot_tell_joke(self, params):
         """Tells you the top joke on r/jokes"""
         if len(params) == 0:
             number = 1
-        elif len(params) == 1:
-            number = int(params[0])
         else:
-            self.telegram.send_message("Jokes takes only one parameter, the number of jokes.")
-            return
+            params_sorted = self.match_reddit_params(params)
+            if params_sorted != None:
+                if len(params_sorted) >= 1:
+                    number = params_sorted[0]
+                if len(params_sorted) > 1:
+                    self.telegram.send_message("Please only specify one argument: the number of jokes")
+
 
         joke = reddit.get_random_rising("jokes", number, "text")
         self.telegram.send_message(joke)
@@ -322,27 +349,18 @@ class ChatBot():
             "biology" : "biologymemes",
             "math" : "mathmemes"
         }
-        number = 1
 
-        if len(params) == 1:
-            try:
-                number = int(params[0])
-            except:
-                try:
-                    subreddit_name = subnames[str(params[0])]
-                except:
-                    self.telegram.send_message("Topic not found")
-        elif len(params) == 2:
-            try:
-                number = int(params[0])
-                subreddit_name = subnames[str(params[1]).lower()]
-            except:
-                number = int(params[1])
-                subreddit_name = subnames[str(params[0]).lower()]
-
-        elif len(params) > 2:
-            self.telegram.send_message("Memes takes 2 parameters: the number of memes, and their topic.")
-            return
+        if len(params) == 0:
+            number = 1
+        else:
+            params_sorted = self.match_reddit_params(params)
+            if params_sorted != None:
+                if len(params_sorted) >= 1:
+                    number = params_sorted[0]
+                if len(params_sorted) >= 2:
+                    subreddit_name = params_sorted[1]
+                if len(params) > 2:
+                    self.telegram.send_message("Memes takes 2 parameters: the number of memes, and their topic.")
 
         urls = reddit.get_random_rising(subreddit_name, number, "photo")
         for u in urls:
@@ -354,22 +372,22 @@ class ChatBot():
 
     def bot_send_news(self, params):
         """Sends the first entries for new from r/"""
-        subreddit_name = "worldnews"
         subnames = {
             "germany" : "germannews",
             "france" : "francenews",
             "europe" : "eunews",
             "usa" : "usanews"
         }
-        if len(params) == 1:
-            try:
-                subreddit_name = subnames[str(params[0]).lower()]
-            except:
-                self.telegram.send_message("Argument not supported")
-                return
-        elif len(params) > 1:
-            self.telegram.send_message("News takes one argument: the location (world, germany, europe, ...)")
-            return
+        if len(params) == 0:
+            subreddit_name = "worldnews"
+        else:
+            params_sorted = self.match_reddit_params(params)
+            if params_sorted != None:
+                if len(params_sorted) >= 1:
+                    number = params_sorted[0]
+                if len(params_sorted) > 1:
+                    self.telegram.send_message("Please only specify one argument: the location")
+
 
         text = reddit.get_top(subreddit_name, 10, "text")
         self.telegram.send_message(text)
