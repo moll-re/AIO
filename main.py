@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from api import telegram, google, reddit, weather
+from web_api import telegram, google, reddit, weather
 from persistence import rw as pvars
 
 import requests
