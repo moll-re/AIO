@@ -349,17 +349,15 @@ class ChatBot():
             "math" : "mathmemes"
         }
 
-        if len(params) == 0:
-            number = 1
-        else:
-            params_sorted = self.match_reddit_params(params)
-            if params_sorted != None:
-                if len(params_sorted) >= 1:
-                    number = params_sorted[0]
-                if len(params_sorted) >= 2:
-                    subreddit_name = params_sorted[1]
-                if len(params) > 2:
-                    self.telegram.send_message("Memes takes 2 parameters: the number of memes, and their topic.")
+        number = 1
+        params_sorted = self.match_reddit_params(params)
+        if params_sorted != None:
+            if len(params_sorted) >= 1:
+                number = params_sorted[0]
+            if len(params_sorted) >= 2:
+                subreddit_name = params_sorted[1]
+            if len(params) > 2:
+                self.telegram.send_message("Memes takes 2 parameters: the number of memes, and their topic.")
 
         urls = reddit.get_random_rising(subreddit_name, number, "photo")
         for u in urls:
