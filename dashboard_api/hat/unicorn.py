@@ -26,7 +26,7 @@ class UnicornHat(object):
 
         self.rotation = 1
         self.brightness = 0.5
-        self.buffer = numpy.zeros((self.WIDTH,self.HEIGHT,3), dtype=int)
+        self.buffer = numpy.zeros((self.HEIGHT,self.WIDTH,3), dtype=int)
 
 
 
@@ -84,6 +84,12 @@ class UnicornHat(object):
         :param b: Amount of blue from 0 to 255
         """
         self.buffer[x][y] = r, g, b
+
+
+    def set_matrix(self, matrix):
+        self.buffer = matrix
+        self.show()
+
 
     def set_pixel_hsv(self, x, y, h, s=1.0, v=1.0):
         """set a single pixel to a colour using HSV.

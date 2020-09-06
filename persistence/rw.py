@@ -4,7 +4,7 @@ import os
 class Variables():
     """"""
 
-    def __init__(self,savefile_path, init_path):
+    def __init__(self, savefile_path, init_path):
         self.path = savefile_path
         self.init_path = init_path
         self.last_action = ""

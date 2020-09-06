@@ -325,15 +325,14 @@ class ChatBot():
 
     def bot_tell_joke(self, params):
         """Tells you the top joke on r/jokes"""
-        if len(params) == 0:
-            number = 1
-        else:
-            params_sorted = self.match_reddit_params(params)
-            if params_sorted != None:
-                if len(params_sorted) >= 1:
-                    number = params_sorted[0]
-                if len(params_sorted) > 1:
-                    self.telegram.send_message("Please only specify one argument: the number of jokes")
+
+        number = 1
+        params_sorted = self.match_reddit_params(params)
+        if params_sorted != None:
+            if len(params_sorted) >= 1:
+                number = params_sorted[0]
+            if len(params_sorted) > 1:
+                self.telegram.send_message("Please only specify one argument: the number of jokes")
 
 
         joke = reddit.get_random_rising("jokes", number, "text")
@@ -395,4 +394,4 @@ class ChatBot():
 
 #######################################################################
 
-bot = ChatBot("ChatterBot", version="1.03")
+bot = ChatBot("ChatterBot", version="1.1")
