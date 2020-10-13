@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont
+from Pillow import Image, ImageDraw, ImageFont
 import numpy as np
 import datetime
 
