@@ -60,7 +60,7 @@ class UnicornHat(object):
 
     def set_brightness(self, b):
         """Set the display brightness between 0.0 and 1.0.
-        :param b: Brightness from 0.0 to 1.0 (default 0.5)
+        :param b: Brightness from 0.0 to 1.0 (default 1)
         """
         self.brightness = b
 
