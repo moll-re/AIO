@@ -33,6 +33,7 @@ class UnicornHat(object):
 
     def reset_clock(self):
         GPIO.output(self.PIN_CS, GPIO.LOW)
+        time.sleep(0.000001)
         GPIO.output(self.PIN_CS, GPIO.HIGH)
 
     def spi_write(self, buf1, buf2):
