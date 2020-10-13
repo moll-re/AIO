@@ -24,9 +24,8 @@ class DashBoard(object):
             if prev_time == datetime.datetime.now().strftime("%H:%M"):
                 time.sleep(5)
             else:
-                if True:
-                    print("implement me!")
-                    
+                print("implement me!")
+
                 prev_time = datetime.datetime.now().strftime("%H:%M")
                 self.IO.clock_face([])
 

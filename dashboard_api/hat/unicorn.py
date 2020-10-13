@@ -88,6 +88,7 @@ class UnicornHat(object):
 
     def set_matrix(self, matrix):
         self.buffer = matrix
+        print(matrix)
         self.show()
 
 
