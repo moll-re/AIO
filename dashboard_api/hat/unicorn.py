@@ -88,7 +88,6 @@ class UnicornHat(object):
 
     def set_matrix(self, matrix):
         self.buffer = matrix
-        print(matrix)
         self.show()
 
 
@@ -136,11 +135,11 @@ class UnicornHat(object):
         """Output the contents of the buffer to Unicorn HAT HD."""
         ##########################################################
         ## Change to desire
-        buff1 = numpy.rot90(self.buffer[:self.HEIGHT,:16],2)
+        buff1 = numpy.rot90(self.buffer[:self.HEIGHT,:16],1)
         buff2 = numpy.rot90(self.buffer[:self.HEIGHT,16:32],2)
         ##########################################################
 
-        # buff1, buff2 = [(x.reshape(768) * self.brightness).astype(numpy.uint8).tolist() for x in (buff1, buff2)]
+        buff1, buff2 = [(x.reshape(768) * self.brightness).astype(numpy.uint8).tolist() for x in (buff1, buff2)]
 
         self.spi_write(buff1, buff2)
 
