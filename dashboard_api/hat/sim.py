@@ -68,7 +68,7 @@ class UnicornHat(object):
         return (self.width, self.height)
 
 
-    def brightness(self, *args):
+    def set_brightness(self, *args):
         pass
 
 

@@ -9,6 +9,7 @@ class UnicornHat(object):
     def __init__(self, width, height, rotation_offset = 0):
         self.PIN_CLK = 11
         ##################################
+        # GPIO Pins for the actual signal. The other ones are for signal clocks and resets.
         self.PINS_DAT = [10, 22]
         ##################################
         self.PIN_CS = 8
@@ -28,7 +29,10 @@ class UnicornHat(object):
         self.brightness = 0.5
         self.buffer = numpy.zeros((self.HEIGHT,self.WIDTH,3), dtype=int)
 
+        self.reset_clock()
 
+    def reset_clock(self):
+        GPIO.output(self.PIN_CLK, GPIO.LOW)
 
     def spi_write(self, buf1, buf2):
         GPIO.output(self.PIN_CS, GPIO.LOW)
@@ -52,7 +56,7 @@ class UnicornHat(object):
             time.sleep(0.00000001)
             GPIO.output(self.PIN_CLK, GPIO.LOW)
 
-    def brightness(self, b):
+    def set_brightness(self, b):
         """Set the display brightness between 0.0 and 1.0.
         :param b: Brightness from 0.0 to 1.0 (default 0.5)
         """
