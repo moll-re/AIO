@@ -77,13 +77,13 @@ class UnicornHat(object):
 
     def set_pixel(self, x, y, r, g, b):
         """Set a single pixel to RGB colour.
-        :param x: Horizontal position from 0 to 15
-        :param y: Veritcal position from 0 to 15
+        :param x: Horizontal position from 0 to width
+        :param y: Veritcal position from 0 to height
         :param r: Amount of red from 0 to 255
         :param g: Amount of green from 0 to 255
         :param b: Amount of blue from 0 to 255
         """
-        self.buffer[x][y] = r, g, b
+        self.buffer[y][x] = r, g, b
 
 
     def set_matrix(self, matrix):
