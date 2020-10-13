@@ -136,12 +136,12 @@ class UnicornHat(object):
         """Output the contents of the buffer to Unicorn HAT HD."""
         ##########################################################
         ## Change to desire
-        _buf1 = numpy.rot90(self.buffer[:16,:self.HEIGHT],2)
-        _buf2 = numpy.rot90(self.buffer[16:32,:self.HEIGHT],2)
+        buff1 = numpy.rot90(self.buffer[:self.HEIGHT,:16],2)
+        buff2 = numpy.rot90(self.buffer[:self.HEIGHT,16:32],2)
         ##########################################################
 
-        _buf1, _buf2 = _buf1, _buf2 = [(x.reshape(768) * self.brightness).astype(numpy.uint8).tolist() for x in (_buf1, _buf2)]
+        # buff1, buff2 = [(x.reshape(768) * self.brightness).astype(numpy.uint8).tolist() for x in (buff1, buff2)]
 
-        self.spi_write(_buf1, _buf2)
+        self.spi_write(buff1, buff2)
 
         time.sleep(self.DELAY)
