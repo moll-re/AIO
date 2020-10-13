@@ -26,13 +26,14 @@ class UnicornHat(object):
         self.HEIGHT = height #16
 
         self.rotation = 1
-        self.brightness = 0.5
+        self.brightness = 1
         self.buffer = numpy.zeros((self.HEIGHT,self.WIDTH,3), dtype=int)
 
         self.reset_clock()
 
     def reset_clock(self):
-        GPIO.output(self.PIN_CLK, GPIO.LOW)
+        GPIO.output(self.PIN_CS, GPIO.LOW)
+        GPIO.output(self.PIN_CS, GPIO.HIGH)
 
     def spi_write(self, buf1, buf2):
         GPIO.output(self.PIN_CS, GPIO.LOW)
