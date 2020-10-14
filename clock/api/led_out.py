@@ -1,12 +1,12 @@
 import time
 import numpy as np
 
-from dashboard_api import converter
+from clock.api import converter
 try:
-    from dashboard_api.hat import unicorn as HAT
+    from clock.api.hat import unicorn as HAT
 except ImportError:
     print("Using the simulator")
-    from dashboard_api.hat import sim as HAT
+    from clock.api.hat import sim as HAT
 
 
 
@@ -103,3 +103,4 @@ class OutputHandler():
             visible = pixels[:,i:self.width+i]
             self.set_matrix(visible,4,colors)
             time.sleep(sleep_time)
+        time.sleep(10 * sleep_time)

@@ -1,1 +1,15 @@
-{"messages_read": 0, "messages_sent": 0, "commands_executed": 0, "photos_sent": 0, "log": [], "chat_members": {}, "reboots": 0}
+{
+  "bot" : {
+    "messages_read": 0,
+    "messages_sent": 0,
+    "commands_executed": 0,
+    "photos_sent": 0,
+    "log": [],
+    "chat_members": {},
+    "reboots": 0
+  },
+
+  "clock" : {
+    "test":""
+  }
+}

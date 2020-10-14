@@ -64,8 +64,10 @@ def date_converter():
     return pixels
 
 def weather_converter(name):
+    result = np.zeros((16,16))
+    return result
     equiv = {
-        "clouds" : "dashboard_api/clouds.pbm",
+        "clouds" : "clouds.pbm",
         "sun" : "sun.pbm",
         "mix" : "mix.pbm",
         "rain" : "rain.pbm",
@@ -88,5 +90,3 @@ def weather_converter(name):
             result[i][ind] = bit
 
     return result
-
-weather_converter("clouds")

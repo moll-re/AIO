@@ -2,14 +2,14 @@ import emoji
 import requests
 import Levenshtein as lev
 
-import api.keys
+import bot.api.keys
 
 
 class TelegramIO():
     def __init__(self, persistence, commands):
         """Inits the Telegram-Interface
         """
-        self.base_url = "https://api.telegram.org/bot" + api.keys.telegram_api + "/"
+        self.base_url = "https://api.telegram.org/bot" + bot.api.keys.telegram_api + "/"
         self.persistence = persistence
         self.commands = commands
         # Dynamic variables for answering
@@ -79,7 +79,7 @@ class TelegramIO():
         /[command] [argument 1] [argument 2] ...
         """
         full = command.split(" ")
-        command = self.fuzzy_match_command(full[0])
+        command = self.fuzzy_match_command(full[0]) # ["EXACT",full[0]] #
         if len(command) != 1:
             if command[0] == "EXACT":
                 self.persistence.increment("commands_executed")

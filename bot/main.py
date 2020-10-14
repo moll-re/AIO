@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from bot.api import telegram, google, reddit, weather
+from bot.api import telegram, google, weather #reddit as well
 from persistence import rw as pvars
 
 import requests
@@ -22,7 +22,7 @@ class ChatBot():
         self.name = name
 
         # Persistent variable
-        self.persistence = pvars.Variables(module_name = "bot")
+        self.persistence = pvars.Variables("bot")
         # Uptime counter
         self.start_time = datetime.datetime.now()
         self.persistence.increment("reboots")
@@ -88,19 +88,30 @@ class ChatBot():
 
         self.telegram = telegram.TelegramIO(self.persistence, self.commands)
 
-        self.message_loop()
+        # self.message_loop()
 
 
-    def message_loop(self):
-        """Calls the telegram entity regularly to check for activity"""
-        while(True):
-            result = self.telegram.fetch_updates()
-            if len(result) != 0:
-                command, params = self.telegram.handle_result(result)
-                if command != "nothing":
-                    self.commands[command](params)
-            time.sleep(5)
+    # def message_loop(self):
+    #     """Calls the telegram entity regularly to check for activity"""
+    #     while(True):
+    #         result = self.telegram.fetch_updates()
+    #         if len(result) != 0:
+    #             command, params = self.telegram.handle_result(result)
+    #             if command != "nothing":
+    #                 self.commands[command](params)
+    #         time.sleep(5)
 
+    def react_command(self, command, params):
+        """"""
+        result = self.run_command(command, params)
+        self.telegram.send_message(result)
+
+
+    def run_command(self, command, params):
+        """"""
+        result = self.commands[command](params)
+
+        return result
 
     def emojify_word(self,word):
         """"""
@@ -121,7 +132,7 @@ class ChatBot():
             message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. At tellus at urna condimentum mattis pellentesque id nibh. Convallis aenean et tortor at risus viverra adipiscing at in. Aliquet risus feugiat in ante metus dictum. Tincidunt augue interdum velit euismod in pellentesque massa placerat duis. Tincidunt vitae semper quis lectus nulla at. Quam nulla porttitor massa id neque aliquam vestibulum morbi blandit. Phasellus egestas tellus rutrum tellus pellentesque eu tincidunt. Gravida rutrum quisque non tellus orci. Adipiscing at in tellus integer feugiat. Integer quis auctor elit sed vulputate mi sit amet mauris. Risus pretium quam vulputate dignissim suspendisse in est. Cras fermentum odio eu feugiat pretium. Ut etiam sit amet nisl purus in mollis nunc sed. Elementum tempus egestas sed sed risus pretium quam. Massa ultricies mi quis hendrerit dolor magna eget."
         else:
             message = "Lorem ipsum dolor sit amet, bla bla bla..."
-        self.telegram.send_message(message)
+        return message
 
 
     def bot_print_status(self, params):
@@ -138,7 +149,9 @@ class ChatBot():
         message += "Messages read: " + str(self.persistence.read("messages_read")) + "\n"
         message += "Messages sent: " + str(self.persistence.read("messages_sent")) + "\n"
         message += "Commands executed " + str(self.persistence.read("commands_executed")) + "</pre>"
-        self.telegram.send_message(message)
+
+        return message
+
         if "full" in params:
             self.bot_print_log([])
 
@@ -146,19 +159,19 @@ class ChatBot():
     def bot_show_weather(self, params):
         """Shows a weather-forecast for a given location"""
         if len(params) != 1:
-            self.telegram.send_message("Invalid Syntax, please give one parameter, the location")
+            return "Invalid Syntax, please give one parameter, the location"
             return
 
         locations = {"freiburg": [47.9990, 7.8421], "zurich": [47.3769, 8.5417], "mulhouse": [47.7508, 7.3359]}
         if params[0].lower().replace("ü","u") in locations:
             city = locations[params[0].lower().replace("ü","u")]
         else:
-            self.telegram.send_message("Couldn't find city, it might be added later though.")
+            return "Couldn't find city, it might be added later though."
             return
 
         message = weather.show_weather(city)
 
-        self.telegram.send_message(message)
+        return message
 
 
     def bot_google_search(self, params):
@@ -167,7 +180,7 @@ class ChatBot():
             self.telegram.send_message("Please tell me what to look for")
             return
         send_string = google.query(params)
-        self.telegram.send_message(send_string)
+        return send_string
 
 
     def bot_print_events(self, params):
@@ -187,7 +200,7 @@ class ChatBot():
                 delta += datetime.timedelta(days = 365)
             send_string += key + ": " + str(delta.days) + " days \n"
 
-        self.telegram.send_message(send_string)
+        return send_string
 
 
     def bot_emojify(self, params):
@@ -202,7 +215,7 @@ class ChatBot():
             out_string = self.emojify_word(word)
             string_emoji += out_string + sep
 
-        self.telegram.send_message(string_emoji)
+        return string_emoji
 
 
     def bot_show_help(self, params):
@@ -213,7 +226,7 @@ class ChatBot():
         for entry in entries:
             send_text += "<b>" + entry + "</b> - "
             send_text += "<code>" + self.commands[entry].__doc__ + "</code>\n\n"
-        self.telegram.send_message(send_text)
+        return send_text
 
 
     def bot_print_log(self, params):
@@ -227,14 +240,13 @@ class ChatBot():
             send_text += event + "\n"
         if send_text == "":
             send_text += "No errors up to now"
-        self.telegram.send_message(send_text)
+        return send_text
 
 
     def bot_show_wikipedia(self, params):
         """Shows the wikipedia entry for a given therm"""
         if len(params) > 2 or len(params) == 0:
-            self.telegram.send_message("Please only search for one word at a time. 1rst param is for language (de or fr or en or ...)")
-            return
+            return "Please only search for one word at a time. 1rst param is for language (de or fr or en or ...)"
 
         if len(params) == 2:
             url = "https://" + params[0] + ".wikipedia.org/wiki/" + params[1]
@@ -247,9 +259,9 @@ class ChatBot():
             url = "https://en.wikipedia.org/wiki/" + params[0]
             r = requests.get(url)
             if r.status_code == 404:
-                self.telegram.send_message("No result found for query")
-                return
-        self.telegram.send_message(url)
+                return "No result found for query"
+
+        return url
 
 
     def bot_do_all(self,params):
@@ -262,8 +274,7 @@ class ChatBot():
     def bot_zvv(self,params):
         """Uses the swiss travel api to return the best route between a start- and endpoint in Zurich (actually whole Switzerland, but I haven't tested that)"""
         if len(params) != 2:
-            self.telegram.send_message("Please give me your start and endpoint")
-            return
+            return "Please give me your start and endpoint"
 
         url = "http://transport.opendata.ch/v1/connections"
         data = {"from" : params[0], "to" : params[1], "limit" : 2}
@@ -287,16 +298,16 @@ class ChatBot():
                     else:
                         text += "Walk."
                 text += "\n"
-            self.telegram.send_message(text)
+            return text
         except:
-            self.telegram.send_message("Invalid api call.")
+            return "Invalid api call."
 
 
     def bot_cronjob(self, params):
         """Allows you to add a timed command, in a crontab-like syntax. Not implemented yet.
         Example usage: /cronjob add 0 8 * * * weather Zürich
         """
-        self.telegram.send_message("I'm not functional yet. But when I am, it is gonna be legendary!")
+        return "I'm not functional yet. But when I am, it is gonna be legendary!"
 
 
     def match_reddit_params(self, params):
@@ -323,6 +334,7 @@ class ChatBot():
                 return None
             return [r1]
 
+
     def bot_tell_joke(self, params):
         """Tells you the top joke on r/jokes"""
 
@@ -336,7 +348,7 @@ class ChatBot():
 
 
         joke = reddit.get_random_rising("jokes", number, "text")
-        self.telegram.send_message(joke)
+        return joke
 
 
     def bot_send_meme(self, params):
@@ -363,8 +375,9 @@ class ChatBot():
         for u in urls:
             try:
                 self.telegram.send_photo(u["image"], u["caption"])
+                return ""
             except:
-                self.telegram.send_message("Meme won't yeet")
+                return "Meme won't yeet"
 
 
     def bot_send_news(self, params):
@@ -383,13 +396,8 @@ class ChatBot():
                 if len(params_sorted) >= 1:
                     number = params_sorted[0]
                 if len(params_sorted) > 1:
-                    self.telegram.send_message("Please only specify one argument: the location")
+                    return "Please only specify one argument: the location"
 
 
         text = reddit.get_top(subreddit_name, 10, "text")
-        self.telegram.send_message(text)
-
-
-#######################################################################
-
-bot = ChatBot("ChatterBot", version="1.1")
+        return text

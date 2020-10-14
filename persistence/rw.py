@@ -4,17 +4,19 @@ import os
 class Variables():
     """"""
 
-    def __init__(self, savefile_path, init_path):
-        self.path = savefile_path
-        self.init_path = init_path
+    def __init__(self, module_name, file_name="persistence/persistent_vars.json", init_name="persistence/persistent_init.json", ):
+        self.path = file_name
+        self.init_path = init_name
         self.last_action = ""
+
+        self.module = module_name
         # last performed action, if only reads are made, then the underlying var has not been changed
         # and doesn't need to be read again
         self.savefile = {}
 
     def write(self, name, value):
         pre = self.read()
-        pre[name] = value
+        pre[self.module][name] = value
         try:
             file = open(self.path,"w")
             json.dump(pre, file)
@@ -29,7 +31,7 @@ class Variables():
             if name == "":
                 return self.savefile
             else:
-                return self.savefile[name]
+                return self.savefile[self.module][name]
 
         try:
             if os.path.exists(self.path):
@@ -45,7 +47,7 @@ class Variables():
             return None
 
         if name != "":
-            vars = vars[name]
+            vars = vars[self.module][name]
         return vars
 
 

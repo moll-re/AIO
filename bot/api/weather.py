@@ -1,5 +1,5 @@
 import requests
-import api.keys
+import bot.api.keys
 import datetime
 
 def show_weather(location):
