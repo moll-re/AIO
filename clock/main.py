@@ -1,18 +1,21 @@
 import datetime
 import time
 import json
-from clock.api import led_out
 from threading import Thread
 import numpy
 
+
+from clock.api import led
 import persistence.rw
+
+
 ################################################################################
 #start of actual programm.
 class ClockFace(object):
     """Actual functions one might need for a clock"""
 
     def __init__(self, text_speed=10):
-        self.IO = led_out.OutputHandler(32,16)
+        self.IO = led.OutputHandler(32,16)
         self.tspeed = text_speed
 
         self.output_thread = ""
@@ -42,9 +45,10 @@ class ClockFace(object):
 
 
 
-    def set_face(self):
+    def set_face(self, weather):
         """"""
-        self.run(self.IO.clock_face,("C"))
+        self.weather = weather
+        self.run(self.IO.clock_face,(weather,))
 
 
     def text_scroll(self, text, color=""):
@@ -66,7 +70,7 @@ class ClockFace(object):
             for i in range(20):
                 ct = i/20 * gradient
                 col = [int(x) for x in ct+start_color]
-                self.IO.set_matrix(ones,5,colors=[col])
+                self.IO.set_matrix(ones,colors=[col])
                 time.sleep(duration / 20)
 
 
@@ -83,24 +87,18 @@ class ClockFace(object):
             red = empty.copy()
             red[red == 0] = 3
             for i in range(int(n)):
-                self.IO.set_matrix(red,5)
+                self.IO.set_matrix(red)
                 time.sleep(1/frequency)
-                self.IO.set_matrix(empty,5)
+                self.IO.set_matrix(empty)
                 time.sleep(1/frequency)
-
-
-
 
         self.run(output,(duration, frequency))
 
 
-    def image_show(self, image):
-        def output():
-            self.output_threads.append("Showing: " + text)
-            self.IO.text_scroll(text, self.tspeed, color)
-            time.sleep(2)
-            self.output_threads.remove("Showing: " + text)
-            self.set_face()
+    def image_show(self, image, duratation):
+        """Shows a 16x32 image for duration seconds"""
+        def output(image, duratation):
+            self.IO.set_matrix_rgb(red)
 
-        scroll_thread = Thread(target = output)
-        scroll_thread.start()
+
+        self.run(output,(image, duration))

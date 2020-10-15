@@ -63,30 +63,25 @@ def date_converter():
     pixels += lrow
     return pixels
 
+
 def weather_converter(name):
     result = np.zeros((16,16))
-    return result
-    equiv = {
-        "clouds" : "clouds.pbm",
-        "sun" : "sun.pbm",
-        "mix" : "mix.pbm",
-        "rain" : "rain.pbm",
-        "snow" : "snow.pbm",
-    }
-    if name in equiv:
-        fname = equiv[name]
-    else:
-        return np.zeros((8,16))
+    cwd = __file__.replace("\\","/") # for windows
+    cwd = cwd.rsplit("/", 1)[0]  # the current working directory (where this file is)
+    if len(cwd) == 0:
+        cwd = "."
+    icon_spritesheet = cwd + "/weather-icons.bmp"
 
-    f = open(fname,"r")
-    f.readline()
-    f.readline()
-    f.readline()
+    icons = Image.open(icon_spritesheet)
+    icons_full = np.array(icons)
+    print(name)
+    icon_loc = ["sun","moon","sun and clouds", "moon and clouds", "cloud","fog and clouds","2 clouds", "3 clouds", "rain and cloud", "rain and clouds", "thunder and cloud", "thunder and cloud and moon", "snow and cloud", "snow and cloud and moon", "fog","fog night"]
+    #ordered 1 2 \n 3 4 \ 5 5 ...
+    try:
+        iy, ix = int(icon_loc.index(name)/2), icon_loc.index(name)%2
+        # x and y coords
+    except:
+        return np.zeros((16,16,3))
 
-    result = np.zeros((16,16))#should be 8x16
-    for i in range(8):
-        l = f.readline()[:-1]
-        for ind,bit in enumerate(l):
-            result[i][ind] = bit
-
-    return result
+    icon_single = icons_full[16*iy:16*(iy + 1),16*ix:16*(ix + 1),...]
+    return icon_single

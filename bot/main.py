@@ -88,18 +88,6 @@ class ChatBot():
 
         self.telegram = telegram.TelegramIO(self.persistence, self.commands)
 
-        # self.message_loop()
-
-
-    # def message_loop(self):
-    #     """Calls the telegram entity regularly to check for activity"""
-    #     while(True):
-    #         result = self.telegram.fetch_updates()
-    #         if len(result) != 0:
-    #             command, params = self.telegram.handle_result(result)
-    #             if command != "nothing":
-    #                 self.commands[command](params)
-    #         time.sleep(5)
 
     def react_command(self, command, params):
         """"""

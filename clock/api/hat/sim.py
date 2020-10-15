@@ -61,6 +61,7 @@ class UnicornHat(object):
         self.clear()
         self.draw()
         pygame.display.flip()
+        pygame.event.pump()
         #time.sleep(5)
 
 
