@@ -74,7 +74,7 @@ def weather_converter(name):
 
     icons = Image.open(icon_spritesheet)
     icons_full = np.array(icons)
-    print(name)
+
     icon_loc = ["sun","moon","sun and clouds", "moon and clouds", "cloud","fog and clouds","2 clouds", "3 clouds", "rain and cloud", "rain and clouds", "rain and cloud and sun", "rain and cloud and moon", "thunder and cloud", "thunder and cloud and moon", "snow and cloud", "snow and cloud and moon", "fog","fog night"]
     #ordered 1 2 \n 3 4 \ 5 5 ...
     try:

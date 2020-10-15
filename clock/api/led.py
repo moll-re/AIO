@@ -91,7 +91,6 @@ class OutputHandler():
 
 
         face2_3d = converter.weather_converter(weather)
-        print("WEATHER",face2_3d.shape)
         face = np.zeros((max(face1_3d.shape[0],face2_3d.shape[0]),face1_3d.shape[1]+face2_3d.shape[1],3))
 
         face[:face1_3d.shape[0],:face1_3d.shape[1],...] = face1_3d
