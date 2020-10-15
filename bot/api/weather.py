@@ -4,7 +4,7 @@ import datetime
 
 def show_weather(location):
     url = "https://api.openweathermap.org/data/2.5/onecall?"
-    data = {"lat" : location[0], "lon" : location[1], "exclude" : "minutely,hourly", "appid" : api.keys.weather_api, "units" : "metric"}
+    data = {"lat" : location[0], "lon" : location[1], "exclude" : "minutely,hourly", "appid" : bot.api.keys.weather_api, "units" : "metric"}
     today = datetime.datetime.today().weekday()
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 

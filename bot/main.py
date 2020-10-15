@@ -155,7 +155,6 @@ class ChatBot():
             city = locations[params[0].lower().replace("ü","u")]
         else:
             return "Couldn't find city, it might be added later though."
-            return
 
         message = weather.show_weather(city)
 
