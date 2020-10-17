@@ -7,10 +7,11 @@ import bot.main
 
 class ModuleWrapper():
     """Wrapper for the CLOCK-functionality"""
-    def __init__(self, module_name):
+    def __init__(self):
         """"""
+        print("Initializing clock-functionality")
         self.clock = clock.main.ClockFace()
-        self.bot = bot.main.ChatBot("Clockbot","1.1")
+        self.bot = bot.main.ChatBot("Clockbot","1.1",{})
         self.time_thread = Thread(target=self.mainloop)
         self.time_thread.start()
         self.weather = ""
@@ -36,6 +37,7 @@ class ModuleWrapper():
 
     def mainloop(self):
         """Runs the showing of the clock-face periodically (better way?)"""
+        print("Starting clock mainloop")
         prev_time = 0
         prev_weather_time = datetime.datetime.fromtimestamp(0)
         while True:
@@ -53,6 +55,3 @@ class ModuleWrapper():
 
                 prev_time = datetime.datetime.now().strftime("%H:%M")
                 self.clock.set_face(self.categories[self.weather])
-
-
-ModuleWrapper("clock")

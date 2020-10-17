@@ -6,20 +6,28 @@ import clock.main
 
 class ModuleWrapper():
     """Wrapper for the BOT-functionality"""
-    def __init__(self, module_name):
+    def __init__(self):
         """"""
+        print("Initializing bot-functionality")
         #######################################################################
-        self.bot = bot.main.ChatBot("ChatterBot", version="1.2")
-        self.clock = clock.main.ClockFace()
 
+        self.clock = clock.main.ClockFace()
         self.hw_commands = {
-            "blink": self.clock.alarm_blink,
+            "blink" : self.clock.alarm_blink,
+            "wakeup" : self.clock.wake_light,
+            "showmessage" : self.clock.show_message,
+
         }
+
+        self.bot = bot.main.ChatBot("ChatterBot", "2.0", self.hw_commands)
+
+
         self.message_loop()
 
 
     def message_loop(self):
         """Calls the telegram entity regularly to check for activity"""
+        print("Starting bot mainloop")
         while(True):
             result = self.bot.telegram.fetch_updates()
             if len(result) != 0:
@@ -33,6 +41,6 @@ class ModuleWrapper():
 
     def react_command(self, command, params):
         """"""
-        self.hw_commands[command](params[0],params[1])
-
-test = ModuleWrapper("bot")
+        # Oh yeah, that needs to be changed
+        # so params is a list, and so, to pass the commands, we need to unpack it:
+        self.hw_commands[command](*params)

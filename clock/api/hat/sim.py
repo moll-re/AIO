@@ -91,21 +91,4 @@ class UnicornHat(object):
 
     def off(self):
         print("Closing window")
-        #pygame.quit()
-
-
-
-"""
-# SD hats works as expected
-#unicornhat = UnicornHatSim(8,8)
-#unicornphat = UnicornHatSim(8, 4)
-
-# Unicornhat HD seems to be the other way around (not that there's anything wrong with that), so we rotate it 180°
-# unicornhathd = UnicornHatSim(16, 16, 180)
-"""
-# twohats = UnicornHat(32, 16)
-#
-# for i in range(16):
-#     twohats.set_pixel(i,i, 200,200,200)
-#     twohats.show()
-#     time.sleep(1)
+        pygame.quit()
