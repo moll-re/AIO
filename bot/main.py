@@ -11,7 +11,7 @@ import emoji
 
 class ChatBot():
     """"""
-    def __init__(self, name, version, hw_commands):
+    def __init__(self, name, version):
         """Inits the Bot with a few conf. vars
         Args:   -> name:str - Name of the bot
                 -> api_key:str - t.me api-key
@@ -27,7 +27,7 @@ class ChatBot():
         self.start_time = datetime.datetime.now()
         self.persistence.increment("reboots")
 
-        # Available commands
+        # Available commands. Must be manually updated!
         self.commands = {
             "help" : self.bot_show_help,
             "status" : self.bot_print_status,
@@ -86,9 +86,12 @@ class ChatBot():
             "9" : ":keycap_digit_nine:",
         }
 
-        self.all_commands = {**self.commands, **hw_commands}
+        self.telegram = telegram.TelegramIO(self.persistence, self.commands)
 
-        self.telegram = telegram.TelegramIO(self.persistence, self.all_commands)
+    def add_commands(self, commands):
+        """adds new commands to an existing list"""
+        self.commands = {**self.commands, **commands}
+        self.telegram.update_commands(self.commands)
 
 
     def react_command(self, command, params):
@@ -211,10 +214,10 @@ class ChatBot():
         """Shows a list of all commands and their description"""
         send_text = "BeebBop, this is " + self.name + " (V." + self.version + ")\n"
         send_text += "Here is what I can do up to now: \n"
-        entries = sorted(list(self.all_commands.keys()))
+        entries = sorted(list(self.commands.keys()))
         for entry in entries:
             send_text += "<b>" + entry + "</b> - "
-            send_text += "<code>" + self.all_commands[entry].__doc__ + "</code>\n\n"
+            send_text += "<code>" + self.commands[entry].__doc__ + "</code>\n\n"
         return send_text
 
 

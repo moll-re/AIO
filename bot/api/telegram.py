@@ -19,6 +19,9 @@ class TelegramIO():
 
 
 
+    def update_commands(self,commands):
+        self.commands = commands
+
     ########################################################################
     """Helper-Functions"""
 
@@ -79,7 +82,7 @@ class TelegramIO():
         /[command] [argument 1] [argument 2] ...
         """
         full = command.split(" ")
-        command = self.fuzzy_match_command(full[0]) # ["EXACT",full[0]] #
+        command = self.fuzzy_match_command(full[0])
         if len(command) != 1:
             if command[0] == "EXACT":
                 self.persistence.increment("commands_executed")

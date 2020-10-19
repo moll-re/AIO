@@ -19,6 +19,7 @@ class UnicornHat(object):
         self.window_width = self.width * self.pixel_size
         self.window_height = self.height * self.pixel_size
 
+        self.brightness = 1
         # Init pygame and off we go
         pygame.init()
         pygame.display.set_caption("Unicorn HAT simulator")
@@ -27,7 +28,7 @@ class UnicornHat(object):
 
 
     def set_pixel(self, x, y, r, g, b):
-        self.pixels[x][y] = int(r), int(g), int(b)
+        self.pixels[x][y] = r, g, b
 
 
     def set_matrix(self, matrix):
@@ -52,7 +53,9 @@ class UnicornHat(object):
         #w_y = int((self.height - 1 - y) * p + p / 2)
         w_y = int(i * p + p / 2)
         r = int(p / 4)
-        color = self.pixels[i,j,:]
+        color = self.pixels[i,j,:]*self.brightness
+        color = color.astype("int")
+
         pygame.gfxdraw.aacircle(self.screen, w_x, w_y, r, color)
         pygame.gfxdraw.filled_circle(self.screen, w_x, w_y, r, color)
 
@@ -69,8 +72,8 @@ class UnicornHat(object):
         return (self.width, self.height)
 
 
-    def set_brightness(self, *args):
-        pass
+    def set_brightness(self, brightness):
+        self.brightness = brightness
 
 
     def rotation(self, r):

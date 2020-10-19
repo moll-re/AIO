@@ -30,8 +30,10 @@ class ClockFace(object):
     def run(self, command, kw=()):
         """Checks for running threads and executes the ones in queue"""
         def enhanced_run(command, kw):
+            """"""
             self.output_thread = "Running " + str(command)
             command(*kw)
+            self.set_brightness()
             self.output_thread = ""
             if len(self.output_queue) != 0:
                 n = self.output_queue.pop(0)
@@ -50,7 +52,6 @@ class ClockFace(object):
     ### basic clock commands
     def set_face(self, weather):
         """"""
-        self.set_brightness()
         self.weather = weather
         self.run(self.IO.clock_face,(weather,))
 
@@ -60,8 +61,14 @@ class ClockFace(object):
         self.run(self.IO.text_scroll,(text, self.tspeed, color))
 
 
-    def set_brightness(self, overwrite=[]):
+    def set_brightness(self, overwrite=[],value=-1):
         """Checks, what brightness rules to apply"""
+
+        if value != -1:
+            self.IO.output.set_brightness(value)
+            return
+
+
         if len(overwrite) != 0:
             self.brightness_overwrite = overwrite
 
@@ -70,7 +77,7 @@ class ClockFace(object):
         if (is_WE and (now > 1000 and now < 2200)) or ((not is_WE) and (now > 800 and now < 2130)):
             brightness = 0.8
         else:
-            brightness = 0.1
+            brightness = 0.05
 
         self.IO.output.set_brightness(brightness)
 
@@ -80,6 +87,7 @@ class ClockFace(object):
     def wake_light(self, duration=600):
         """Simulates a sunris, takes one optional parameter: the duration"""
         def output(duration):
+            self.set_brightness(value=0.1)
             start_color = numpy.array([153, 0, 51])
             end_color = numpy.array([255, 255, 0])
             empty = numpy.zeros((16,32))
@@ -91,7 +99,7 @@ class ClockFace(object):
                 ct = i/20 * gradient
                 col = [int(x) for x in ct+start_color]
                 self.IO.set_matrix(ones,colors=[col])
-                time.sleep(duration / 20)
+                time.sleep(int(duration) / 20)
 
 
         self.run(output,(duration,))
@@ -100,6 +108,7 @@ class ClockFace(object):
     def alarm_blink(self, duration, frequency):
         """Blinks the whole screen (red-black). Duration in seconds, frequency in Hertz"""
         def output(duration, frequency):
+            self.set_brightness(value=1)
             duration =  int(duration)
             frequency = int(frequency)
             n = duration * frequency / 2

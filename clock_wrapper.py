@@ -2,16 +2,14 @@ import time
 import datetime
 from threading import Thread
 
-import clock.main
-import bot.main
 
 class ModuleWrapper():
     """Wrapper for the CLOCK-functionality"""
-    def __init__(self):
+    def __init__(self, bot_module, clock_module):
         """"""
         print("Initializing clock-functionality")
-        self.clock = clock.main.ClockFace()
-        self.bot = bot.main.ChatBot("Clockbot","1.1",{})
+        self.clock = clock_module
+        self.bot = bot_module
         self.time_thread = Thread(target=self.mainloop)
         self.time_thread.start()
         self.weather = ""
@@ -48,10 +46,11 @@ class ModuleWrapper():
                 if d.total_seconds() >= 3*3600:
                     prev_weather_time = datetime.datetime.now()
                     weather = self.bot.bot_show_weather(["zurich"])
-                    offset = weather.find("</b>") + 6
-                    weather = weather[offset:]
-                    weather = weather[:weather.find(":")]
-                    self.weather = weather
+                    l1 = weather[:weather.find("\n")]
+                    l1 = l1.replace("<b>Today:</b> ","")
+                    l1 = l1.replace (":","")
+                    self.weather = l1
 
                 prev_time = datetime.datetime.now().strftime("%H:%M")
+
                 self.clock.set_face(self.categories[self.weather])
