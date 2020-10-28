@@ -33,13 +33,13 @@ class ModuleWrapper():
                 command, params = self.bot.telegram.handle_result(result)
                 if command != "nothing":
                     if command in self.hw_commands:
-                        self.react_command(command,params) #hw-level
+                        self.react_hw_command(command,params) # hw-level
                     else:
-                        self.bot.react_command(command,params) #sw-level
+                        self.bot.react_command(command,params) # sw-level
             time.sleep(5)
 
 
-    def react_command(self, command, params):
+    def react_hw_command(self, command, params):
         """"""
         # Oh yeah, that needs to be changed
         # so params is a list, and so, to pass the commands, we need to unpack it:

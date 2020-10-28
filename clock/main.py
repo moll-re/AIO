@@ -77,7 +77,7 @@ class ClockFace(object):
         if (is_WE and (now > 1000 and now < 2200)) or ((not is_WE) and (now > 800 and now < 2130)):
             brightness = 0.8
         else:
-            brightness = 0.05
+            brightness = 0.02
 
         self.IO.output.set_brightness(brightness)
 
@@ -131,8 +131,9 @@ class ClockFace(object):
 
         self.run(output,(image, duration))
 
-    def show_message(self, message):
+    def show_message(self, *args):
         """Runs a text message over the screen. Obviously needs the text"""
-        # keep in mind, message is a list of all input, separated by a space
-        message_str = " ".join(message)
+        # keep in mind, in this case args is a tuple of all words
+        message_str = " ".join(args)
+        print("SENDING: " + message_str)
         self.text_scroll(message_str)
