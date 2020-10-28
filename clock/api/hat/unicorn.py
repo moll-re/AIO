@@ -141,8 +141,8 @@ class UnicornHat(object):
         """Output the contents of the buffer to Unicorn HAT HD."""
         ##########################################################
         ## Change to desire
-        buff2 = numpy.rot90(self.buffer[:self.HEIGHT,:16],1)
-        buff1 = numpy.rot90(self.buffer[:self.HEIGHT,16:32],3)
+        buff2 = numpy.rot90(self.buffer[:self.HEIGHT,:16],3)
+        buff1 = numpy.rot90(self.buffer[:self.HEIGHT,16:32],1)
         ##########################################################
 
         buff1, buff2 = [(x.reshape(768) * self.brightness).astype(numpy.uint8).tolist() for x in (buff1, buff2)]
