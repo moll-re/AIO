@@ -14,7 +14,7 @@ import persistence.rw
 class ClockFace(object):
     """Actual functions one might need for a clock"""
 
-    def __init__(self, text_speed=12):
+    def __init__(self, text_speed=15):
         self.IO = led.OutputHandler(32,16)
         self.tspeed = text_speed
 
