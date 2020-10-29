@@ -21,7 +21,7 @@ class Launcher():
 
         self.threads = []
         self.threads.append(Thread(target=self.chatbot))
-        # self.threads.append(Thread(target=self.clock))
+        self.threads.append(Thread(target=self.clock))
 
         for i in self.threads:
             i.start()
