@@ -44,7 +44,7 @@ class UnicornHat(object):
         for x in range(len(buf1)):
             b1, b2= buf1[x], buf2[x]
             self.spi_write_byte(b1, b2)
-            time.sleep(0.0000001)
+            #time.sleep(0.0000001)
 
         GPIO.output(self.PIN_CS, GPIO.HIGH)
 
@@ -55,7 +55,7 @@ class UnicornHat(object):
             GPIO.output(self.PIN_CLK, GPIO.HIGH)
             b1 <<= 1
             b2 <<= 1
-            time.sleep(0.00000001)
+            #time.sleep(0.00000001)
             GPIO.output(self.PIN_CLK, GPIO.LOW)
 
     def set_brightness(self, b):
@@ -74,10 +74,6 @@ class UnicornHat(object):
         """Returns the display rotation in degrees."""
         return self.rotation * 90
 
-    def set_layout(self, pixel_map=None):
-        """Does nothing, for library compatibility with Unicorn HAT."""
-        pass
-
     def set_all(self, r, g, b):
         self.buffer[:] = r, g, b
 
@@ -93,6 +89,7 @@ class UnicornHat(object):
 
 
     def set_matrix(self, matrix):
+        """Sets a height x width matrix directly"""
         self.buffer = matrix
         self.show()
 

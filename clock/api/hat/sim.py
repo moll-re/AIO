@@ -88,10 +88,6 @@ class UnicornHat(object):
         return self._rotation * 90
 
 
-    def set_layout(self, *args):
-        pass
-
-
     def off(self):
         print("Closing window")
         pygame.quit()
