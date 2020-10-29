@@ -45,7 +45,7 @@ class ModuleWrapper():
                 d = datetime.datetime.now() - prev_weather_time
                 if d.total_seconds() >= 3*3600:
                     prev_weather_time = datetime.datetime.now()
-                    weather = self.bot.bot_show_weather(["zurich"])
+                    weather = self.bot.bot_show_weather("zurich")
                     l1 = weather[:weather.find("\n")]
                     l1 = l1.replace("<b>Today:</b> ","")
                     l1 = l1.replace (":","")

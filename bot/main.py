@@ -150,8 +150,9 @@ class ChatBot():
             return "Invalid Syntax, please give one parameter, the location"
 
         locations = {"freiburg": [47.9990, 7.8421], "zurich": [47.3769, 8.5417], "mulhouse": [47.7508, 7.3359]}
-        if args[0].lower().replace("ü","u") in locations:
-            city = locations[args[0].lower().replace("ü","u")]
+        loc = args[0]
+        if loc.lower().replace("ü","u") in locations:
+            city = locations[loc.lower().replace("ü","u")]
         else:
             return "Couldn't find city, it might be added later though."
 
