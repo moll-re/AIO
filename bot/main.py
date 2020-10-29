@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from bot.api import telegram, google, weather #reddit as well
+from bot.api import telegram, google, weather, reddit
 from persistence import rw as pvars
 
 import requests
@@ -38,7 +38,6 @@ class ChatBot():
             "events" : self.bot_print_events,
             "emojify" : self.bot_emojify,
             "wikipedia" : self.bot_show_wikipedia,
-            "bot_do_all" : self.bot_do_all,
             "zvv" : self.bot_zvv,
             "cronjob" : self.bot_cronjob,
             "joke" : self.bot_tell_joke,
@@ -96,15 +95,10 @@ class ChatBot():
 
     def react_command(self, command, params):
         """"""
-        result = self.run_command(command, params)
+        result = self.commands[command](*params)
+        #*params means the list is unpacked and handed over as separate arguments.
         self.telegram.send_message(result)
 
-
-    def run_command(self, command, params):
-        """"""
-        result = self.commands[command](params)
-
-        return result
 
     def emojify_word(self,word):
         """"""
@@ -119,16 +113,17 @@ class ChatBot():
     ############################################################################
     """BOT-Commands: implementation"""
 
-    def bot_print_lorem(self, params):
+    def bot_print_lorem(self, *args):
         """Prints a placeholder text."""
-        if "full" in params:
+
+        if "full" in args:
             message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. At tellus at urna condimentum mattis pellentesque id nibh. Convallis aenean et tortor at risus viverra adipiscing at in. Aliquet risus feugiat in ante metus dictum. Tincidunt augue interdum velit euismod in pellentesque massa placerat duis. Tincidunt vitae semper quis lectus nulla at. Quam nulla porttitor massa id neque aliquam vestibulum morbi blandit. Phasellus egestas tellus rutrum tellus pellentesque eu tincidunt. Gravida rutrum quisque non tellus orci. Adipiscing at in tellus integer feugiat. Integer quis auctor elit sed vulputate mi sit amet mauris. Risus pretium quam vulputate dignissim suspendisse in est. Cras fermentum odio eu feugiat pretium. Ut etiam sit amet nisl purus in mollis nunc sed. Elementum tempus egestas sed sed risus pretium quam. Massa ultricies mi quis hendrerit dolor magna eget."
         else:
             message = "Lorem ipsum dolor sit amet, bla bla bla..."
         return message
 
 
-    def bot_print_status(self, params):
+    def bot_print_status(self, *args):
         """Prints the bots current status and relevant information"""
         delta = str(datetime.datetime.now() - self.start_time)
         try:
@@ -145,19 +140,18 @@ class ChatBot():
 
         return message
 
-        if "full" in params:
-            self.bot_print_log([])
+        if "full" in args:
+            self.bot_print_log()
 
 
-    def bot_show_weather(self, params):
+    def bot_show_weather(self, *args):
         """Shows a weather-forecast for a given location"""
-        if len(params) != 1:
+        if len(args) != 1:
             return "Invalid Syntax, please give one parameter, the location"
-            return
 
         locations = {"freiburg": [47.9990, 7.8421], "zurich": [47.3769, 8.5417], "mulhouse": [47.7508, 7.3359]}
-        if params[0].lower().replace("ü","u") in locations:
-            city = locations[params[0].lower().replace("ü","u")]
+        if args[0].lower().replace("ü","u") in locations:
+            city = locations[args[0].lower().replace("ü","u")]
         else:
             return "Couldn't find city, it might be added later though."
 
@@ -166,16 +160,16 @@ class ChatBot():
         return message
 
 
-    def bot_google_search(self, params):
+    def bot_google_search(self, *args):
         """Does a google search and shows relevant links"""
-        if len(params) < 1:
-            self.telegram.send_message("Please tell me what to look for")
-            return
-        send_string = google.query(params)
+        if len(args) < 1:
+            return "Please tell me what to look for"
+
+        send_string = google.query(args)
         return send_string
 
 
-    def bot_print_events(self, params):
+    def bot_print_events(self, *args):
         """Shows a list of couple-related events and a countdown"""
         events = {
             "anniversary :red_heart:" : datetime.date(datetime.datetime.now().year,12,7),
@@ -195,33 +189,41 @@ class ChatBot():
         return send_string
 
 
-    def bot_emojify(self, params):
+    def bot_emojify(self, *args):
         """Converts a string to emojis"""
 
         if len(params) < 2:
-            self.telegram.send_message(emoji.emojize("Please send a separator as the first argument, and the text afterwards.\nExample:\n/emojify :heart: Example text"))
+            return "Please send a separator as the first argument, and the text afterwards.\nExample:\n/emojify :heart: Example text"
 
-        sep = params[0]
+        sep = args[0]
         string_emoji = ""
-        for word in params[1:]:
+        for word in args[1:]:
             out_string = self.emojify_word(word)
             string_emoji += out_string + sep
 
         return string_emoji
 
 
-    def bot_show_help(self, params):
+    def bot_show_help(self, *args):
         """Shows a list of all commands and their description"""
+        description = False
+        if "verbose" in args:
+            description = True
+
         send_text = "BeebBop, this is " + self.name + " (V." + self.version + ")\n"
         send_text += "Here is what I can do up to now: \n"
+
         entries = sorted(list(self.commands.keys()))
         for entry in entries:
-            send_text += "<b>" + entry + "</b> - "
-            send_text += "<code>" + self.commands[entry].__doc__ + "</code>\n\n"
+            send_text += "<b>" + entry + "</b>"
+            if description:
+                send_text += " - <code>" + self.commands[entry].__doc__ + "</code>\n\n"
+            else:
+                send_text += "\n"
         return send_text
 
 
-    def bot_print_log(self, params):
+    def bot_print_log(self, *args):
         """Shows an error-log, mostly of bad api-requests"""
         if "clear" in params:
             self.persistence.write("log",[])
@@ -235,41 +237,38 @@ class ChatBot():
         return send_text
 
 
-    def bot_show_wikipedia(self, params):
-        """Shows the wikipedia entry for a given therm"""
-        if len(params) > 2 or len(params) == 0:
-            return "Please only search for one word at a time. 1rst param is for language (de or fr or en or ...)"
-
-        if len(params) == 2:
-            url = "https://" + params[0] + ".wikipedia.org/wiki/" + params[1]
+    def bot_show_wikipedia(self, *args):
+        """Shows the wikipedia entry for a given term"""
+        if len(args) == 0:
+            return "Please provide the first argument for language (de or fr or en or ...) and then your query"
+        args = list(args)
+        if len(args) >= 2:
+            url = "https://" + args.pop(0) + ".wikipedia.org/wiki/" + args.pop(0)
+            for word in args:
+                url +=  "_" + word
         else:
-            url = "https://en.wikipedia.org/wiki/" + params[0]
+            url = "https://en.wikipedia.org/wiki/" + args[0]
 
-        try:
-            r = requests.get(url)
-        except:
-            url = "https://en.wikipedia.org/wiki/" + params[0]
-            r = requests.get(url)
-            if r.status_code == 404:
-                return "No result found for query"
+        print(url)
+        r = requests.get(url)
+        if r.status_code == 404:
+            return "No result found for query (404)"
 
         return url
 
 
-    def bot_do_all(self,params):
-        """Executes every single command with random params"""
-        for command in self.commands:
-            if command != "bot_do_all":
-                	self.commands[command](["en","Freiburg"])
-
-
-    def bot_zvv(self,params):
-        """Uses the swiss travel api to return the best route between a start- and endpoint in Zurich (actually whole Switzerland, but I haven't tested that)"""
-        if len(params) != 2:
-            return "Please give me your start and endpoint"
+    def bot_zvv(self, *args):
+        """Uses the swiss travel api to return the best route between a start- and endpoint.
+        usage: <start> to <finish>"""
+        if len(args) <= 3:
+            return "Please specify a start- and endpoint as well as a separator (the 'to')"
 
         url = "http://transport.opendata.ch/v1/connections"
-        data = {"from" : params[0], "to" : params[1], "limit" : 2}
+        args = list(args)
+        goal = " ".join(args[:args.index("to")])
+        dest = " ".join(args[args.index("to")+1:])
+
+        data = {"from" : goal, "to" : dest, "limit" : 2}
         try:
             routes = requests.get(url, params=data).json()
             result = routes["connections"]
@@ -302,12 +301,12 @@ class ChatBot():
         return "I'm not functional yet. But when I am, it is gonna be legendary!"
 
 
-    def match_reddit_params(self, params):
+    def match_reddit_params(self, *args):
         """matches a list of two elements to one int and one string
         returns int, string or invalid, invalid
         """
-        if len(params) == 2:
-            p1 = params[0], p2 = params[1]
+        if len(args) == 2:
+            p1 = args[0], p2 = args[1]
             try:
                 try:
                     r1 = int(p1)
@@ -319,19 +318,19 @@ class ChatBot():
                 return None
 
             return [r1, r2]
-        elif len(params) == 1:
+        elif len(args) == 1:
             try:
-                r1 = int(params[0])
+                r1 = int(args[0])
             except:
                 return None
             return [r1]
 
 
-    def bot_tell_joke(self, params):
+    def bot_tell_joke(self, *args):
         """Tells you the top joke on r/jokes"""
 
         number = 1
-        params_sorted = self.match_reddit_params(params)
+        params_sorted = self.match_reddit_params(*args)
         if params_sorted != None:
             if len(params_sorted) >= 1:
                 number = params_sorted[0]
@@ -343,7 +342,7 @@ class ChatBot():
         return joke
 
 
-    def bot_send_meme(self, params):
+    def bot_send_meme(self, *args):
         """Sends a meme from r/"""
         subreddit_name = "memes"
         subnames = {
@@ -354,13 +353,13 @@ class ChatBot():
         }
 
         number = 1
-        params_sorted = self.match_reddit_params(params)
+        params_sorted = self.match_reddit_params(*args)
         if params_sorted != None:
             if len(params_sorted) >= 1:
                 number = params_sorted[0]
             if len(params_sorted) >= 2:
                 subreddit_name = params_sorted[1]
-            if len(params) > 2:
+            if len(args) > 2:
                 self.telegram.send_message("Memes takes 2 parameters: the number of memes, and their topic.")
 
         urls = reddit.get_random_rising(subreddit_name, number, "photo")
@@ -372,7 +371,7 @@ class ChatBot():
                 return "Meme won't yeet"
 
 
-    def bot_send_news(self, params):
+    def bot_send_news(self, *args):
         """Sends the first entries for new from r/"""
         subnames = {
             "germany" : "germannews",
@@ -383,7 +382,7 @@ class ChatBot():
         if len(params) == 0:
             subreddit_name = "worldnews"
         else:
-            params_sorted = self.match_reddit_params(params)
+            params_sorted = self.match_reddit_params(*args)
             if params_sorted != None:
                 if len(params_sorted) >= 1:
                     number = params_sorted[0]

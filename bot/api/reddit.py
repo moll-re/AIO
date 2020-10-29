@@ -1,6 +1,6 @@
 import praw
 try:
-    import api.keys as keys
+    import bot.api.keys as keys
 except:
     import keys
 
