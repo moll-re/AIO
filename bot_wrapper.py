@@ -41,7 +41,5 @@ class ModuleWrapper():
 
     def react_hw_command(self, command, params):
         """"""
-        # Oh yeah, that needs to be changed
         # so params is a list, and so, to pass the commands, we need to unpack it:
-        # should work fine
         self.hw_commands[command](*params)

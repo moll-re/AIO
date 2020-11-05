@@ -110,8 +110,18 @@ class ChatBot():
                 string_emoji += letter
         return string_emoji
 
+
+    def write_bot_log(self, function_name, error_message):
+        """"""
+        out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
+        out += " @ " + function_name
+        out += " --> " + error_message
+        self.persistence.append_list("log", out)
+
+
     ############################################################################
     """BOT-Commands: implementation"""
+
 
     def bot_print_lorem(self, *args):
         """Prints a placeholder text."""
@@ -208,7 +218,7 @@ class ChatBot():
     def bot_show_help(self, *args):
         """Shows a list of all commands and their description"""
         description = False
-        if "verbose" in args:
+        if "full" in args:
             description = True
 
         send_text = "BeebBop, this is " + self.name + " (V." + self.version + ")\n"
@@ -226,7 +236,7 @@ class ChatBot():
 
     def bot_print_log(self, *args):
         """Shows an error-log, mostly of bad api-requests"""
-        if "clear" in params:
+        if "clear" in args:
             self.persistence.write("log",[])
             self.telegram.send_message("Log cleared")
             return
@@ -260,7 +270,7 @@ class ChatBot():
 
     def bot_zvv(self, *args):
         """Uses the swiss travel api to return the best route between a start- and endpoint.
-        usage: <start> to <finish>"""
+        usage: 'start' to 'finish'"""
         if len(args) <= 3:
             return "Please specify a start- and endpoint as well as a separator (the 'to')"
 
@@ -303,42 +313,48 @@ class ChatBot():
 
 
     def match_reddit_params(self, *args):
-        """matches a list of two elements to one int and one string
-        returns int, string or invalid, invalid
+        """ matches a list of two elements to a dict
+            returns: {"int": number, "str": name}
         """
-        args = list(args)
+        r = {"int": 1, "str": "default"}
+        print(args)
         if len(args) == 2:
-            p1 = args[0], p2 = args[1]
+            p1, p2 = args[0], args[1]
             try:
                 try:
                     r1 = int(p1)
                     r2 = p2
                 except:
-                    r2 = int(p2)
-                    r1 = p1
-            except:
-                return None
+                    r1 = int(p2)
+                    r2 = p1
 
-            return [r1, r2]
+                r["int"] = r1
+                r["str"] = r2
+
+            except:
+                self.write_bot_log("match_reddit_params", "could not match given params to known pattern")
+
         elif len(args) == 1:
             try:
-                r1 = int(args[0])
+                try:
+                    r["int"] = int(args[0])
+                except:
+                    r["str"] = args[0]
             except:
-                return None
-            return [r1]
+                self.write_bot_log("match_reddit_params", "could not match given params to known pattern")
+
+        return r
 
 
     def bot_tell_joke(self, *args):
         """Tells you the top joke on r/jokes"""
 
-        number = 1
         params_sorted = self.match_reddit_params(*args)
-        if params_sorted != None:
-            if len(params_sorted) >= 1:
-                number = params_sorted[0]
-            if len(params_sorted) > 1:
-                self.telegram.send_message("Please only specify one argument: the number of jokes")
 
+        number = params_sorted["int"]
+
+        if len(params_sorted) > 1:
+            self.telegram.send_message("Ignored other params than number of jokes")
 
         joke = reddit.get_random_rising("jokes", number, "text")
         return joke
@@ -346,51 +362,52 @@ class ChatBot():
 
     def bot_send_meme(self, *args):
         """Sends a meme from r/"""
-        subreddit_name = "memes"
         subnames = {
+            "default" : "memes", # general case
             "physics" : "physicsmemes",
             "dank" : "dankmemes",
             "biology" : "biologymemes",
             "math" : "mathmemes"
         }
 
-        number = 1
         params_sorted = self.match_reddit_params(*args)
-        if params_sorted != None:
-            if len(params_sorted) >= 1:
-                number = params_sorted[0]
-            if len(params_sorted) >= 2:
-                subreddit_name = params_sorted[1]
-            if len(args) > 2:
-                self.telegram.send_message("Memes takes 2 parameters: the number of memes, and their topic.")
+
+        number = params_sorted["int"]
+        if params_sorted["str"] in subnames:
+            subreddit_name = subnames[params_sorted["str"]]
+        else:
+            subreddit_name = subnames["default"]
+
 
         urls = reddit.get_random_rising(subreddit_name, number, "photo")
         for u in urls:
             try:
                 self.telegram.send_photo(u["image"], u["caption"])
-                return ""
             except:
+                self.write_bot_log("bot_send_meme", "could not send image")
                 return "Meme won't yeet"
+
+        return ""
 
 
     def bot_send_news(self, *args):
         """Sends the first entries for new from r/"""
         subnames = {
+            "default" : "worldnews",
             "germany" : "germannews",
             "france" : "francenews",
             "europe" : "eunews",
             "usa" : "usanews"
         }
-        if len(params) == 0:
-            subreddit_name = "worldnews"
+
+
+        params_sorted = self.match_reddit_params(*args)
+
+        number = params_sorted["int"]
+        if params_sorted["str"] in subnames:
+            subreddit_name = subnames[params_sorted["str"]]
         else:
-            params_sorted = self.match_reddit_params(*args)
-            if params_sorted != None:
-                if len(params_sorted) >= 1:
-                    number = params_sorted[0]
-                if len(params_sorted) > 1:
-                    return "Please only specify one argument: the location"
+            subreddit_name = subnames["default"]
 
-
-        text = reddit.get_top(subreddit_name, 10, "text")
+        text = reddit.get_top(subreddit_name, number, "text")
         return text

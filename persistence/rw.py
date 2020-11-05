@@ -15,7 +15,7 @@ class Variables():
         self.savefile = {}
 
     def write(self, name, value):
-        pre = self.read()
+        pre = self.read("")
         pre[self.module][name] = value
         try:
             file = open(self.path,"w")
@@ -26,7 +26,7 @@ class Variables():
             print("Config not written - critical")
 
 
-    def read(self, name=""):
+    def read(self, name):
         if self.last_action == "read":
             if name == "":
                 return self.savefile
@@ -51,7 +51,13 @@ class Variables():
         return vars
 
 
-    def increment(self, name=""):
+    def increment(self, name, inc=1):
         pre = self.read(name)
-        plus1 = pre + 1
+        plus1 = pre + inc
         self.write(name, plus1)
+
+
+    def append_list(self, name, value):
+        pre = self.read(name)
+        pre.append(value)
+        self.write(name, pre)

@@ -42,39 +42,44 @@ class TelegramIO():
 
     def handle_result(self, result):
         """Inspects the message and reacts accordingly. Can easily be extended"""
-        for message_data in result:
-            self.persistence.increment("messages_read")
-            self.offset = message_data["update_id"] + 1
-            message = message_data["message"]
-            self.message_id = message["message_id"]
-            self.chat_id = message["chat"]["id"]
-            author = message["from"]
+        message_data = result[0]
 
-            chat_members = self.persistence.read("chat_members")
-            if str(author["id"]) not in chat_members:
-                name = ""
-                if "first_name" in author:
-                    name += author["first_name"] + " "
-                if "last_name" in author:
-                    name += author["last_name"]
-                if len(name) == 0:
-                    name += "anonymous"
-                chat_members[author["id"]] = name
-                self.persistence.write("chat_members", chat_members)
-                self.send_message("Welcome to this chat " + name + "!")
+        self.persistence.increment("messages_read")
+        self.offset = message_data["update_id"] + 1
 
-            if "text" in message:
-                print("Chat said: ", emoji.demojize(message["text"]))
-
-                if "entities" in message:
-                    for entry in message["entities"]:
-                        if entry["type"] == "bot_command":
-                            return self.handle_command(message["text"][1:])
-
-            elif "photo" in message:
-                print("Photo received, what do I do?")
-
+        if "edited_message" in message_data:
             return "nothing", "happened"
+
+        message = message_data["message"]
+        self.message_id = message["message_id"]
+        self.chat_id = message["chat"]["id"]
+        author = message["from"]
+
+        chat_members = self.persistence.read("chat_members")
+        if str(author["id"]) not in chat_members:
+            name = ""
+            if "first_name" in author:
+                name += author["first_name"] + " "
+            if "last_name" in author:
+                name += author["last_name"]
+            if len(name) == 0:
+                name += "anonymous"
+            chat_members[author["id"]] = name
+            self.persistence.write("chat_members", chat_members)
+            self.send_message("Welcome to this chat " + name + "!")
+
+        if "text" in message:
+            print("Chat said: ", emoji.demojize(message["text"]))
+
+            if "entities" in message:
+                for entry in message["entities"]:
+                    if entry["type"] == "bot_command":
+                        return self.handle_command(message["text"][1:])
+
+        elif "photo" in message:
+            print("Photo received, what do I do?")
+
+        return "nothing", "happened"
 
 
     def handle_command(self, command):
@@ -97,6 +102,7 @@ class TelegramIO():
             self.send_message("Command <code>" + full[0] + "</code> not found. Please try again.")
 
         return "nothing", ["happened"]
+
 
     def fuzzy_match_command(self, input):
         matches = ["not exact"]
@@ -122,6 +128,10 @@ class TelegramIO():
 
 
     def send_message(self, message):
+
+        if message == "":
+            return
+
         print("SENDING: " + emoji.demojize(message))
 
         data = {
@@ -130,15 +140,17 @@ class TelegramIO():
             "parse_mode": "HTML",
             "reply_to_message_id" : self.message_id,
         }
+
         send_url = self.base_url + "sendMessage"
         try:
             r = requests.post(send_url, data=data)
+            print(r.status_code)
+            self.persistence.increment("messages_sent")
         except:
-            log = self.persistence.read("log")
-            log.append(str(datetime.datetime.now()) + " - did not send:\n" + message)
-            self.persistence.write("log", log)
-
-        self.persistence.increment("messages_sent")
+            out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
+            out += " @ " + "telegram.send_message"
+            out += " --> " + "did not send:\n" + message
+            self.persistence.append_list("log", out)
 
 
     def send_photo(self, url, caption):
@@ -153,9 +165,9 @@ class TelegramIO():
         send_url = self.base_url + "sendPhoto"
         try:
             r = requests.post(send_url, data=data)
+            self.persistence.increment("photos_sent")
         except:
-            log = self.persistence.read("log")
-            log.append(str(datetime.datetime.now()) + " - did not send:\n" + url)
-            self.persistence.write("log", log)
-
-        self.persistence.increment("photos_sent")
+            out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
+            out += " @ " + "telegram.send_photo"
+            out += " --> " + "did not send:\n" + url
+            self.persistence.append_list("log", out)
