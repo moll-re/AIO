@@ -77,7 +77,7 @@ class ClockFace(object):
         if (is_WE and (now > 1000 and now < 2200)) or ((not is_WE) and (now > 800 and now < 2130)):
             brightness = 0.8
         else:
-            brightness = 0.02
+            brightness = 0.01
 
         self.IO.output.set_brightness(brightness)
 
