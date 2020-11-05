@@ -306,6 +306,7 @@ class ChatBot():
         """matches a list of two elements to one int and one string
         returns int, string or invalid, invalid
         """
+        args = list(args)
         if len(args) == 2:
             p1 = args[0], p2 = args[1]
             try:
