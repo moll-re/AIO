@@ -56,6 +56,7 @@ class UnicornHat(object):
             GPIO.output(self.PINS_DAT[0], b1 & 0b10000000)
             GPIO.output(self.PINS_DAT[1], b2 & 0b10000000)
             GPIO.output(self.PIN_CLK, GPIO.HIGH)
+
             b1 <<= 1
             b2 <<= 1
             #time.sleep(0.00000001)
@@ -83,20 +84,18 @@ class UnicornHat(object):
     def set_pixel(self, x, y, r, g, b):
         """Set a single pixel to RGB colour.
         :param x: Horizontal position from 0 to width
-        :param y: Veritcal position from 0 to height
+        :param y: Vertical position from 0 to height
         :param r: Amount of red from 0 to 255
         :param g: Amount of green from 0 to 255
         :param b: Amount of blue from 0 to 255
         """
         self.buffer[y][x] = r, g, b
 
-
     def set_matrix(self, matrix):
         """Sets a height x width matrix directly"""
         self.reset_clock()
         self.buffer = matrix
         self.show()
-
 
     def set_pixel_hsv(self, x, y, h, s=1.0, v=1.0):
         """set a single pixel to a colour using HSV.
@@ -124,7 +123,6 @@ class UnicornHat(object):
 
     def get_shape(self):
         """Return the shape (width, height) of the display."""
-
         return self.WIDTH, self.HEIGHT
 
     def clear(self):

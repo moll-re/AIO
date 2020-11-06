@@ -11,14 +11,14 @@ except ImportError:
 
 
 class OutputHandler():
-    def __init__(self, width, height):
+    def __init__(self, width, height, primary = [200, 200, 200], secondary = [10, 200, 10], error = [200, 10, 10]):
         """width is presumed to be larger than height"""
         self.width = width
         self.height = height
         self.output = HAT.UnicornHat(width, height)
-        self.primary = [200, 200, 200]
-        self.secondary = [10, 200, 10]
-        self.red = [200, 10, 10]
+        self.primary = primary
+        self.secondary = secondary
+        self.red = error
 
 
 

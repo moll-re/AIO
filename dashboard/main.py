@@ -10,8 +10,8 @@ app = dash.Dash(__name__, external_stylesheets=ex_css)
 
 card_main = dbc.Card(
     [
-        dbc.CardImg(src="/assets/ball_of_sun.jpg", top=True, bottom=False,
-                    title="Image by Kevin Dinkel", alt='Learn Dash Bootstrap Card Component'),
+        #dbc.CardImg(src="/assets/ball_of_sun.jpg", top=True, bottom=False,
+        #            title="Image by Kevin Dinkel", alt='Learn Dash Bootstrap Card Component'),
         dbc.CardBody(
             [
                 html.H4("Learn Dash with Charming Data", className="card-title"),
@@ -47,9 +47,6 @@ card_question = dbc.Card(
 )
 
 
-
-
-
 today = datetime.date.today().strftime("%d.%m.%Y")
 tag = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"][datetime.datetime.today().weekday()]
 
@@ -59,24 +56,24 @@ string_header = tag + ", der " + today
 app.layout = html.Div([
     html.Header(children = [
         html.H1(string_header)
-    ]),
+    ],),
     html.Div(
         className = "content",
         style = {"padding-top" : "32em"},
         children = [
-            dbc.Row([dbc.Col(card_main, width=3),
-                     dbc.Col(card_question, width=3)], justify="around"),  # justify="start", "center", "end", "between", "around"
+            # dbc.Row([dbc.Col(card_main, width=3),
+            #         dbc.Col(card_question, width=3)], justify="around"),  # justify="start", "center", "end", "between", "around"
 
             # dbc.CardGroup([card_main, card_question, card_graph])   # attaches cards with equal width and height columns
             # dbc.CardDeck([card_main, card_question, card_graph])    # same as CardGroup but with gutter in between cards
 
-            # dbc.CardColumns([                        # Cards organised into Masonry-like columns
-            #         card_main,
-            #         card_question,
+            dbc.CardColumns([                        # Cards organised into Masonry-like columns
+                    card_main,
+                    card_question,card_question,card_question,card_question,
             #         card_graph,
             #         card_question,
             #         card_question,
-            # ])
+            ])
     ])
 ])
 
@@ -85,3 +82,4 @@ app.layout = html.Div([
 
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0")
+5

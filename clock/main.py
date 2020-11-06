@@ -53,6 +53,7 @@ class ClockFace(object):
     def set_face(self, weather):
         """"""
         self.weather = weather
+        print("WEATHER: ", weather)
         self.run(self.IO.clock_face,(weather,))
 
 
