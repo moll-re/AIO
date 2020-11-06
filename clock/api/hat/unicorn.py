@@ -29,7 +29,7 @@ class UnicornHat(object):
         self.brightness = 1
         self.buffer = numpy.zeros((self.HEIGHT,self.WIDTH,3), dtype=int)
 
-        self.reset_clock()
+        #self.reset_clock()
 
     def reset_clock(self):
         GPIO.output(self.PIN_CS, GPIO.LOW)

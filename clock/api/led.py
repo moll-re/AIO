@@ -16,7 +16,7 @@ class OutputHandler():
         self.width = width
         self.height = height
         self.output = HAT.UnicornHat(width, height)
-        self.primary = [230, 230, 230]
+        self.primary = [200, 200, 200]
         self.secondary = [10, 200, 10]
         self.red = [200, 10, 10]
 
