@@ -29,12 +29,14 @@ class UnicornHat(object):
         self.brightness = 1
         self.buffer = numpy.zeros((self.HEIGHT,self.WIDTH,3), dtype=int)
 
-        #self.reset_clock()
+        self.reset_clock()
+
 
     def reset_clock(self):
         GPIO.output(self.PIN_CS, GPIO.LOW)
-        time.sleep(0.000001)
+        time.sleep(0.00001)
         GPIO.output(self.PIN_CS, GPIO.HIGH)
+
 
     def spi_write(self, buf1, buf2):
         GPIO.output(self.PIN_CS, GPIO.LOW)
@@ -44,9 +46,10 @@ class UnicornHat(object):
         for x in range(len(buf1)):
             b1, b2= buf1[x], buf2[x]
             self.spi_write_byte(b1, b2)
-            #time.sleep(0.0000001)
+
 
         GPIO.output(self.PIN_CS, GPIO.HIGH)
+
 
     def spi_write_byte(self, b1, b2):
         for x in range(8):
@@ -90,6 +93,7 @@ class UnicornHat(object):
 
     def set_matrix(self, matrix):
         """Sets a height x width matrix directly"""
+        self.reset_clock()
         self.buffer = matrix
         self.show()
 
