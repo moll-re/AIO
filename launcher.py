@@ -10,7 +10,6 @@ from threading import Thread
 
 
 
-
 class Launcher():
     """Launches all other submodules"""
 

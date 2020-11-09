@@ -131,6 +131,7 @@ class ClockFace(object):
 
         self.run(output,(image, duration))
 
+
     def show_message(self, *args):
         """Runs a text message over the screen. Obviously needs the text"""
         # keep in mind, in this case args is a tuple of all words

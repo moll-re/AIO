@@ -33,10 +33,10 @@ digits = {
 ##place of numbers, invariable
 digit_position = [[2,4], [2,10], [9,4], [9,10]]
 
-def time_converter():
+def time_converter(time=datetime.datetime.now().strftime("%H%M")):
     """Converts 4-digit time to a pixel-matrix
     returns: np.array((16, 16))"""
-    time = datetime.datetime.now().strftime("%H%M")
+    #time = datetime.datetime.now().strftime("%H%M")
     pixels = np.zeros((16,16),dtype=np.uint8)
     time = "0" * (4 - len(str(time))) + str(time)
     time_split = [int(i) for i in time]
@@ -64,6 +64,27 @@ def date_converter():
     return pixels
 
 
+
+
+weather_categories = {
+    "cloud": "cloud",
+    "cloud_with_rain": "rain and cloud",
+    "thunder_cloud_rain": "thunder and cloud",
+    "droplet": "rain and cloud",
+    "cloud_snow": "snow and cloud",
+    "sun": "sun",
+    "Mist": "fog and clouds",
+    "Smoke": "Smoke",
+    "Haze": "Haze",
+    "Dust": "Dust",
+    "Fog": "fog",
+    "Sand": "Sand",
+    "Dust": "Dust",
+    "Ash": "Ash",
+    "Squal": "Squal",
+    "Tornado": "Tornado",
+}
+
 def weather_converter(name):
     result = np.zeros((16,16))
     cwd = __file__.replace("\\","/") # for windows
@@ -77,6 +98,7 @@ def weather_converter(name):
 
     icon_loc = ["sun","moon","sun and clouds", "moon and clouds", "cloud","fog and clouds","2 clouds", "3 clouds", "rain and cloud", "rain and clouds", "rain and cloud and sun", "rain and cloud and moon", "thunder and cloud", "thunder and cloud and moon", "snow and cloud", "snow and cloud and moon", "fog","fog night"]
     #ordered 1 2 \n 3 4 \ 5 5 ...
+    name = weather_categories[name]
     try:
         iy, ix = int(icon_loc.index(name)/2), icon_loc.index(name)%2
         # x and y coords

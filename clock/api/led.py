@@ -43,11 +43,11 @@ class OutputHandler():
         c1 = self.primary
         c2 = self.secondary
         c3 = self.red
-        if len(colors) == 1:
+        if len(colors) > 0:
             c1 = colors[0]
-        if len(colors) == 2:
+        if len(colors) > 1:
             c2 = colors[1]
-        if len(colors) == 3:
+        if len(colors) > 2:
             c3 = colors[2]
         if len(colors) > 3:
             print("Too many colors")
@@ -68,7 +68,6 @@ class OutputHandler():
         return r3
 
 
-
     def set_matrix_rgb(self, matrix, quadrant=1):
         result = np.zeros((self.height, self.width,3))
         if quadrant == 1:
@@ -83,14 +82,21 @@ class OutputHandler():
         self.output.set_matrix(result)
 
 
-    def clock_face(self,weather):
+    def clock_face(self, weather):
+        """weather as a dict"""
         hour = converter.time_converter()
         day = converter.date_converter()
         face1 = hour + day
         face1_3d = self.matrix_add_depth(face1)
 
+        print(weather)
+        if weather["show"] == "weather":
+            face2_3d = converter.weather_converter(weather["weather"])
+        else:
+            face2 = converter.time_converter(int(weather["low"]+weather["high"]))
+            face2 = np.concatenate((face2[:8,...],2*face2[8:,...]))
+            face2_3d = self.matrix_add_depth(face2,[[10,10,200],[200,10,10]])
 
-        face2_3d = converter.weather_converter(weather)
         face = np.zeros((max(face1_3d.shape[0],face2_3d.shape[0]),face1_3d.shape[1]+face2_3d.shape[1],3))
 
         face[:face1_3d.shape[0],:face1_3d.shape[1],...] = face1_3d
