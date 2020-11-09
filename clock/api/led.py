@@ -89,13 +89,12 @@ class OutputHandler():
         face1 = hour + day
         face1_3d = self.matrix_add_depth(face1)
 
-        print(weather)
         if weather["show"] == "weather":
             face2_3d = converter.weather_converter(weather["weather"])
         else:
             face2 = converter.time_converter(int(weather["low"]+weather["high"]))
             face2 = np.concatenate((face2[:8,...],2*face2[8:,...]))
-            face2_3d = self.matrix_add_depth(face2,[[10,10,200],[200,10,10]])
+            face2_3d = self.matrix_add_depth(face2,[[100,100,10],[200,10,10]])
 
         face = np.zeros((max(face1_3d.shape[0],face2_3d.shape[0]),face1_3d.shape[1]+face2_3d.shape[1],3))
 
