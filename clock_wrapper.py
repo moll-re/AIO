@@ -12,7 +12,7 @@ class ModuleWrapper():
         self.bot = bot_module
         self.time_thread = Thread(target=self.mainloop)
         self.time_thread.start()
-        self.weather = {"weather":"", "high":"", "low":"", "show":"weather"}
+        self.weather = {"weather":"", "high":"", "low":"", "show":"temps"}
 
 
     def mainloop(self):

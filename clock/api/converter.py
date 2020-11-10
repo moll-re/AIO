@@ -33,10 +33,11 @@ digits = {
 ##place of numbers, invariable
 digit_position = [[2,4], [2,10], [9,4], [9,10]]
 
-def time_converter(time=datetime.datetime.now().strftime("%H%M")):
+def time_converter(time=""):
     """Converts 4-digit time to a pixel-matrix
     returns: np.array((16, 16))"""
-    #time = datetime.datetime.now().strftime("%H%M")
+    if time == "":
+        time = datetime.datetime.now().strftime("%H%M")
     pixels = np.zeros((16,16),dtype=np.uint8)
     time = "0" * (4 - len(str(time))) + str(time)
     time_split = [int(i) for i in time]
