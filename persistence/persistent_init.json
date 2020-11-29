@@ -11,5 +11,11 @@
 
   "clock" : {
     "test":""
+  },
+  "dashboard" : {
+    "test":""
+  },
+  "global" : {
+    "shopping_list" : []
   }
 }

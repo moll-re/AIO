@@ -18,30 +18,50 @@ def text_converter(text, height):
 
 
 digits = {
-    1 : [[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
-    2 : [[1,1,1],[0,0,1],[1,1,1],[1,0,0],[1,1,1]],
-    3 : [[1,1,1],[0,0,1],[1,1,1],[0,0,1],[1,1,1]],
-    4 : [[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1]],
-    5 : [[1,1,1],[1,0,0],[1,1,1],[0,0,1],[1,1,1]],
-    6 : [[1,1,1],[1,0,0],[1,1,1],[1,0,1],[1,1,1]],
-    7 : [[1,1,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
-    8 : [[1,1,1],[1,0,1],[1,1,1],[1,0,1],[1,1,1]],
-    9 : [[1,1,1],[1,0,1],[1,1,1],[0,0,1],[1,1,1]],
-    0 : [[1,1,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]]
+    "1" : [[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
+    "2" : [[1,1,1],[0,0,1],[1,1,1],[1,0,0],[1,1,1]],
+    "3" : [[1,1,1],[0,0,1],[1,1,1],[0,0,1],[1,1,1]],
+    "4" : [[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1]],
+    "5" : [[1,1,1],[1,0,0],[1,1,1],[0,0,1],[1,1,1]],
+    "6" : [[1,1,1],[1,0,0],[1,1,1],[1,0,1],[1,1,1]],
+    "7" : [[1,1,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
+    "8" : [[1,1,1],[1,0,1],[1,1,1],[1,0,1],[1,1,1]],
+    "9" : [[1,1,1],[1,0,1],[1,1,1],[0,0,1],[1,1,1]],
+    "0" : [[1,1,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]],
+    "-" : [[0,0,0],[0,0,0],[1,1,1],[0,0,0],[0,0,0]],
+    "-1" : [[0,0,1],[0,0,1],[1,1,1],[0,0,1],[0,0,1]],
 }
 
-##place of numbers, invariable
+##place of numbers, invariant
 digit_position = [[2,4], [2,10], [9,4], [9,10]]
 
-def time_converter(time=""):
+def time_converter(top="", bottom=""):
     """Converts 4-digit time to a pixel-matrix
     returns: np.array((16, 16))"""
-    if time == "":
-        time = datetime.datetime.now().strftime("%H%M")
-    pixels = np.zeros((16,16),dtype=np.uint8)
-    time = "0" * (4 - len(str(time))) + str(time)
-    time_split = [int(i) for i in time]
 
+    pixels = np.zeros((16,16),dtype=np.uint8)
+
+    if bottom == "" or top == "":
+        top = datetime.datetime.now().strftime("%H")
+        bottom = datetime.datetime.now().strftime("%M")
+
+    if len(top) < 2:
+        top = "0" * (2 - len(top)) + top
+    if len(bottom) < 2:
+        bottom = "0" * (2 - len(bottom)) + bottom
+
+    if ("-" in top and len(top) > 2) or ("-" in bottom and len(bottom) > 2):
+        time_split = 4*["-"]
+    else:
+        time_split = [i for i in top] + [i for i in bottom]
+
+    if "-1" in top and len(top) != 2:
+        time_split = ["-1", top[-1]] + [i for i in bottom]
+    if "-1" in bottom and len(bottom) != 2:
+        time_split = [i for i in top] + ["-1", bottom[-1]]
+    
+
+    print(time_split)
     for i in range(4):
         x = digit_position[i][0]
         y = digit_position[i][1]

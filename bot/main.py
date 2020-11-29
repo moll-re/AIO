@@ -43,6 +43,8 @@ class ChatBot():
             "joke" : self.bot_tell_joke,
             "meme" : self.bot_send_meme,
             "news" : self.bot_send_news,
+            "shopping" : self.bot_shopping_list,
+
         }
 
 
@@ -203,7 +205,7 @@ class ChatBot():
     def bot_emojify(self, *args):
         """Converts a string to emojis"""
 
-        if len(params) < 2:
+        if len(args) < 2:
             return "Please send a separator as the first argument, and the text afterwards.\nExample:\n/emojify :heart: Example text"
 
         sep = args[0]
@@ -411,3 +413,41 @@ class ChatBot():
 
         text = reddit.get_top(subreddit_name, number, "text")
         return text
+
+
+    def bot_shopping_list(self, *args):
+        """Shows a shopping list. Usage
+        add <aobject>
+        print
+        clear
+        remove <position>
+        """
+        output = ""
+        # args = list(args)
+        if len(args) == 0:
+            return "Missing parameter(s)"
+        
+        if args[0] == "print":
+            sl = self.persistence.global_action("read", "shopping_list")
+            for ind,thing in enumerate(sl):
+                output += str(ind+1) + ". " + thing + "\n"
+        elif args[0] == "clear":
+            self.persistence.global_action("write", "shopping_list", value=[])
+            output = "Cleared list."
+        elif args[0] == "add":
+            if len(args) == 1:
+                output = "Missing parameter"
+            add = " ".join(args[1:])
+            self.persistence.global_action("append_list", "shopping_list", value=add)
+            output = "Added " + add + "."
+        elif args[0] == "remove":
+            output = "Removed test."
+        return output
+
+
+    def bot_save_alias(self, *args):
+        """Save a shortcut for special commands (+params)
+        usage: /alias sa shopping add
+        Means: /sa will now be treated as input /shopping add"""
+
+        return "Does this look finished to you?"
