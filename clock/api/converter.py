@@ -60,8 +60,6 @@ def time_converter(top="", bottom=""):
     if "-1" in bottom and len(bottom) != 2:
         time_split = [i for i in top] + ["-1", bottom[-1]]
     
-
-    print(time_split)
     for i in range(4):
         x = digit_position[i][0]
         y = digit_position[i][1]
