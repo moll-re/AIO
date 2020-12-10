@@ -77,8 +77,7 @@ class Variables():
         """returns content of given file"""
         if not os.path.exists(path):
             return "File does not exist"
-        file = os.open(path,"r")
-        print(os.getcwd())
-        content = os.read(file)
-        os.close(file)
+        file = open(path,"r")
+        content = file.read()
+        file.close()
         return content

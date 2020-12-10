@@ -245,9 +245,9 @@ class ChatBot():
             self.persistence.write("log",[])
             return "Log cleared"
         elif "system" in args:
-            send_text = self.persistence.read_ext_file("log.txt")
+            send_text = self.persistence.read_ext_file("persistence/log.txt")
             return send_text
-            
+
         send_text = ""
         for event in self.persistence.read("log"):
             send_text += event + "\n"
