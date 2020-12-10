@@ -28,17 +28,21 @@ class ClockWrapper(wrapper.Wrapper):
                     # fetch new weather every 3 hours (hard coded)
                     prev_weather_time = datetime.datetime.now()
                     weather = self.others[0].bot_show_weather("zurich")
+                    if not (sad in weather):
+                        l1 = weather[weather.find("</b>")+5:weather.find("\n")].replace (":","")
+                        # current weather situation (icon): we pick the first line, remove the start string, remove :: indicating an emoji
 
-                    l1 = weather[weather.find("</b>")+5:weather.find("\n")].replace (":","")
-                    # current weather situation (icon): we pick the first line, remove the start string, remove :: indicating an emoji
-
-                    temps_today = weather.splitlines()[4]
-                    low = temps_today[temps_today.find("button")+8:temps_today.find("°")]
-                    temps_today = temps_today[temps_today.find("°") + 1:]
-                    high = temps_today[temps_today.find("button")+8:temps_today.find("°")]
-                    self.weather["weather"] = l1
-                    self.weather["high"] = high
-                    self.weather["low"] = low
+                        temps_today = weather.splitlines()[4]
+                        low = temps_today[temps_today.find("button")+8:temps_today.find("°")]
+                        temps_today = temps_today[temps_today.find("°") + 1:]
+                        high = temps_today[temps_today.find("button")+8:temps_today.find("°")]
+                        self.weather["weather"] = l1
+                        self.weather["high"] = high
+                        self.weather["low"] = low
+                    else:
+                        self.weather["weather"] = "error"
+                        self.weather["high"] = "error"
+                        self.weather["low"] = "error"
 
                 if mins_elapsed % 5 == 0:
                     if self.weather["show"] == "weather":

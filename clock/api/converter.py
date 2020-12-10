@@ -30,6 +30,7 @@ digits = {
     "0" : [[1,1,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]],
     "-" : [[0,0,0],[0,0,0],[1,1,1],[0,0,0],[0,0,0]],
     "-1" : [[0,0,1],[0,0,1],[1,1,1],[0,0,1],[0,0,1]],
+    "error" : [[1,0,1],[1,0,1],[0,1,0],[1,0,1],[1,0,1]],
 }
 
 ##place of numbers, invariant
@@ -52,6 +53,8 @@ def time_converter(top="", bottom=""):
 
     if ("-" in top and len(top) > 2) or ("-" in bottom and len(bottom) > 2):
         time_split = 4*["-"]
+    elif "error" in top and "error" in bottom:
+        time_split = 4*["error"]
     else:
         time_split = [i for i in top] + [i for i in bottom]
 
@@ -102,6 +105,7 @@ weather_categories = {
     "Ash": "Ash",
     "Squal": "Squal",
     "Tornado": "Tornado",
+    "error" : "moon"
 }
 
 def weather_converter(name):

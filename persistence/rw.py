@@ -71,3 +71,13 @@ class Variables():
         pre = self.read(name)
         pre.append(value)
         self.write(name, pre)
+
+
+    def read_ext_file(self, path):
+        """returns content of given file"""
+        if not os.path.exists(path):
+            return "File does not exist"
+        file = os.open(path,"r")
+        content = os.read(file)
+        os.close(file)
+        return content
