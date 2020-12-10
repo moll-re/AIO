@@ -28,7 +28,7 @@ class ClockWrapper(wrapper.Wrapper):
                     # fetch new weather every 3 hours (hard coded)
                     prev_weather_time = datetime.datetime.now()
                     weather = self.others[0].bot_show_weather("zurich")
-                    if not (sad in weather):
+                    if not (":sad:" in weather):
                         l1 = weather[weather.find("</b>")+5:weather.find("\n")].replace (":","")
                         # current weather situation (icon): we pick the first line, remove the start string, remove :: indicating an emoji
 
