@@ -78,6 +78,7 @@ class Variables():
         if not os.path.exists(path):
             return "File does not exist"
         file = os.open(path,"r")
+        print(os.getcwd())
         content = os.read(file)
         os.close(file)
         return content
