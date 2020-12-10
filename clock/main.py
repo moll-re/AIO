@@ -6,15 +6,13 @@ import numpy
 
 
 from clock.api import led
-import persistence.rw
-
 
 ################################################################################
 #start of actual programm.
 class ClockFace(object):
     """Actual functions one might need for a clock"""
 
-    def __init__(self, text_speed=18):
+    def __init__(self, text_speed=18, prst=""):
         self.IO = led.OutputHandler(32,16)
         self.tspeed = text_speed
 
@@ -136,5 +134,5 @@ class ClockFace(object):
         """Runs a text message over the screen. Obviously needs the text"""
         # keep in mind, in this case args is a tuple of all words
         message_str = " ".join(args)
-        print("SENDING: " + message_str)
+        print("SHOWING (CLOCK): " + message_str)
         self.text_scroll(message_str)

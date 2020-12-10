@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from bot.api import telegram, google, weather, reddit
-from persistence import rw as pvars
 
 import requests
 import time
@@ -11,21 +10,21 @@ import emoji
 
 class ChatBot():
     """"""
-    def __init__(self, name, version):
+    def __init__(self, name, version, prst):
         """Inits the Bot with a few conf. vars
         Args:   -> name:str - Name of the bot
-                -> api_key:str - t.me api-key
                 -> version:str - Version number
+                -> prst:shelveObj - persistence
         """
 
         self.version = version
         self.name = name
 
         # Persistent variable
-        self.persistence = pvars.Variables("bot")
+        self.persistence = prst
         # Uptime counter
         self.start_time = datetime.datetime.now()
-        self.persistence.increment("reboots")
+        self.persistence["bot"]["reboots"] += 1
 
         # Available commands. Must be manually updated!
         self.commands = {
@@ -43,7 +42,7 @@ class ChatBot():
             "joke" : self.bot_tell_joke,
             "meme" : self.bot_send_meme,
             "news" : self.bot_send_news,
-            "shopping" : self.bot_shopping_list,
+            "list" : self.bot_list,
 
         }
 
@@ -118,7 +117,7 @@ class ChatBot():
         out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
         out += " @ " + function_name
         out += " --> " + error_message
-        self.persistence.append_list("log", out)
+        self.persistence["bot"]["log"] += [out]
 
 
     ############################################################################
@@ -144,11 +143,11 @@ class ChatBot():
             ip = "not fetchable"
         message = "<pre>Status: Running :green_circle:\n"
         message += "Uptime: " + delta[:delta.rfind(".")] + "\n"
-        message += "Reboots: " + str(self.persistence.read("reboots")) + "\n"
+        message += "Reboots: " + str(self.persistence["bot"]["reboots"]) + "\n"
         message += "IP-Adress: " + ip + "\n"
-        message += "Messages read: " + str(self.persistence.read("messages_read")) + "\n"
-        message += "Messages sent: " + str(self.persistence.read("messages_sent")) + "\n"
-        message += "Commands executed " + str(self.persistence.read("commands_executed")) + "</pre>"
+        message += "Messages read: " + str(self.persistence["bot"]["messages_read"]) + "\n"
+        message += "Messages sent: " + str(self.persistence["bot"]["messages_sent"]) + "\n"
+        message += "Commands executed " + str(self.persistence["bot"]["commands_executed"]) + "</pre>"
 
         return message
 
@@ -245,9 +244,15 @@ class ChatBot():
             self.persistence.write("log",[])
             return "Log cleared"
         elif "system" in args:
-            send_text = self.persistence.read_ext_file("persistence/log.txt")
-            return send_text
-
+            path="persistence/log.txt"
+            try:
+                file = open(path,"r")
+                content = file.read()
+                file.close()
+                return content
+            except:
+                return "could not read File"
+        
         send_text = ""
         for event in self.persistence.read("log"):
             send_text += event + "\n"
@@ -279,7 +284,7 @@ class ChatBot():
     def bot_zvv(self, *args):
         """Uses the swiss travel api to return the best route between a start- and endpoint.
         usage: 'start' to 'finish'"""
-        if len(args) <= 3:
+        if len(args) < 3:
             return "Please specify a start- and endpoint as well as a separator (the 'to')"
 
         url = "http://transport.opendata.ch/v1/connections"
@@ -421,33 +426,49 @@ class ChatBot():
         return text
 
 
-    def bot_shopping_list(self, *args):
-        """Shows a shopping list. Usage
-        add <aobject>
-        print
-        clear
-        remove <position>
+    def bot_list(self, *args):
+        """Shows and interacts with a list. Usage
+        list &lt;name&gt; &lt;action&gt; {object}
+        actions are: create, delete, print, clear, add, remove
+        example:
+        list new shopping : creates list name shopping
+        list shopping add bread : adds bread to the list
+        list shopping print
+        list shopping clear
         """
         output = ""
         # args = list(args)
-        if len(args) == 0:
-            return "Missing parameter(s)"
-        
-        if args[0] == "print":
-            sl = self.persistence.global_action("read", "shopping_list")
-            for ind,thing in enumerate(sl):
-                output += str(ind+1) + ". " + thing + "\n"
-        elif args[0] == "clear":
-            self.persistence.global_action("write", "shopping_list", value=[])
-            output = "Cleared list."
-        elif args[0] == "add":
-            if len(args) == 1:
-                output = "Missing parameter"
-            add = " ".join(args[1:])
-            self.persistence.global_action("append_list", "shopping_list", value=add)
-            output = "Added " + add + "."
-        elif args[0] == "remove":
-            output = "Removed test."
+        if len(args) < 2:
+            return "Missing parameters"
+        try:
+            if args[0] == "create":
+                lname = " ".join(args[1:])
+                self.persistence["global"]["lists"][lname] = []
+                output = "Created list " + lname
+            elif args[0] == "delete":
+                lname = " ".join(args[1:])
+                self.persistence["global"]["lists"].pop(lname, None) # no error if key doesnt exist
+                output = "Deleted list " + lname
+            else:
+                lname = args[0]
+                act = args[1]
+                if act == "print":
+                    sl = self.persistence["global"]["lists"][lname]
+                    for ind,thing in enumerate(sl):
+                        output += str(ind+1) + ". " + thing + "\n"
+                elif act == "clear":
+                    self.persistence["global"]["lists"][lname] = []
+                    output = "Cleared list " + lname
+                elif act == "add":
+                    if len(args) < 3:
+                        return "Missing paramaeter"
+                    add = " ".join(args[2:])
+                    self.persistence["global"]["lists"][lname] += [add]
+                    return "Added " + add + "."
+                elif act == "remove":
+                    return "Not working yet"
+        except:
+            output = "Could not handle your request. Maybe check the keys?"
         return output
 
 

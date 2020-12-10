@@ -1,5 +1,5 @@
 # Persistence
-persistent_vars.json
+prst.db.*
 
 # API-Key (keep secret at all times)
 keys.py

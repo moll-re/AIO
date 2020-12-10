@@ -4,13 +4,11 @@ import clock.main
 import dashboard.main
 
 # wrapper
-import clock_wrapper
-import bot_wrapper
-import dashboard_wrapper
+import wrapper
 
 # misc.
 from threading import Thread
-
+import shelve
 
 
 class Launcher():
@@ -18,8 +16,11 @@ class Launcher():
 
     def __init__(self):
         """"""
-        self.bot_module = bot.main.ChatBot("ChatterBot", "2.0")
-        self.clock_module = clock.main.ClockFace()
+        self.persistence = shelve.open('persistence/prst.db', writeback=True)
+        self.init_persistence()
+        # TODO populate the persistence
+        self.bot_module = bot.main.ChatBot(name="ChatterBot", version="2.1", prst=self.persistence)
+        self.clock_module = clock.main.ClockFace(prst=self.persistence)
 
         self.threads = []
         self.threads.append(Thread(target=self.chatbot))
@@ -30,18 +31,32 @@ class Launcher():
 
 
     def clock(self):
-        print("Launching clock-functionality")
-        self.clock = clock_wrapper.ClockWrapper(self.clock_module, self.bot_module)
+        self.clock = wrapper.ClockWrapper(self.clock_module, self.bot_module)
 
 
     def chatbot(self):
-        print("Launching bot-functionality")
-        self.bot = bot_wrapper.ModuleWrapper(self.bot_module, self.clock_module)
+        self.bot = wrapper.BotWrapper(self.bot_module, self.clock_module)
 
 
     def dashboard(self):
-        print("Launching dashboard-functionality")
-        self.dashboard = dashboard_wrapper.DashBoardWrapper(self.dashboard_module, self.bot_module)
+        self.dashboard = wrapper.DashBoardWrapper(self.dashboard_module, self.bot_module)
+
+    def init_persistence(self):
+        self.persistence["bot"] =  {
+            "messages_read": 0,
+            "messages_sent": 0,
+            "commands_executed": 0,
+            "photos_sent": 0,
+            "log": [],
+            "chat_members": {},
+            "reboots": 0
+        }
+        self.persistence["clock"] = {}
+        self.persistence["dashboard"] = {}
+        self.persistence["global"] = {
+            "lists" : {}
+            }
+
 
 ########################################################################
 ## Aand liftoff!

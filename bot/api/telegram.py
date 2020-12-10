@@ -1,6 +1,7 @@
 import emoji
 import requests
 import Levenshtein as lev
+import datetime
 
 import bot.api.keys
 
@@ -44,7 +45,7 @@ class TelegramIO():
         """Inspects the message and reacts accordingly. Can easily be extended"""
         message_data = result[0]
 
-        self.persistence.increment("messages_read")
+        self.persistence["bot"]["messages_read"] += 1
         self.offset = message_data["update_id"] + 1
 
         if "edited_message" in message_data:
@@ -55,7 +56,7 @@ class TelegramIO():
         self.chat_id = message["chat"]["id"]
         author = message["from"]
 
-        chat_members = self.persistence.read("chat_members")
+        chat_members = self.persistence["bot"]["chat_members"]
         if str(author["id"]) not in chat_members:
             name = ""
             if "first_name" in author:
@@ -65,7 +66,7 @@ class TelegramIO():
             if len(name) == 0:
                 name += "anonymous"
             chat_members[author["id"]] = name
-            self.persistence.write("chat_members", chat_members)
+            self.persistence["bot"]["chat_members"] =  chat_members
             self.send_message("Welcome to this chat " + name + "!")
 
         if "text" in message:
@@ -90,7 +91,7 @@ class TelegramIO():
         command = self.fuzzy_match_command(full[0])
         if len(command) != 1:
             if command[0] == "EXACT":
-                self.persistence.increment("commands_executed")
+                self.persistence["bot"]["commands_executed"] += 1
                 return command[1], full[1:]
             else:
                 send = "Did you mean <code>" + command[1] + "</code>"
@@ -129,11 +130,12 @@ class TelegramIO():
 
     def send_message(self, message):
 
-        if message == "":
+        if message == "" or message == None:
             return
 
-        print("SENDING: " + emoji.demojize(message))
-
+        print("SENDING: " + message)
+        # message = message.replace("<","&lt;").replace(">", "&gt;")
+        # TODO: sanitize input but keep relevant tags
         data = {
             'chat_id': self.chat_id,
             'text': emoji.emojize(message),
@@ -144,13 +146,14 @@ class TelegramIO():
         send_url = self.base_url + "sendMessage"
         try:
             r = requests.post(send_url, data=data)
-            print(r.status_code)
-            self.persistence.increment("messages_sent")
+            if (r.status_code != 200):
+                raise Exception
+            self.persistence["bot"]["messages_sent"]
         except:
             out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
             out += " @ " + "telegram.send_message"
             out += " --> " + "did not send:\n" + message
-            self.persistence.append_list("log", out)
+            self.persistence["bot"]["log"] += [out]
 
 
     def send_photo(self, url, caption):
@@ -165,9 +168,9 @@ class TelegramIO():
         send_url = self.base_url + "sendPhoto"
         try:
             r = requests.post(send_url, data=data)
-            self.persistence.increment("photos_sent")
+            self.persistence["bot"]["photos_sent"] += 1
         except:
             out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
             out += " @ " + "telegram.send_photo"
             out += " --> " + "did not send:\n" + url
-            self.persistence.append_list("log", out)
+            self.persistence["bot"]["log"] += [out]
