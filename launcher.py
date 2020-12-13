@@ -2,7 +2,6 @@
 import bot.main
 import clock.main
 import dashboard.main
-
 # wrapper
 import wrapper
 
@@ -10,18 +9,18 @@ import wrapper
 from threading import Thread
 import shelve
 
-
 class Launcher():
     """Launches all other submodules"""
 
     def __init__(self):
         """"""
-        self.persistence = shelve.open('persistence/prst.db', writeback=True)
-        self.init_persistence()
-        # TODO populate the persistence
-        self.bot_module = bot.main.ChatBot(name="ChatterBot", version="2.1", prst=self.persistence)
+        self.persistence = shelve.DbfilenameShelf("persistence/prst.db", writeback = True)
+        if len(self.persistence) == 0:
+            self.init_persistence()
+        self.persistence["global"]["reboots"] += 1
         self.clock_module = clock.main.ClockFace(prst=self.persistence)
-
+        self.bot_module = bot.main.ChatBot(name="ChatterBot", version="2.1", prst=self.persistence, hw_commands=self.clock_module.commands)
+        
         self.threads = []
         self.threads.append(Thread(target=self.chatbot))
         self.threads.append(Thread(target=self.clock))
@@ -42,6 +41,7 @@ class Launcher():
         self.dashboard = wrapper.DashBoardWrapper(self.dashboard_module, self.bot_module)
 
     def init_persistence(self):
+        print("New Persistence created")
         self.persistence["bot"] =  {
             "messages_read": 0,
             "messages_sent": 0,
@@ -49,12 +49,13 @@ class Launcher():
             "photos_sent": 0,
             "log": [],
             "chat_members": {},
-            "reboots": 0
+            "aliases" : {}
         }
         self.persistence["clock"] = {}
         self.persistence["dashboard"] = {}
         self.persistence["global"] = {
-            "lists" : {}
+            "lists" : {},
+            "reboots": 0
             }
 
 

@@ -1,6 +1,6 @@
 # Persistence
-prst.db.*
-
+prst.*
+log.txt
 # API-Key (keep secret at all times)
 keys.py
 

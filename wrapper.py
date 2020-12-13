@@ -19,6 +19,8 @@ class Wrapper():
         while True:
             action()
             time.sleep(sleep_delta)
+            self.own.persistence.sync()
+
 
 
 
@@ -86,16 +88,6 @@ class BotWrapper(Wrapper):
 
         self.bot = own_module
         self.clock = other_modules[0]
-        
-
-        # available hw-commands. Must be updated manually!
-        self.hw_commands = {
-            "blink" : self.clock.alarm_blink,
-            "wakeup" : self.clock.wake_light,
-            "showmessage" : self.clock.show_message,
-
-        }
-        self.bot.add_commands(self.hw_commands)
 
         self.mainloop(10)
 
@@ -103,18 +95,38 @@ class BotWrapper(Wrapper):
     def mainloop(self, sleep_delta):
         """Calls the telegram entity regularly to check for activity"""
         def perform_loop():
-            result = self.bot.telegram.fetch_updates()
-            if len(result) != 0:
-                command, params = self.bot.telegram.handle_result(result)
-                if command != "nothing":
-                    if command in self.hw_commands:
-                        self.react_hw_command(command,params) # hw-level
-                    else:
-                        self.bot.react_command(command,params) # sw-level
+            self.bot.react_chats()
+            # num = self.bot.telegram.fetch_updates()
+            # for message in range(num):
+            #     command, params = self.bot.react_command() # returns None if handled internally
+            #     if command != None:
+            #         self.clock.external_action(command, params)
+        super().mainloop(sleep_delta, perform_loop)
+
+
+
+
+from threading import Thread
+
+class DashBoardWrapper(Wrapper):
+    def __init__(self, own_module, *other_modules):
+        """Wrapper for the dashboard functionality"""
+        super().__init__(own_module, other_modules)
+        # self.mainloop(2 * 3600) # 2 hours refresh-cycle
+
+
+    def mainloop(self, sleep_delta):
+        def perform_loop():
+            self.set_weather()
+            self.set_shopping_list()
+            self.set_bot_logs()
+            self.set_joke()
+            self.bot.refresh()
 
         super().mainloop(sleep_delta, perform_loop)
 
-    def react_hw_command(self, command, params):
-        """"""
-        # so params is a list, and so, to pass the commands, we need to unpack it:
-        self.hw_commands[command](*params)
+
+    def set_weather(self):
+        weather = self.bot.bot_show_weather("zurich")
+        ...
+        self.own.set_weather(weather)

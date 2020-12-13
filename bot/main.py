@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-
 from bot.api import telegram, google, weather, reddit
+
+import datetime
 
 import requests
 import time
@@ -8,26 +8,20 @@ import json
 import datetime
 import emoji
 
-class ChatBot():
+import bot.framework as FW
+
+class ChatBot(FW.BotFramework):
     """"""
-    def __init__(self, name, version, prst):
+    def __init__(self, name, version, prst, hw_commands):
         """Inits the Bot with a few conf. vars
         Args:   -> name:str - Name of the bot
                 -> version:str - Version number
                 -> prst:shelveObj - persistence
         """
-
-        self.version = version
-        self.name = name
-
-        # Persistent variable
-        self.persistence = prst
-        # Uptime counter
-        self.start_time = datetime.datetime.now()
-        self.persistence["bot"]["reboots"] += 1
-
+        super().__init__(name, version, prst)
+        
         # Available commands. Must be manually updated!
-        self.commands = {
+        self.commands = dict({
             "help" : self.bot_show_help,
             "status" : self.bot_print_status,
             "log" : self.bot_print_log,
@@ -43,81 +37,10 @@ class ChatBot():
             "meme" : self.bot_send_meme,
             "news" : self.bot_send_news,
             "list" : self.bot_list,
+            "alias" : self.bot_save_alias,
+        }, **hw_commands)
+        # concat bot_commands + hw-commands
 
-        }
-
-
-        self.emoji_dict = {
-            "a" : ":regional_indicator_symbol_letter_a:",
-            "b" : ":regional_indicator_symbol_letter_b:",
-            "c" : ":regional_indicator_symbol_letter_c:",
-            "d" : ":regional_indicator_symbol_letter_d:",
-            "e" : ":regional_indicator_symbol_letter_e:",
-            "f" : ":regional_indicator_symbol_letter_f:",
-            "g" : ":regional_indicator_symbol_letter_g:",
-            "h" : ":regional_indicator_symbol_letter_h:",
-            "i" : ":regional_indicator_symbol_letter_i:",
-            "j" : ":regional_indicator_symbol_letter_j:",
-            "k" : ":regional_indicator_symbol_letter_k:",
-            "l" : ":regional_indicator_symbol_letter_l:",
-            "m" : ":regional_indicator_symbol_letter_m:",
-            "n" : ":regional_indicator_symbol_letter_n:",
-            "o" : ":regional_indicator_symbol_letter_o:",
-            "p" : ":regional_indicator_symbol_letter_p:",
-            "q" : ":regional_indicator_symbol_letter_q:",
-            "r" : ":regional_indicator_symbol_letter_r:",
-            "s" : ":regional_indicator_symbol_letter_s:",
-            "t" : ":regional_indicator_symbol_letter_t:",
-            "u" : ":regional_indicator_symbol_letter_u:",
-            "v" : ":regional_indicator_symbol_letter_v:",
-            "w" : ":regional_indicator_symbol_letter_w:",
-            "x" : ":regional_indicator_symbol_letter_x:",
-            "y" : ":regional_indicator_symbol_letter_y:",
-            "z" : ":regional_indicator_symbol_letter_z:",
-            "0" : ":keycap_digit_zero:",
-            "1" : ":keycap_digit_one:",
-            "2" : ":keycap_digit_two:",
-            "3" : ":keycap_digit_three:",
-            "4" : ":keycap_digit_four:",
-            "5" : ":keycap_digit_five:",
-            "6" : ":keycap_digit_six:",
-            "7" : ":keycap_digit_seven:",
-            "8" : ":keycap_digit_eight:",
-            "9" : ":keycap_digit_nine:",
-        }
-
-        self.telegram = telegram.TelegramIO(self.persistence, self.commands)
-
-    def add_commands(self, commands):
-        """adds new commands to an existing list"""
-        self.commands = {**self.commands, **commands}
-        self.telegram.update_commands(self.commands)
-
-
-    def react_command(self, command, params):
-        """"""
-        result = self.commands[command](*params)
-        #*params means the list is unpacked and handed over as separate arguments.
-        self.telegram.send_message(result)
-
-
-    def emojify_word(self,word):
-        """"""
-        string_emoji = ""
-        for letter in word:
-            if letter in self.emoji_dict:
-                string_emoji += self.emoji_dict[letter.lower()]
-            else:
-                string_emoji += letter
-        return string_emoji
-
-
-    def write_bot_log(self, function_name, error_message):
-        """"""
-        out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
-        out += " @ " + function_name
-        out += " --> " + error_message
-        self.persistence["bot"]["log"] += [out]
 
 
     ############################################################################
@@ -137,13 +60,14 @@ class ChatBot():
     def bot_print_status(self, *args):
         """Prints the bots current status and relevant information"""
         delta = str(datetime.datetime.now() - self.start_time)
+        message = "BeebBop, this is " + self.name + " (V." + self.version + ")\n"
         try:
             ip = requests.get('https://api.ipify.org').text
         except:
             ip = "not fetchable"
-        message = "<pre>Status: Running :green_circle:\n"
+        message += "<pre>Status: Running :green_circle:\n"
         message += "Uptime: " + delta[:delta.rfind(".")] + "\n"
-        message += "Reboots: " + str(self.persistence["bot"]["reboots"]) + "\n"
+        message += "Reboots: " + str(self.persistence["global"]["reboots"]) + "\n"
         message += "IP-Adress: " + ip + "\n"
         message += "Messages read: " + str(self.persistence["bot"]["messages_read"]) + "\n"
         message += "Messages sent: " + str(self.persistence["bot"]["messages_sent"]) + "\n"
@@ -217,10 +141,22 @@ class ChatBot():
 
 
     def bot_show_help(self, *args):
-        """Shows a list of all commands and their description"""
+        """Show a help message.
+        
+        Usage: help {keyword}
+        Keywords:
+        * no kw - list of all commands
+        * full -  all commands and their docstring
+        * command-name - specific command and its docstring
+        """
         description = False
-        if "full" in args:
-            description = True
+        if len(args) > 0:
+            if args[0] == "full":
+                description = True
+            elif args[0] in self.commands:
+                send_text = "<b>" + args[0] + "</b>\n"
+                send_text += "<code>" + self.commands[args[0]].__doc__ + "</code>"
+                return send_text
 
         send_text = "BeebBop, this is " + self.name + " (V." + self.version + ")\n"
         send_text += "Here is what I can do up to now: \n"
@@ -236,12 +172,16 @@ class ChatBot():
 
 
     def bot_print_log(self, *args):
-        """Shows an error-log, mostly of bad api-requests. Usage
-        log clear - clears log
-        log system - shows python output"""
+        """Show an error-log, mostly of bad api-requests.
+
+        Usage: log {keyword}
+        Keywords:
+        * clear - clears log
+        * system - shows python output
+        """
 
         if "clear" in args:
-            self.persistence.write("log",[])
+            self.persistence["bot"]["log"] = []
             return "Log cleared"
         elif "system" in args:
             path="persistence/log.txt"
@@ -254,7 +194,7 @@ class ChatBot():
                 return "could not read File"
         
         send_text = ""
-        for event in self.persistence.read("log"):
+        for event in self.persistence["bot"]["log"]:
             send_text += event + "\n"
         if send_text == "":
             send_text += "No errors up to now"
@@ -262,7 +202,13 @@ class ChatBot():
 
 
     def bot_show_wikipedia(self, *args):
-        """Shows the wikipedia entry for a given term"""
+        """Shows the wikipedia entry for a given term
+        
+        Usage: wikipedia &lt;language&gt; &lt;term&gt;
+        Keywords:
+        * language - de, fr, en ...
+        * term - search term, can consist of multiple words
+        """
         if len(args) == 0:
             return "Please provide the first argument for language (de or fr or en or ...) and then your query"
         args = list(args)
@@ -283,7 +229,12 @@ class ChatBot():
 
     def bot_zvv(self, *args):
         """Uses the swiss travel api to return the best route between a start- and endpoint.
-        usage: 'start' to 'finish'"""
+
+        Usage: zvv &lt;start&gt; 'to' &lt;finish&gt;
+        Keywords:
+        * start - start point (can be more than 1 word9
+        * end - end point
+        """
         if len(args) < 3:
             return "Please specify a start- and endpoint as well as a separator (the 'to')"
 
@@ -360,7 +311,12 @@ class ChatBot():
 
 
     def bot_tell_joke(self, *args):
-        """Tells you the top joke on r/jokes"""
+        """Tells you the top joke on r/jokes
+        
+        Usage: joke {number}
+        Keywords:
+        * number - number of jokes
+        """
 
         params_sorted = self.match_reddit_params(*args)
 
@@ -427,20 +383,33 @@ class ChatBot():
 
 
     def bot_list(self, *args):
-        """Shows and interacts with a list. Usage
-        list &lt;name&gt; &lt;action&gt; {object}
-        actions are: create, delete, print, clear, add, remove
-        example:
-        list new shopping : creates list name shopping
+        """Interacts with a list (like a shopping list eg.)
+        
+        Usage list &lt;name&gt; &lt;action&gt; {object}
+        Keyword:
+        * name - name of list
+        * action - create, delete, all, print, clear, add, remove
+        * object - might not be needed: index to delete, or item to add
+
+        Example usage:
+        list create shopping : creates list name shopping
         list shopping add bread : adds bread to the list
         list shopping print
         list shopping clear
+        list all
         """
         output = ""
         # args = list(args)
-        if len(args) < 2:
+        if len(args) == 0:
             return "Missing parameters"
         try:
+            if args[0] == "all":
+                try:
+                    return "Existing lists are: " + list(self.persistence["global"]["lists"].keys()).join(" ")
+                except:
+                    return "No lists created."
+            if len(args) < 2:
+                return "Missing parameters"
             if args[0] == "create":
                 lname = " ".join(args[1:])
                 self.persistence["global"]["lists"][lname] = []
@@ -454,6 +423,7 @@ class ChatBot():
                 act = args[1]
                 if act == "print":
                     sl = self.persistence["global"]["lists"][lname]
+                    output += "Content of " + lname + ":\n"
                     for ind,thing in enumerate(sl):
                         output += str(ind+1) + ". " + thing + "\n"
                 elif act == "clear":
@@ -474,7 +444,48 @@ class ChatBot():
 
     def bot_save_alias(self, *args):
         """Save a shortcut for special commands (+params)
-        usage: /alias sa shopping add
-        Means: /sa will now be treated as input /shopping add"""
 
-        return "Does this look finished to you?"
+        Usage: alias &lt;alias-name&gt; {&lt;alias-name&gt; &lt;command&gt;}
+        Keywords:
+        * action - all, add, delete or clear (deleta all)
+        * alias-name - short name
+        * command - command to be executed, can contain arguments for the command
+        Example usage:
+        * alias sa list shopping add
+        * alias sp list shopping print
+        Means that '/sa ...' will now be treated as if typed '/list shopping add ...'
+        """
+        # args = list(args)
+        if len(args) == 0:
+            return "Missing parameters"
+        try:
+            if args[0] == "clear":
+                self.persistence["bot"]["aliases"] = {}
+                return "All aliases cleared"
+            elif args[0] == "all":
+                try:
+                    output = "Existing aliases are:\n"
+                    for j, k in self.persistence["bot"]["aliases"].items():
+                        output += j + " -&gt; " + k + "\n"
+                    return output
+                except:
+                    return "No aliases created."
+
+            if len(args) < 2:
+                return "Missing parameters"
+            if args[0] == "delete":
+                ak = args[1]
+                self.persistence["bot"]["aliases"].pop(ak, None) # no error if key doesnt exist
+                return "Deleted alias " + ak
+
+            if len(args) < 3:
+                return "Missing parameters"
+            if args[0] == "add":
+                ak = args[1]
+                cmd = " ".join(args[2:])
+                self.persistence["bot"]["aliases"][ak] = cmd
+                return "Created alias for " + ak
+
+        except:
+            return "Could not handle your request. Maybe check the keys?"
+        return "Bad input..."

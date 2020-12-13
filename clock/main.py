@@ -13,6 +13,8 @@ class ClockFace(object):
     """Actual functions one might need for a clock"""
 
     def __init__(self, text_speed=18, prst=""):
+        """"""
+        self.persistence = prst
         self.IO = led.OutputHandler(32,16)
         self.tspeed = text_speed
 
@@ -20,6 +22,12 @@ class ClockFace(object):
         # Action the thread is currently performing
         self.output_queue = []
         # Threads to execute next
+
+        self.commands = {
+            "blink" : self.alarm_blink,
+            "wakeup" : self.wake_light,
+            "showmessage" : self.show_message,
+        }
 
         self.weather = ""
         self.brightness_overwrite = {"value" : 1, "duration" : 0}
@@ -82,6 +90,11 @@ class ClockFace(object):
 
     ############################################################################
     ### Higher level commands, accessible from the chat-bot
+    def external_action(self, command, params):
+        """"""
+        self.commands[command](*params)
+
+
     def wake_light(self, duration=600):
         """Simulates a sunris, takes one optional parameter: the duration"""
         def output(duration):
@@ -99,11 +112,10 @@ class ClockFace(object):
                 self.IO.set_matrix(ones,colors=[col])
                 time.sleep(int(duration) / 20)
 
-
         self.run(output,(duration,))
 
 
-    def alarm_blink(self, duration, frequency):
+    def alarm_blink(self, duration=0, frequency=0):
         """Blinks the whole screen (red-black). Duration in seconds, frequency in Hertz"""
         def output(duration, frequency):
             self.set_brightness(value=1)
@@ -118,8 +130,8 @@ class ClockFace(object):
                 time.sleep(1/frequency)
                 self.IO.set_matrix(empty)
                 time.sleep(1/frequency)
-
-        self.run(output,(duration, frequency))
+        if not(duration == 0 or frequency == 0):
+            self.run(output,(duration, frequency))
 
 
     def image_show(self, image, duration):
