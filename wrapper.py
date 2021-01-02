@@ -30,6 +30,7 @@ class ClockWrapper(Wrapper):
         """"""
         super().__init__(own_module, *other_modules)
         self.weather = {"weather":"", "high":"", "low":"", "show":"temps"}
+        self.weather_raw = {}
         self.mainloop(15)
         
 
@@ -37,42 +38,35 @@ class ClockWrapper(Wrapper):
     def mainloop(self, sleep_delta):
         """Runs the showing of the clock-face periodically (better way?)"""
         
-        self.prev_time = 0
-        self.prev_weather_time = datetime.datetime.fromtimestamp(0)
+        self.prev_time = "0"
 
         def perform_loop():
-            if self.prev_time != datetime.datetime.now().strftime("%H:%M"):
-                d = datetime.datetime.now() - self.prev_weather_time
-                mins_elapsed = int(d.total_seconds()/60)
+            if self.prev_time != datetime.datetime.now().strftime("%H%M"):
 
-                if mins_elapsed >= 3*60:
-                    # fetch new weather every 3 hours (hard coded)
-                    self.prev_weather_time = datetime.datetime.now()
-                    weather = self.others[0].bot_show_weather("zurich")
-                    if not (":sad:" in weather):
-                        l1 = weather[weather.find("</b>")+5:weather.find("\n")].replace (":","")
-                        # current weather situation (icon): we pick the first line, remove the start string, remove :: indicating an emoji
+                if int(self.prev_time) % 5 == 0:
+                    weather = self.others[0].weather.show_weather([47.3769, 8.5417]) # zürich
 
-                        temps_today = weather.splitlines()[4]
-                        low = temps_today[temps_today.find("button")+8:temps_today.find("°")]
-                        temps_today = temps_today[temps_today.find("°") + 1:]
-                        high = temps_today[temps_today.find("button")+8:temps_today.find("°")]
-                        self.weather["weather"] = l1
+                    if weather != self.weather_raw and len(weather) != 0:
+                        td = weather[1]
+
+                        low = td["temps"][0]
+                        high = td["temps"][1]
+                        self.weather["weather"] = td["short"]
                         self.weather["high"] = high
                         self.weather["low"] = low
-                    else:
+                    elif len(weather) == 0:
                         self.weather["weather"] = "error"
                         self.weather["high"] = "error"
                         self.weather["low"] = "error"
+                    # if weather == self.weather.raw do nothing
 
-                if mins_elapsed % 5 == 0:
                     if self.weather["show"] == "weather":
                         next = "temps"
                     else:
                         next = "weather"
                     self.weather["show"] = next
 
-                self.prev_time = datetime.datetime.now().strftime("%H:%M")
+                self.prev_time = datetime.datetime.now().strftime("%H%M")
 
                 self.own.set_face(self.weather)
 
@@ -105,28 +99,11 @@ class BotWrapper(Wrapper):
 
 
 
-
-from threading import Thread
-
 class DashBoardWrapper(Wrapper):
     def __init__(self, own_module, *other_modules):
         """Wrapper for the dashboard functionality"""
         super().__init__(own_module, other_modules)
-        # self.mainloop(2 * 3600) # 2 hours refresh-cycle
-
-
-    def mainloop(self, sleep_delta):
-        def perform_loop():
-            self.set_weather()
-            self.set_shopping_list()
-            self.set_bot_logs()
-            self.set_joke()
-            self.bot.refresh()
-
-        super().mainloop(sleep_delta, perform_loop)
-
-
-    def set_weather(self):
-        weather = self.bot.bot_show_weather("zurich")
-        ...
-        self.own.set_weather(weather)
+        # self.mainloop(1 * 3600) # 1 hour refresh-cycle
+        # cannot get called through mainloop, will use the included callback-functionality of Dash
+        own_module.bot = other_modules[0]
+        own_module.launch_dashboard()

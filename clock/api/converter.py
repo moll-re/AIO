@@ -86,15 +86,13 @@ def date_converter():
     return pixels
 
 
-
-
 weather_categories = {
-    "cloud": "cloud",
-    "cloud_with_rain": "rain and cloud",
-    "thunder_cloud_rain": "thunder and cloud",
-    "droplet": "rain and cloud",
-    "cloud_snow": "snow and cloud",
-    "sun": "sun",
+    "Clouds": "cloud",
+    "Rain": "rain and cloud",
+    "Thunderstorm": "thunder and cloud",
+    "Drizzle": "rain and cloud",
+    "Snow": "snow and cloud",
+    "Clear": "sun",
     "Mist": "fog and clouds",
     "Smoke": "Smoke",
     "Haze": "Haze",

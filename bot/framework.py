@@ -60,6 +60,7 @@ class BotFramework():
         }
 
         self.telegram = telegram.TelegramIO(self.persistence)
+        self.weather = weather.WeatherFetch()
 
     def react_chats(self):
         """Checks unanswered messages and answers them"""

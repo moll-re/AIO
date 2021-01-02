@@ -92,7 +92,7 @@ class OutputHandler():
         if weather["show"] == "weather":
             face2_3d = converter.weather_converter(weather["weather"])
         else:
-            face2 = converter.time_converter(top=weather["low"], bottom=weather["high"])
+            face2 = converter.time_converter(top=str(weather["low"]), bottom=str(weather["high"]))
             face2 = np.concatenate((face2[:8,...],2*face2[8:,...]))
             face2_3d = self.matrix_add_depth(face2,[[0, 102, 255],[255, 102, 0]])
 

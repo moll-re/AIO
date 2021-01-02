@@ -1,6 +1,5 @@
-from bot.api import telegram, google, weather, reddit
-
 import datetime
+from bot.api import telegram, google, weather, reddit
 
 import requests
 import time
@@ -90,8 +89,22 @@ class ChatBot(FW.BotFramework):
             city = locations[loc.lower().replace("ü","u")]
         else:
             return "Couldn't find city, it might be added later though."
+        
+        categories = {"Clouds": ":cloud:", "Rain": ":cloud_with_rain:", "Thunderstorm": "thunder_cloud_rain", "Drizzle": ":droplet:", "Snow": ":cloud_snow:", "Clear": ":sun:", "Mist": "Mist", "Smoke": "Smoke", "Haze": "Haze", "Dust": "Dust", "Fog": "Fog", "Sand": "Sand", "Dust": "Dust", "Ash": "Ash", "Squall": "Squall", "Tornado": "Tornado",}
+        days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        today = datetime.datetime.today().weekday()
+        weather = self.weather.show_weather(city)
+        
+        now = weather.pop(0)
+        message = "<b>Now:</b> " + categories[now["short"]] + "\n"
+        message += ":thermometer: " + str(now["temps"][0]) + "°\n\n"
 
-        message = weather.show_weather(city)
+        for i, day in enumerate(weather):
+            if i == 0:
+                message += "<b>" + "Today" + ":</b> " + categories[day["short"]] + "\n"
+            else:
+                message += "<b>" + days[(today + i + 1) % 7] + ":</b> " + categories[day["short"]] + "\n"
+            message += ":thermometer: :fast_down_button: " + str(day["temps"][0]) + "° , :thermometer: :fast_up_button: " + str(day["temps"][1]) + "°\n\n"
 
         return message
 
