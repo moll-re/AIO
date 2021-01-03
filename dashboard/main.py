@@ -2,6 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash_core_components as dcc
+import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 
 import locale
@@ -14,6 +15,7 @@ import xmltodict
 
 import requests
 import emoji
+
 
 class DashBoard():
     """"""
@@ -32,7 +34,8 @@ class DashBoard():
                 interval=3600*1000, # in milliseconds
                 n_intervals=0
                 )
-        ])
+        ]#,style={'background-image':'url("static/background.jpg")'}
+        )
 
         @self.app.callback(Output('layout-update','children'), Input('interval-component','n_intervals'))
         def update_layout(n):
@@ -40,16 +43,14 @@ class DashBoard():
             kids = [
                 self.card_header(),
                 dbc.CardColumns([
+                    self.card_weather(),
                     *self.cards_lists(),
+                    self.card_bot_stats(),
                     self.card_news(),
                     self.card_xkcd(),
-                    self.card_weather()
-
-
                 ])
             ]
             return kids
-            #[card_header, dbc.CardColumns([card_shopping_list,card_placeholder,card_placeholder,card_placeholder,card_placeholder,card_placeholder])]
 
 
     def launch_dashboard(self):
@@ -89,8 +90,31 @@ class DashBoard():
         return ret
 
 
-    # def card_bot_stats(self):
-    #     return card
+    def card_bot_stats(self):
+        xs = self.persistence["bot"]["send_activity"]["hour"]
+        ys = self.persistence["bot"]["send_activity"]["count"]
+        xr = self.persistence["bot"]["receive_activity"]["hour"]
+        yr = self.persistence["bot"]["receive_activity"]["count"]
+        xe = self.persistence["bot"]["execute_activity"]["hour"]
+        ye = self.persistence["bot"]["execute_activity"]["count"]
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=xs, y=ys, fill="tozeroy", mode="lines", text="Gesendet"))
+        fig.add_trace(go.Scatter(x=xr, y=yr, fill="tozeroy", mode="lines", text="Gelesen"))
+        fig.add_trace(go.Scatter(x=xe, y=ye, fill="tozeroy", mode="lines", text="Ausgeführt"))
+        fig.layout.update(showlegend=False,margin=dict(l=0, r=0, t=0, b=0),)
+
+        card = dbc.Card(
+                [   
+                    dbc.CardBody([
+                        html.H4("Statistiken", className="card-title"),
+                        dcc.Graph(figure=fig,config={'displayModeBar': False})
+                    ]),
+                ],
+                color="dark",
+                inverse=True,
+                )
+        return card
 
     def card_weather(self):
         try:
@@ -187,8 +211,3 @@ class DashBoard():
             inverse=True,
             )
         return card
-
-
-
-if __name__ == "__main__":
-    test = DashBoard(host_ip="0.0.0.0")

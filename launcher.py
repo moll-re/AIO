@@ -45,9 +45,9 @@ class Launcher():
     def init_persistence(self):
         print("New Persistence created")
         self.persistence["bot"] =  {
-            "messages_read": 0,
-            "messages_sent": 0,
-            "commands_executed": 0,
+            "send_activity" : {"hour":[], "count":[]},
+            "receive_activity" : {"hour":[], "count":[]},
+            "execute_activity" : {"hour":[], "count":[]},
             "photos_sent": 0,
             "log": [],
             "chat_members": {},

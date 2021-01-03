@@ -43,8 +43,13 @@ class TelegramIO():
     def process_message(self):
         """Inspects the first message from self.message_queue and reacts accordingly."""
         message_data = self.message_queue.pop(0)
-
-        self.persistence["bot"]["messages_read"] += 1
+        current_hour = int(datetime.datetime.now().timestamp() // 3600)
+        if len(self.persistence["bot"]["receive_activity"]["hour"]) == 0 or current_hour != self.persistence["bot"]["receive_activity"]["hour"][-1]:
+                self.persistence["bot"]["receive_activity"]["hour"].append(current_hour)
+                self.persistence["bot"]["receive_activity"]["count"].append(1)
+        else:
+            self.persistence["bot"]["receive_activity"]["count"][-1] += 1
+        
         self.offset = message_data["update_id"] + 1
 
         if "edited_message" in message_data:
@@ -112,7 +117,13 @@ class TelegramIO():
             r = requests.post(send_url, data=data)
             if (r.status_code != 200):
                 raise Exception
-            self.persistence["bot"]["messages_sent"]
+
+            current_hour = int(datetime.datetime.now().timestamp() // 3600)
+            if len(self.persistence["bot"]["send_activity"]["hour"]) == 0 or current_hour != self.persistence["bot"]["send_activity"]["hour"][-1]:
+                self.persistence["bot"]["send_activity"]["hour"].append(current_hour)
+                self.persistence["bot"]["send_activity"]["count"].append(1)
+            else:
+                self.persistence["bot"]["send_activity"]["count"][-1] += 1
         except:
             out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
             out += " @ " + "telegram.send_message"
