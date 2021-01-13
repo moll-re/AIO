@@ -2,6 +2,7 @@ import datetime
 from bot.api import telegram, google, weather, reddit
 
 import requests
+import socket
 import numpy as np
 import time
 import json
@@ -65,12 +66,13 @@ class ChatBot(FW.BotFramework):
             ip = requests.get('https://api.ipify.org').text
         except:
             ip = "not fetchable"
+        local_ips = [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None)]
 
         message += "<pre>Status: Running :green_circle:\n"
         message += "Uptime: " + delta[:delta.rfind(".")] + "\n"
         message += "Reboots: " + str(self.persistence["global"]["reboots"]) + "\n"
-        message += "IP-Adress: " + ip + "\n"
-
+        message += "IP-Adress (public): " + ip + "\n"
+        message += "IP-Adress (private): " + str(local_ips) + "\n"
         tot_r = np.array(self.persistence["bot"]["receive_activity"]["count"]).sum()
         message += "Total messages read: " + str(tot_r) + "\n"
 

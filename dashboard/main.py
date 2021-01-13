@@ -99,9 +99,11 @@ class DashBoard():
         ye = self.persistence["bot"]["execute_activity"]["count"]
         
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=xs, y=ys, fill="tozeroy", mode="lines", text="Gesendet"))
         fig.add_trace(go.Scatter(x=xr, y=yr, fill="tozeroy", mode="lines", text="Gelesen"))
+        fig.add_trace(go.Scatter(x=xs, y=ys, fill="tozeroy", mode="lines", text="Gesendet"))
         fig.add_trace(go.Scatter(x=xe, y=ye, fill="tozeroy", mode="lines", text="Ausgeführt"))
+
+
         fig.layout.update(showlegend=False,margin=dict(l=0, r=0, t=0, b=0),)
 
         card = dbc.Card(

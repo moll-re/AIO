@@ -20,7 +20,7 @@ class Launcher():
         self.persistence["global"]["reboots"] += 1
 
         self.clock_module = clock.main.ClockFace(prst=self.persistence)
-        self.bot_module = bot.main.ChatBot(name="ChatterBot", version="2.1", prst=self.persistence, hw_commands=self.clock_module.commands)
+        self.bot_module = bot.main.ChatBot(name="ChatterBot", version="2.2", prst=self.persistence, hw_commands=self.clock_module.commands)
         self.dashboard_module = dashboard.main.DashBoard(host_ip="0.0.0.0", prst=self.persistence)
 
         self.threads = []
