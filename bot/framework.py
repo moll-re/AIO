@@ -121,7 +121,7 @@ class BotFramework():
         if max_match == 1:
             return True
         if max_match != 0:
-            self.telegram.send_message("Did you mean <code>" + command_candidate + "</code>")
+            self.telegram.send_message("Did you mean <code>" + command_candidate + "</code>?")
         return False
 
 

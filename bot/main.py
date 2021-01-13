@@ -428,7 +428,7 @@ class ChatBot(FW.BotFramework):
         try:
             if args[0] == "all":
                 try:
-                    return "Existing lists are: " + list(self.persistence["global"]["lists"].keys()).join(" ")
+                    return "Existing lists are: " + " ".join(list(self.persistence["global"]["lists"].keys()))
                 except:
                     return "No lists created."
             if len(args) < 2:
@@ -459,6 +459,14 @@ class ChatBot(FW.BotFramework):
                     self.persistence["global"]["lists"][lname] += [add]
                     return "Added " + add + "."
                 elif act == "remove":
+                    if len(args) < 3:
+                        return "Missing paramaeter"
+                    try:
+                        ind = int(args[2]) - 1
+                        item = self.persistence["global"]["lists"][lname].pop(ind)
+                        return "Removed " + item + " from list " + lname + "."
+                    except:
+                        return "Couldn't remove item."
                     return "Not working yet"
         except:
             output = "Could not handle your request. Maybe check the keys?"
