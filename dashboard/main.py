@@ -54,7 +54,7 @@ class DashBoard():
 
 
     def launch_dashboard(self):
-        self.app.run_server(host=self.host_ip)#, debug=True)
+        self.app.run_server(host=self.host_ip, port=8080)#, debug=True)
 
 
     def card_header(self):
@@ -75,7 +75,7 @@ class DashBoard():
         ret = []
         for l in self.persistence["global"]["lists"].keys():
             l_content = self.persistence["global"]["lists"][l]
-            html_content = [dbc.ListGroupItem(t) for t in l_content]
+            html_content = [html.A(t, href="#", className="list-group-item bg-dark list-group-item-action text-light") for t in l_content]
             card = dbc.Card(
                 [   
                     dbc.CardBody([
@@ -99,12 +99,18 @@ class DashBoard():
         ye = self.persistence["bot"]["execute_activity"]["count"]
         
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=xr, y=yr, fill="tozeroy", mode="lines", text="Gelesen"))
-        fig.add_trace(go.Scatter(x=xs, y=ys, fill="tozeroy", mode="lines", text="Gesendet"))
-        fig.add_trace(go.Scatter(x=xe, y=ye, fill="tozeroy", mode="lines", text="Ausgeführt"))
-
-
-        fig.layout.update(showlegend=False,margin=dict(l=0, r=0, t=0, b=0),)
+        fig.add_trace(go.Scatter(x=xr, y=yr, mode="lines", text="Gelesen", line=dict(width=4)))
+        fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines", text="Gesendet", line=dict(width=4)))
+        fig.add_trace(go.Scatter(x=xe, y=ye, mode="lines", text="Ausgeführt", line=dict(width=4)))
+        
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(showgrid=False)
+        fig.layout.update(
+            showlegend=False,
+            margin=dict(l=0, r=0, t=0, b=0),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            )
 
         card = dbc.Card(
                 [   

@@ -64,6 +64,10 @@ class BotFramework():
 
     def react_chats(self):
         """Checks unanswered messages and answers them"""
+
+        # HACKY: TODO remove
+        self.persistence.sync()
+        # writes persistent variables to file so that they ACTUALLY persist
         num = self.telegram.fetch_updates()
         for i in range(num):
             self.react_command()
