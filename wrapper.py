@@ -19,7 +19,6 @@ class Wrapper():
         while True:
             action()
             time.sleep(sleep_delta)
-            self.own.persistence.sync()
 
 
 

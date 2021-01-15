@@ -4,17 +4,16 @@ import clock.main
 import dashboard.main
 # wrapper
 import wrapper
-
+import persistence.main
 # misc.
 from threading import Thread
-import shelve
 
 class Launcher():
     """Launches all other submodules"""
 
     def __init__(self):
         """"""
-        self.persistence = shelve.DbfilenameShelf("persistence/prst.db", writeback = True)
+        self.persistence = persistence.main.PersistentDict("persistence/prst.json")
         if len(self.persistence) == 0:
             self.init_persistence()
         self.persistence["global"]["reboots"] += 1
