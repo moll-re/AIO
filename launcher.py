@@ -47,7 +47,6 @@ class Launcher():
             "send_activity" : {"hour":[], "count":[]},
             "receive_activity" : {"hour":[], "count":[]},
             "execute_activity" : {"hour":[], "count":[]},
-            "photos_sent": 0,
             "log": [],
             "chat_members": {},
             "aliases" : {}

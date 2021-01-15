@@ -32,7 +32,7 @@ class PersistentDict(dict):
     def __setitem__(self, key, value):
         if self.last_action != "r":
             self.read_dict()
-        
+        # not sure if the step to read is necessary, but I'll keep it for safety
         super().__setitem__(key,value)
         self.write_dict() # writes 'self' to a json file.
 

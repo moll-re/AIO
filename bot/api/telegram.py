@@ -43,12 +43,8 @@ class TelegramIO():
     def process_message(self):
         """Inspects the first message from self.message_queue and reacts accordingly."""
         message_data = self.message_queue.pop(0)
-        current_hour = int(datetime.datetime.now().timestamp() // 3600)
-        if len(self.persistence["bot"]["receive_activity"]["hour"]) == 0 or current_hour != self.persistence["bot"]["receive_activity"]["hour"][-1]:
-                self.persistence["bot"]["receive_activity"]["hour"].append(current_hour)
-                self.persistence["bot"]["receive_activity"]["count"].append(1)
-        else:
-            self.persistence["bot"]["receive_activity"]["count"][-1] += 1
+        
+        self.increase_counter("receive_activity")
         
         self.offset = message_data["update_id"] + 1
 
@@ -59,8 +55,8 @@ class TelegramIO():
         self.message_id = message["message_id"]
         self.chat_id = message["chat"]["id"]
         author = message["from"]
-
-        if author["id"] not in self.persistence["bot"]["chat_members"]:
+        
+        if str(author["id"]) not in self.persistence["bot"]["chat_members"]:
             name = ""
             if "first_name" in author:
                 name += author["first_name"] + " "
@@ -68,7 +64,7 @@ class TelegramIO():
                 name += author["last_name"]
             if len(name) == 0:
                 name = "anonymous"
-            self.persistence["bot"]["chat_members"][author["id"]] = name
+            self.persistence["bot"]["chat_members"][str(author["id"])] = name # seems like the conversion to string is handled implicitly, but it got me really confused
             self.send_message("Welcome to this chat " + name + "!")
 
         if "text" in message:
@@ -118,12 +114,7 @@ class TelegramIO():
             if (r.status_code != 200):
                 raise Exception
 
-            current_hour = int(datetime.datetime.now().timestamp() // 3600)
-            if len(self.persistence["bot"]["send_activity"]["hour"]) == 0 or current_hour != self.persistence["bot"]["send_activity"]["hour"][-1]:
-                self.persistence["bot"]["send_activity"]["hour"].append(current_hour)
-                self.persistence["bot"]["send_activity"]["count"].append(1)
-            else:
-                self.persistence["bot"]["send_activity"]["count"][-1] += 1
+            self.increase_counter("send_activity")
         except:
             out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
             out += " @ " + "telegram.send_message"
@@ -143,9 +134,17 @@ class TelegramIO():
         send_url = self.base_url + "sendPhoto"
         try:
             r = requests.post(send_url, data=data)
-            self.persistence["bot"]["photos_sent"] += 1
+            self.increase_counter("send_activity")
         except:
             out = datetime.datetime.now().strftime("%d.%m.%y - %H:%M")
             out += " @ " + "telegram.send_photo"
             out += " --> " + "did not send:\n" + url
             self.persistence["bot"]["log"] += [out]
+
+    def increase_counter(self, counter_name):
+        current_hour = int(datetime.datetime.now().timestamp() // 3600)
+        if len(self.persistence["bot"][counter_name]["hour"]) == 0 or current_hour != self.persistence["bot"][counter_name]["hour"][-1]:
+            self.persistence["bot"][counter_name]["hour"].append(current_hour)
+            self.persistence["bot"][counter_name]["count"].append(1)
+        else:
+            self.persistence["bot"][counter_name]["count"][-1] += 1

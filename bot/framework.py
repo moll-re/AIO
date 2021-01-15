@@ -88,12 +88,7 @@ class BotFramework():
             # *params means the list is unpacked and handed over as separate arguments.
             self.telegram.send_message(result)
 
-            current_hour = int(datetime.datetime.now().timestamp() // 3600)
-            if len(self.persistence["bot"]["execute_activity"]["hour"]) == 0 or current_hour != self.persistence["bot"]["execute_activity"]["hour"][-1]:
-                self.persistence["bot"]["execute_activity"]["hour"].append(current_hour)
-                self.persistence["bot"]["execute_activity"]["count"].append(1)
-            else:
-                self.persistence["bot"]["execute_activity"]["count"][-1] += 1
+            self.telegram.increase_counter("execute_activity")
 
         if self.is_command(cmd): # first word
             call_command(cmd, params)

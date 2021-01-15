@@ -17,7 +17,7 @@ class ChatBot(FW.BotFramework):
         """Inits the Bot with a few conf. vars
         Args:   -> name:str - Name of the bot
                 -> version:str - Version number
-                -> prst:shelveObj - persistence
+                -> prst:dict - persistence (overloaded dict that writes to json file)
         """
         super().__init__(name, version, prst)
         
@@ -64,15 +64,20 @@ class ChatBot(FW.BotFramework):
         message = "BeebBop, this is " + self.name + " (V." + self.version + ")\n"
         try:
             ip = requests.get('https://api.ipify.org').text
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                s.connect(('8.8.8.8', 80))
+                (addr, port) = s.getsockname()
+            local_ips = addr
         except:
             ip = "not fetchable"
+            local_ips = "not fetchable"
         local_ips = [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None)]
 
         message += "<pre>Status: Running :green_circle:\n"
         message += "Uptime: " + delta[:delta.rfind(".")] + "\n"
         message += "Reboots: " + str(self.persistence["global"]["reboots"]) + "\n"
-        message += "IP-Adress (public): " + ip + "\n"
-        message += "IP-Adress (private): " + str(local_ips) + "\n"
+        message += "IP (public): " + ip + "\n"
+        message += "IP (private): " + str(local_ips) + "\n"
         tot_r = np.array(self.persistence["bot"]["receive_activity"]["count"]).sum()
         message += "Total messages read: " + str(tot_r) + "\n"
 

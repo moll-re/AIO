@@ -54,7 +54,7 @@ class DashBoard():
 
 
     def launch_dashboard(self):
-        self.app.run_server(host=self.host_ip, port=8080)#, debug=True)
+        self.app.run_server(host=self.host_ip, port=80)#, debug=True)
 
 
     def card_header(self):
