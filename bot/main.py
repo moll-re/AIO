@@ -30,7 +30,6 @@ class ChatBot(FW.BotFramework):
             "weather" : self.bot_show_weather,
             "google" : self.bot_google_search,
             "events" : self.bot_print_events,
-            "emojify" : self.bot_emojify,
             "wikipedia" : self.bot_show_wikipedia,
             "zvv" : self.bot_zvv,
             "cronjob" : self.bot_cronjob,
@@ -151,21 +150,6 @@ class ChatBot(FW.BotFramework):
             send_string += key + ": " + str(delta.days) + " days \n"
 
         return send_string
-
-
-    def bot_emojify(self, *args):
-        """Converts a string to emojis"""
-
-        if len(args) < 2:
-            return "Please send a separator as the first argument, and the text afterwards.\nExample:\n/emojify :heart: Example text"
-
-        sep = args[0]
-        string_emoji = ""
-        for word in args[1:]:
-            out_string = self.emojify_word(word)
-            string_emoji += out_string + sep
-
-        return string_emoji
 
 
     def bot_show_help(self, *args):

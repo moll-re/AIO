@@ -39,7 +39,6 @@ class DashBoard():
 
         @self.app.callback(Output('layout-update','children'), Input('interval-component','n_intervals'))
         def update_layout(n):
-            print("REFRESH")
             kids = [
                 self.card_header(),
                 dbc.CardColumns([
@@ -91,12 +90,24 @@ class DashBoard():
 
 
     def card_bot_stats(self):
-        xs = self.persistence["bot"]["send_activity"]["hour"]
-        ys = self.persistence["bot"]["send_activity"]["count"]
-        xr = self.persistence["bot"]["receive_activity"]["hour"]
-        yr = self.persistence["bot"]["receive_activity"]["count"]
-        xe = self.persistence["bot"]["execute_activity"]["hour"]
-        ye = self.persistence["bot"]["execute_activity"]["count"]
+        def cleanse_graph(category):
+            x = self.persistence["bot"][category]["hour"]
+            y = self.persistence["bot"][category]["count"]
+            xn = range(x[0], x[-1]+1)
+            yn = []
+            count = 0
+            for x_i in xn:
+                if x_i in x:
+                    yn.append(y[count])
+                    count += 1
+                else:
+                    yn.append(0)
+            xn = [i - int(x[0]) for i in xn]
+            return xn, yn
+
+        xs, ys = cleanse_graph("send_activity")
+        xr, yr = cleanse_graph("receive_activity")
+        xe, ye = cleanse_graph("execute_activity")
         
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=xr, y=yr, mode="lines", text="Gelesen", line=dict(width=4)))
@@ -106,6 +117,17 @@ class DashBoard():
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
         fig.layout.update(
+            xaxis = {
+                'showgrid': False, # thin lines in the background
+                'zeroline': False, # thick line at x=0
+                'visible': False,  # numbers below
+            }, # the same for yaxis
+            yaxis = {
+                'showgrid': False, # thin lines in the background
+                'zeroline': False, # thick line at x=0
+                'visible': False,  # numbers below
+            }, # the same for yaxis
+
             showlegend=False,
             margin=dict(l=0, r=0, t=0, b=0),
             paper_bgcolor='rgba(0,0,0,0)',
