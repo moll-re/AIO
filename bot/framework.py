@@ -86,21 +86,21 @@ class BotFramework():
         def call_command(cmd, par):
             result = self.commands[cmd](*par)
             # *params means the list is unpacked and handed over as separate arguments.
-            self.telegram.send_message(result)
-
             self.telegram.increase_counter("execute_activity")
+            return result
+            
 
         if self.is_command(cmd): # first word
-            call_command(cmd, params)
+            result = call_command(cmd, params)
         elif cmd in self.persistence["bot"]["aliases"]:
             dealias = self.persistence["bot"]["aliases"][cmd].split(" ") # as a list
             new_cmd = dealias[0]
             params = dealias[1:] + params
-            self.telegram.send_message("Substituted <code>" + cmd + "</code> to <code>" + self.persistence["bot"]["aliases"][cmd] + "</code> and got:")
-            call_command(new_cmd, params)
+            result  = "Substituted <code>" + cmd + "</code> to <code>" + self.persistence["bot"]["aliases"][cmd] + "</code> and got:\n\n"
+            result += call_command(new_cmd, params)
         else:
-            self.telegram.send_message("Command <code>" + tmp[0] + "</code> not found.")
-
+            result = "Command <code>" + tmp[0] + "</code> not found."
+        self.telegram.send_message(result)
 
     def is_command(self, input):
         """checks if we have a command. Returns true if yes and False if not
