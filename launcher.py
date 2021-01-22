@@ -5,8 +5,14 @@ import dashboard.main
 # wrapper
 import wrapper
 import persistence.main
-# misc.
+
+# various
+import logging
 from threading import Thread
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
 
 class Launcher():
     """Launches all other submodules"""
@@ -14,6 +20,9 @@ class Launcher():
     def __init__(self):
         """"""
         self.persistence = persistence.main.PersistentDict("persistence/prst.json")
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Starting")
+
         if len(self.persistence) == 0:
             self.init_persistence()
         self.persistence["global"]["reboots"] += 1
@@ -33,16 +42,16 @@ class Launcher():
     def clock(self):
         self.clock = wrapper.ClockWrapper(self.clock_module, self.bot_module)
 
-
     def chatbot(self):
         self.bot = wrapper.BotWrapper(self.bot_module, self.clock_module)
-
 
     def dashboard(self):
         self.dashboard = wrapper.DashBoardWrapper(self.dashboard_module, self.bot_module)
 
+
     def init_persistence(self):
-        print("New Persistence created")
+        self.logger.warn("New Persistence created")
+
         self.persistence["bot"] =  {
             "send_activity" : {"hour":[], "count":[]},
             "receive_activity" : {"hour":[], "count":[]},
@@ -61,4 +70,7 @@ class Launcher():
 
 ########################################################################
 ## Aand liftoff!
+
+
+
 Launcher()

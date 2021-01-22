@@ -232,7 +232,7 @@ class DashBoard():
             inverse=True,
             )
         except:
-            card = card = dbc.Card([
+            card = dbc.Card([
                 dbc.CardBody([
                     html.H4("Could not load XKCD", className="card-title"),
                     ])

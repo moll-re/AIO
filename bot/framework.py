@@ -2,6 +2,10 @@ import datetime
 from bot.api import telegram, google, weather, reddit
 import Levenshtein as lev
 
+
+
+
+
 class BotFramework():
     """Main functionality for a bot """
 
@@ -19,45 +23,6 @@ class BotFramework():
         self.persistence = prst
         # Uptime counter
         self.start_time = datetime.datetime.now()
-    	
-        self.emoji_dict = {
-            "a" : ":regional_indicator_symbol_letter_a:",
-            "b" : ":regional_indicator_symbol_letter_b:",
-            "c" : ":regional_indicator_symbol_letter_c:",
-            "d" : ":regional_indicator_symbol_letter_d:",
-            "e" : ":regional_indicator_symbol_letter_e:",
-            "f" : ":regional_indicator_symbol_letter_f:",
-            "g" : ":regional_indicator_symbol_letter_g:",
-            "h" : ":regional_indicator_symbol_letter_h:",
-            "i" : ":regional_indicator_symbol_letter_i:",
-            "j" : ":regional_indicator_symbol_letter_j:",
-            "k" : ":regional_indicator_symbol_letter_k:",
-            "l" : ":regional_indicator_symbol_letter_l:",
-            "m" : ":regional_indicator_symbol_letter_m:",
-            "n" : ":regional_indicator_symbol_letter_n:",
-            "o" : ":regional_indicator_symbol_letter_o:",
-            "p" : ":regional_indicator_symbol_letter_p:",
-            "q" : ":regional_indicator_symbol_letter_q:",
-            "r" : ":regional_indicator_symbol_letter_r:",
-            "s" : ":regional_indicator_symbol_letter_s:",
-            "t" : ":regional_indicator_symbol_letter_t:",
-            "u" : ":regional_indicator_symbol_letter_u:",
-            "v" : ":regional_indicator_symbol_letter_v:",
-            "w" : ":regional_indicator_symbol_letter_w:",
-            "x" : ":regional_indicator_symbol_letter_x:",
-            "y" : ":regional_indicator_symbol_letter_y:",
-            "z" : ":regional_indicator_symbol_letter_z:",
-            "0" : ":keycap_digit_zero:",
-            "1" : ":keycap_digit_one:",
-            "2" : ":keycap_digit_two:",
-            "3" : ":keycap_digit_three:",
-            "4" : ":keycap_digit_four:",
-            "5" : ":keycap_digit_five:",
-            "6" : ":keycap_digit_six:",
-            "7" : ":keycap_digit_seven:",
-            "8" : ":keycap_digit_eight:",
-            "9" : ":keycap_digit_nine:",
-        }
 
         self.telegram = telegram.TelegramIO(self.persistence)
         self.weather = weather.WeatherFetch()
@@ -119,17 +84,6 @@ class BotFramework():
         if max_match != 0:
             self.telegram.send_message("Did you mean <code>" + command_candidate + "</code>?")
         return False
-
-
-    def emojify_word(self,word):
-        """"""
-        string_emoji = ""
-        for letter in word:
-            if letter in self.emoji_dict:
-                string_emoji += self.emoji_dict[letter.lower()]
-            else:
-                string_emoji += letter
-        return string_emoji
 
 
     def write_bot_log(self, function_name, error_message):

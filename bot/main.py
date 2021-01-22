@@ -70,7 +70,6 @@ class ChatBot(FW.BotFramework):
         except:
             ip = "not fetchable"
             local_ips = "not fetchable"
-        local_ips = [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None)]
 
         message += "<pre>Status: Running :green_circle:\n"
         message += "Uptime: " + delta[:delta.rfind(".")] + "\n"
@@ -270,7 +269,7 @@ class ChatBot(FW.BotFramework):
                     if step["journey"] != None:
                         text += step["journey"]["passList"][0]["station"]["name"] + " (" + datetime.datetime.fromtimestamp(int(step["journey"]["passList"][0]["departureTimestamp"])).strftime("%H:%M") + ")\n"
 
-                        text += ":right_arrow: Linie " + self.emojify_word(step["journey"]["number"]) + "\n"
+                        text += ":right_arrow: Linie " + step["journey"]["number"] + "\n"
 
                         text += step["journey"]["passList"][-1]["station"]["name"] + " (" + datetime.datetime.fromtimestamp(int(step["journey"]["passList"][-1]["arrivalTimestamp"])).strftime("%H:%M") +")\n"
                     else:

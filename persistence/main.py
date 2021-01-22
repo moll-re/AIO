@@ -4,10 +4,12 @@ import os
 
 
 class PersistentDict(dict):
-    """"""
-    def __init__(self, file_name, *args, **kwargs):
+    """Extended dict that writes its content to a file every time a value is changed"""
 
+    def __init__(self, file_name, *args, **kwargs):
+        """initialization of the dict and of the required files"""
         super().__init__(*args, **kwargs)
+
         self.path = file_name
         self.last_action = ""
         if not os.path.exists(self.path):
@@ -15,7 +17,7 @@ class PersistentDict(dict):
                 f.write("{}")
         self.read_dict()
 
-
+    ## helper - functions
     def write_dict(self):
         with open(self.path, "w") as f:
             json.dump(self, f)
@@ -28,7 +30,7 @@ class PersistentDict(dict):
                 super().__setitem__(key, tmp[key])
         self.last_action = "r"
 
-
+    ## extended dictionary - logic
     def __setitem__(self, key, value):
         if self.last_action != "r":
             self.read_dict()
@@ -51,7 +53,11 @@ class PersistentDict(dict):
         self.write_dict()
         return {}
 
+
+
 class HookedDict(dict):
+    """helper class to detect writes to a child-dictionary and triger a write in PersistentDict"""
+
     def __init__(self, own_name, parent_dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = own_name
