@@ -1,5 +1,2 @@
 # Placeholder
-from . import clock
-from . import help
-from . import weather
-from . import status
+from . import clock, help, weather, status, zvv, lists, alias, plaintext

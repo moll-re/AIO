@@ -1,5 +1,6 @@
 # functionality
 import bot.main
+import bot2.main
 import clock.main
 import dashboard.main
 # wrapper
@@ -28,16 +29,19 @@ class Launcher():
         self.persistence["global"]["reboots"] += 1
 
         self.clock_module = clock.main.ClockFace(prst=self.persistence)
-        self.bot_module = bot.main.ChatBot(name="ChatterBot", version="2.3", prst=self.persistence, hw_commands=self.clock_module.commands)
+        self.bot_module = bot2.main.ChatBot(name="Norbit", version="3.0a", prst=self.persistence, hw_commands=self.clock_module.commands)
         self.dashboard_module = dashboard.main.DashBoard(host_ip="0.0.0.0", prst=self.persistence)
 
         self.threads = []
-        self.threads.append(Thread(target=self.chatbot))
+        #self.threads.append(Thread(target=self.chatbot))
+        
         self.threads.append(Thread(target=self.clock))
         self.threads.append(Thread(target=self.dashboard))
+        
         for i in self.threads:
             i.start()
-
+        self.chatbot()
+        
 
     def clock(self):
         self.clock = wrapper.ClockWrapper(self.clock_module, self.bot_module)
@@ -50,7 +54,7 @@ class Launcher():
 
 
     def init_persistence(self):
-        self.logger.warn("New Persistence created")
+        self.logger.warn("No persistence found, created a new one")
 
         self.persistence["bot"] =  {
             "send_activity" : {"hour":[], "count":[]},
@@ -70,7 +74,4 @@ class Launcher():
 
 ########################################################################
 ## Aand liftoff!
-
-
-
 Launcher()

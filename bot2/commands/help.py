@@ -1,19 +1,13 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
-from telegram.ext import (
-    Updater,
-    CommandHandler,
-    CallbackQueryHandler,
-    ConversationHandler,
-    CallbackContext,
-)
+from .template import *
 
 FIRST = 1
 
-class Help():
+
+class Help(BotFunc):
     """Shows the functions and their usage"""
     
-    def __init__(self):
+    def __init__(self, prst):
+        super().__init__(prst)
         self.available_commands = {}
 
 
@@ -25,7 +19,7 @@ class Help():
                     CallbackQueryHandler(self.print_all, pattern="^all$"),
                     CallbackQueryHandler(self.choose_specific, pattern="^specific$"),
                     CallbackQueryHandler(self.print_one, pattern='func-'),
-                ]
+                ],
             },
             fallbacks=[CommandHandler('help', self.entry_point)],
         )
@@ -34,9 +28,13 @@ class Help():
     def add_commands(self, commands):
         # commands is a dict {"name": class}
         for k in commands:
-            self.available_commands[k] = commands[k].__doc__
+            if k != "plaintext":
+                self.available_commands[k] = commands[k].__doc__
+
+
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
+        super().entry_point()
         keyboard = [
             [
                 InlineKeyboardButton("All commands", callback_data="all"),
@@ -51,12 +49,11 @@ class Help():
     def print_all(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
         query.answer()
-
         all_cmd = ""
-        for k in self.available_commands:
-            all_cmd += k + " - " + self.available_commands[k] +"\n"
+        for h in self.available_commands:
+            all_cmd += h + " - `" + self.available_commands[h] + "`\n"
 
-        query.edit_message_text(text="List of all commands:\n" + all_cmd)
+        query.edit_message_text(text="List of all commands:\n" + all_cmd, parse_mode = ParseMode.MARKDOWN)
         return ConversationHandler.END
 
 
@@ -66,8 +63,8 @@ class Help():
 
         
         keyboard = [[InlineKeyboardButton(k, callback_data="func-" + k)] for k in self.available_commands]
-
         reply_markup = InlineKeyboardMarkup(keyboard)
+
         query.edit_message_text(
             text="What command should be printed?", reply_markup=reply_markup
         )
@@ -77,11 +74,12 @@ class Help():
     def print_one(self, update: Update, context: CallbackContext) -> None:
         """Show new choice of buttons"""
         query = update.callback_query
-        data = query.data.replace("func-", "")
-
+        name = query.data.replace("func-", "")
         query.answer()
-        message = self.available_commands[data]
+
+        message = name + ": `" + self.available_commands[name] + "`"
         query.edit_message_text(
-            text= message
+            text= message,
+            parse_mode = ParseMode.MARKDOWN_V2
         )
         return ConversationHandler.END

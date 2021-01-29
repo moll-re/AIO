@@ -72,3 +72,8 @@ class HookedDict(dict):
         if type(ret_val) == dict:
             ret_val = HookedDict(key, self, ret_val)
         return ret_val
+    
+    def pop(self, k, d=None):
+        retvalue = super().pop(k, d)
+        self.parent.__setitem__(self.name, self)
+        return retvalue

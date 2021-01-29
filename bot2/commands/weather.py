@@ -1,22 +1,17 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
-from telegram.ext import (
-    Updater,
-    CommandHandler,
-    CallbackQueryHandler,
-    ConversationHandler,
-    CallbackContext,
-)
+from .template import *
 
 import datetime
+
 FIRST = 1
 
-class Weather():
+class Weather(BotFunc):
     """Shows a weatherforecast for a given location"""
-    def __init__(self, api):
+    def __init__(self, api, prst):
         """initialize api and persistence"""
+        super().__init__(prst)
         self.api = api
         self.city = ""
+
 
     def create_handler(self):
         """returns the handlers with button-logic"""
@@ -36,6 +31,7 @@ class Weather():
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
         """Reacts the call of the command. Prints the first buttons"""
+        super().entry_point()
         keyboard = [
             [
                 InlineKeyboardButton("Zürich", callback_data="city-zurich"),
@@ -44,7 +40,10 @@ class Weather():
             ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text("Which city?", reply_markup=reply_markup)
+        if update.message:
+            update.message.reply_text("Which city?", reply_markup=reply_markup)
+        else:
+            update.callback_query.edit_message_text("Which city", reply_markup=reply_markup)
         return FIRST
 
 

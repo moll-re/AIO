@@ -52,7 +52,7 @@ class DashBoard():
             return kids
 
 
-    def launch_dashboard(self):
+    def START(self):
         self.app.run_server(host=self.host_ip, port=80)#, debug=True)
 
 
