@@ -10,10 +10,19 @@ import persistence.main
 # various
 import logging
 from threading import Thread
+import os
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
+if os.name == "nt":
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+    )
+else:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO,
+        filename='persistence/complete.log',
+    )
+
 
 class Launcher():
     """Launches all other submodules"""

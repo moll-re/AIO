@@ -36,7 +36,6 @@ class ClockWrapper(Wrapper):
     def START(self): # I prefer the name tick_tack
         """Runs the showing of the clock-face periodically: update every minute"""    
         def perform_loop():
-            logger.warning("NEW TIME")
             t = int(datetime.datetime.now().strftime("%H%M"))
 
             if t % 5 == 0:
@@ -45,7 +44,6 @@ class ClockWrapper(Wrapper):
 
                 if weather != self.weather_raw and len(weather) != 0:
                     td = weather[1]
-
                     low = td["temps"][0]
                     high = td["temps"][1]
                     self.weather["weather"] = td["short"]
@@ -62,14 +60,14 @@ class ClockWrapper(Wrapper):
                 else:
                     next = "weather"
                 self.weather["show"] = next
-
-            self.prev_time = datetime.datetime.now().strftime("%H%M")
-
+    
             self.own.set_face(self.weather)
         
+        perform_loop()
+        while datetime.datetime.now().strftime("%H%M%S")[-2:] != "00":
+            pass
         RepeatedTimer(60, perform_loop)
         
-
 
 
 class BotWrapper(Wrapper):
