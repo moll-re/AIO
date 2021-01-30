@@ -69,7 +69,7 @@ class Status(BotFunc):
         tot_e = np.array(self.persistence["bot"]["execute_activity"]["count"]).sum()
         message += "Commands executed `" + str(tot_e) + "`\n"
 
-        update.message.reply_text(message, reply_markup=reply_markup)
+        update.message.reply_text(message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
         return FIRST
 
 

@@ -75,7 +75,8 @@ class Weather(BotFunc):
         forecast_time = query.data.replace("time-","")
         weather = self.get_weather(self.city, forecast_time)
         query.edit_message_text(
-            text = "Weather: \n" + weather
+            text = "Weather: \n\n" + weather,
+            parse_mode = ParseMode.HTML
         )
         return ConversationHandler.END
 
@@ -100,8 +101,10 @@ class Weather(BotFunc):
             message += "🌡 ❄ " + str(tod["temps"][0]) + "° , 🌡 🔥 " + str(tod["temps"][1]) + "°\n\n"
 
         if forecast_time == "tomorrow" or forecast_time == "7":
-            tom = weather.pop(0)
-            print(tom)
+            if forecast_time == "tomorrow": # previous statement was not executed: tomorrow is at weather[2]
+                tom = weather.pop(2)
+            else:
+                tom = weather.pop(0)
             message += "<b>" + "Tomorrow" + ":</b> " + categories[tom["short"]] + "\n"
             message += "🌡 ❄ " + str(tom["temps"][0]) + "° , 🌡 🔥 " + str(tom["temps"][1]) + "°\n\n"
 
