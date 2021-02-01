@@ -14,7 +14,6 @@ import time
 import xmltodict
 
 import requests
-import emoji
 
 
 class DashBoard():
@@ -150,24 +149,26 @@ class DashBoard():
         try:
             body = [html.H4("Wetter", className="card-title")]
 
-            content = self.bot.weather.show_weather([47.3769, 8.5417]) # still zürich
+            content = self.bot.api_weather.show_weather([47.3769, 8.5417]) # still zürich
             
             wt = content.pop(0)
             body.append(html.Span(children=[
                 html.H6("Jetzt: " + wt["short"]),
-                html.P(emoji.emojize(":thermometer: ") + str(wt["temps"][0]) + "°")
+                html.P("🌡 " + str(wt["temps"][0]) + "°")
             ]))
 
             days = ["Montag", "Dienstag", "Miitwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+            categories = {"Clouds": "☁", "Rain": "🌧", "Thunderstorm": "🌩", "Drizzle": ":droplet:", "Snow": "❄", "Clear": "☀", "Mist": "🌫", "Smoke": "Smoke", "Haze": "Haze", "Dust": "Dust", "Fog": "Fog", "Sand": "Sand", "Dust": "Dust", "Ash": "Ash", "Squall": "Squall", "Tornado": "Tornado",}
+
             today = datetime.datetime.today().weekday()
 
             for i, day in enumerate(content):
                 tmp = []
                 if i == 0:
-                    tmp.append(html.H6("Heute: "+ day["short"]))
+                    tmp.append(html.H6("Heute: "+ categories[day["short"]]))
                 else:
-                    tmp.append(html.H6(days[(today + i + 1) % 7] + ": " + day["short"]))
-                tmp.append(html.P(emoji.emojize(":thermometer: :fast_down_button: " + str(day["temps"][0]) + "° , :thermometer: :fast_up_button: " + str(day["temps"][1]) + "°")))
+                    tmp.append(html.H6(days[(today + i + 1) % 7] + ": " + categories[day["short"]]))
+                tmp.append(html.P("🌡 ❄  " + str(day["temps"][0]) + "° , 🌡 🔥 " + str(day["temps"][1]) + "°"))
 
                 body.append(html.Span(children=tmp))
 
