@@ -5,6 +5,7 @@ import requests
 import socket
 import numpy as np
 import os
+import json
 
 
 FIRST = 1
@@ -59,6 +60,7 @@ class Status(BotFunc):
         message += "Reboots: `" + str(self.persistence["global"]["reboots"]) + "`\n"
         message += "IP (public): `" + ip + "`\n"
         message += "IP (private): `" + str(local_ips) + "`\n"
+        message += "URL: `" + str(self.get_ngrok_url())  "`\n"
         
         tot_r = np.array(self.persistence["bot"]["receive_activity"]["count"]).sum()
         message += "Total messages read: `" + str(tot_r) + "`\n"
@@ -81,3 +83,17 @@ class Status(BotFunc):
             query.message.reply_document(l)
 
         return ConversationHandler.END
+
+
+    def get_ngrok_url(self):
+        try:
+            url = "http://localhost:4040/api/tunnels/"
+            res = requests.get(url)
+            res_unicode = res.content.decode("utf-8")
+            res_json = json.loads(res_unicode)
+            for i in res_json["tunnels"]:
+                if i['name'] == 'command_line':
+                    return i['public_url']
+                    break
+        except:
+            return "Not available"

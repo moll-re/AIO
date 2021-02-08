@@ -146,44 +146,56 @@ class DashBoard():
         return card
 
     def card_weather(self):
-        try:
-            body = [html.H4("Wetter", className="card-title")]
+        def weather_item(name, overview, temps):
+            if len(temps) == 2:
+                temp = "🌡(❄): " + str(temps[0]) + "°  ➡  🌡(🔥): " + str(temps[1]) + "°"
+            else:
+                temp = "🌡: " + str(temps[0]) + "°"
+            temp_line = html.P(temp, className="mb-1")
 
+            it = html.A([
+                html.Div([
+                    html.H5(name, className="mb-1"),
+                    html.Span(categories[overview], className="badge badge-primary badge-pill")
+                    ],
+                    className="d-flex w-100 justify-content-between"),
+                temp_line,
+                ],
+                href="#", className="list-group-item bg-dark list-group-item-action text-light"
+            )
+
+            return it
+
+        days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+        categories = {"Clouds": "☁", "Rain": "🌧", "Thunderstorm": "🌩", "Drizzle": ":droplet:", "Snow": "❄", "Clear": "☀", "Mist": "🌫", "Smoke": "Smoke", "Haze": "Haze", "Dust": "Dust", "Fog": "Fog", "Sand": "Sand", "Dust": "Dust", "Ash": "Ash", "Squall": "Squall", "Tornado": "Tornado",}
+        today = datetime.datetime.today().weekday()
+
+        body = []
+        
+        try:
             content = self.bot.api_weather.show_weather([47.3769, 8.5417]) # still zürich
             
             wt = content.pop(0)
-            body.append(html.Span(children=[
-                html.H6("Jetzt: " + wt["short"]),
-                html.P("🌡 " + str(wt["temps"][0]) + "°")
-            ]))
-
-            days = ["Montag", "Dienstag", "Miitwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
-            categories = {"Clouds": "☁", "Rain": "🌧", "Thunderstorm": "🌩", "Drizzle": ":droplet:", "Snow": "❄", "Clear": "☀", "Mist": "🌫", "Smoke": "Smoke", "Haze": "Haze", "Dust": "Dust", "Fog": "Fog", "Sand": "Sand", "Dust": "Dust", "Ash": "Ash", "Squall": "Squall", "Tornado": "Tornado",}
-
-            today = datetime.datetime.today().weekday()
+            body.append(weather_item("Jetzt", wt["short"], wt["temps"]))
 
             for i, day in enumerate(content):
                 tmp = []
                 if i == 0:
-                    tmp.append(html.H6("Heute: "+ categories[day["short"]]))
+                    day_name = "Heute"
                 else:
-                    tmp.append(html.H6(days[(today + i + 1) % 7] + ": " + categories[day["short"]]))
-                tmp.append(html.P("🌡 ❄  " + str(day["temps"][0]) + "° , 🌡 🔥 " + str(day["temps"][1]) + "°"))
+                    day_name = days[(today + i) % 7]
 
-                body.append(html.Span(children=tmp))
+                body.append(weather_item(day_name, day["short"], day["temps"]))
+            body = dbc.ListGroup(body, flush=True, style={"color":"black"})
 
 
-            card = dbc.Card(
-                [dbc.CardBody(body)],
-                color="dark",
-                inverse=True,
-                )
         except:
-            card = card = dbc.Card([
-                dbc.CardBody([
-                    html.H4("Could not load WEATHER", className="card-title"),
-                    ])
-            ],
+            body.append(html.H6("Konnte nicht geladen werden"))
+
+        card = dbc.Card(
+            [dbc.CardBody([
+                html.H4("Wetter", className="card-title"),
+                body])],
             color="dark",
             inverse=True,
             )
@@ -242,3 +254,4 @@ class DashBoard():
             inverse=True,
             )
         return card
+

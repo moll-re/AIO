@@ -20,8 +20,12 @@ class Help(BotFunc):
                     CallbackQueryHandler(self.choose_specific, pattern="^specific$"),
                     CallbackQueryHandler(self.print_one, pattern='func-'),
                 ],
+                # ConversationHandler.TIMEOUT : [
+                #     CallbackQueryHandler(self.timeout)
+                # ]
             },
             fallbacks=[CommandHandler('help', self.entry_point)],
+            # conversation_timeout=5,
         )
         return conv_handler
 
@@ -80,6 +84,22 @@ class Help(BotFunc):
         message = name + ": `" + self.available_commands[name] + "`"
         query.edit_message_text(
             text= message,
+            parse_mode = ParseMode.MARKDOWN_V2
+        )
+        return ConversationHandler.END
+
+
+
+    def timeout(self, update: Update, context: CallbackContext) -> None:
+        """For dying conversation. Currently unused."""
+
+        query = update.callback_query
+        name = query.data.replace("func-", "")
+        query.answer()
+
+        message = name + ": `" + self.available_commands[name] + "`"
+        query.edit_message_text(
+            text= "EHHHHH",
             parse_mode = ParseMode.MARKDOWN_V2
         )
         return ConversationHandler.END
