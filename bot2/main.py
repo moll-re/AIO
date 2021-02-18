@@ -21,7 +21,8 @@ class ChatBot():
         self.persistence = prst
         # Import submodules
         self.api_weather = api.weather.WeatherFetch(api.keys.weather_api)
-        # self.reddit_api = api.reddit.RedditFetch()
+        self.api_reddit = api.reddit.RedditFetch(api.keys.reddit_api)
+        self.api_search = api.search.WebSearch()
         # and so on
 
         self.telegram = Updater(api.keys.telegram_api, use_context=True)
@@ -37,17 +38,15 @@ class ChatBot():
             "status" : self.commands.status.Status(name, version, prst),
             "zvv" : self.commands.zvv.Zvv(prst),
             "list" : self.commands.lists.Lists(prst),
-            #"alias" : commands.alias.Alias(self.dispatcher, prst),
+            # "alias" : commands.alias.Alias(self.dispatcher, prst),
+            "joke" : self.commands.reddit.Joke(self.api_reddit, prst),
+            "meme" : self.commands.reddit.Meme(self.api_reddit, prst),
+            # "news" : self.commands.reddit.News(self.api_reddit, prst),
+            "search" : self.commands.search.Search(self.api_search, prst),
+
+
             "plaintext" : self.commands.plaintext.Plain(prst) # for handling non-command messages that should simply contribute to statistics
             }
-            
-        #     "events" : self.bot_print_events,
-        #     "wikipedia" : self.bot_show_wikipedia,
-        #     "cronjob" : self.bot_cronjob,
-        #     "joke" : self.bot_tell_joke,
-        #     "meme" : self.bot_send_meme,
-        #     "news" : self.bot_send_news,
-        # }
         # must be a class that has a method create_handler
     
     def add_commands(self):

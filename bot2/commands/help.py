@@ -1,6 +1,6 @@
 from .template import *
 
-FIRST = 1
+FIRST, EXECUTE = range(2)
 
 
 class Help(BotFunc):
@@ -20,6 +20,7 @@ class Help(BotFunc):
                     CallbackQueryHandler(self.choose_specific, pattern="^specific$"),
                     CallbackQueryHandler(self.print_one, pattern='func-'),
                 ],
+                EXECUTE :[CallbackQueryHandler(self.execute_now)],
                 # ConversationHandler.TIMEOUT : [
                 #     CallbackQueryHandler(self.timeout)
                 # ]
@@ -46,7 +47,10 @@ class Help(BotFunc):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text("What exactly do you want?", reply_markup=reply_markup)
+        if update.message:
+            update.message.reply_text("What exactly do you want?", reply_markup=reply_markup)
+        else:
+            update._effective_chat.send_message("What exactly do you want?", reply_markup=reply_markup)
         return FIRST
 
 
@@ -82,13 +86,28 @@ class Help(BotFunc):
         query.answer()
 
         message = name + ": `" + self.available_commands[name] + "`"
+
+        keyboard = [[InlineKeyboardButton("Call " + name + " now", callback_data=name),]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
         query.edit_message_text(
             text= message,
+            #reply_markup = reply_markup,
             parse_mode = ParseMode.MARKDOWN_V2
         )
-        return ConversationHandler.END
+        return ConversationHandler.END #EXECUTE
 
-
+    def execute_now(self, update: Update, context: CallbackContext) -> None:
+        query = update.callback_query
+        name = query.data
+        query.answer()
+        funcs = context.dispatcher.handlers[0]
+        for func in funcs:
+            if name == func.entry_points[0].command[0]:
+                break
+        callback = func.entry_points[0].callback
+        func.callback(update, context)
+        return FIRST
 
     def timeout(self, update: Update, context: CallbackContext) -> None:
         """For dying conversation. Currently unused."""

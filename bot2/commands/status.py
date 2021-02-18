@@ -34,7 +34,6 @@ class Status(BotFunc):
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
         super().entry_point()
-        user = update.message.from_user
         keyboard = [
             [
                 InlineKeyboardButton("And the log?", callback_data="full"),
@@ -72,7 +71,10 @@ class Status(BotFunc):
         tot_e = np.array(self.persistence["bot"]["execute_activity"]["count"]).sum()
         message += "Commands executed `" + str(tot_e) + "`\n"
 
-        update.message.reply_text(message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
+        if update.message:
+            update.message.reply_text(message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
+        else:
+            update._effective_chat.send_message(message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
         return FIRST
 
 
