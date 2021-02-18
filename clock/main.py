@@ -1,19 +1,19 @@
 import datetime
 import time
 import json
-from threading import Thread
+from threading import Thread, Timer
 import numpy
-
 
 from clock.api import led
 
-################################################################################
-#start of actual programm.
+
 class ClockFace(object):
     """Actual functions one might need for a clock"""
 
     def __init__(self, text_speed=18, prst=""):
         """"""
+        # added by the launcher, we have self.modules (dict)
+
         self.persistence = prst
         self.IO = led.OutputHandler(32,16)
         self.tspeed = text_speed
@@ -23,15 +23,46 @@ class ClockFace(object):
         self.output_queue = []
         # Threads to execute next
 
-        self.commands = {
-            "blink" : self.alarm_blink,
-            "wakeup" : self.wake_light,
-            "showmessage" : self.show_message,
-        }
-
-        self.weather = ""
+        self.weather = {"weather":"", "high":"", "low":"", "show":"temps"}
+        self.weather_raw = {}
+        # different?
         self.brightness_overwrite = {"value" : 1, "duration" : 0}
 
+
+    def start(self):
+        while datetime.datetime.now().strftime("%H%M%S")[-2:] != "00":
+            pass
+        RepeatedTimer(60, self.clock_loop)
+
+
+    def clock_loop(self):
+        t = int(datetime.datetime.now().strftime("%H%M"))
+
+        if t % 5 == 0:
+            # switch secondary face every 5 minutes
+            weather = self.modules["bot"].api_weather.show_weather([47.3769, 8.5417]) # zürich
+
+            if weather != self.weather_raw and len(weather) != 0:
+                td = weather[1]
+                low = td["temps"][0]
+                high = td["temps"][1]
+                self.weather["weather"] = td["short"]
+                self.weather["high"] = high
+                self.weather["low"] = low
+            elif len(weather) == 0:
+                self.weather["weather"] = "error"
+                self.weather["high"] = "error"
+                self.weather["low"] = "error"
+            # if weather == self.weather.raw do nothing
+
+            if self.weather["show"] == "weather":
+                next = "temps"
+            else:
+                next = "weather"
+            self.weather["show"] = next
+
+        self.set_face()
+    
 
     def run(self, command, kw=()):
         """Checks for running threads and executes the ones in queue"""
@@ -56,15 +87,9 @@ class ClockFace(object):
 
     ############################################################################
     ### basic clock commands
-    def set_face(self, weather):
+    def set_face(self):
         """"""
-        self.weather = weather
-        self.run(self.IO.clock_face,(weather,))
-
-
-    def text_scroll(self, text, color=""):
-        """"""
-        self.run(self.IO.text_scroll,(text, self.tspeed, color))
+        self.run(self.IO.clock_face,(self.weather,))
 
 
     def set_brightness(self, overwrite=[],value=-1):
@@ -88,63 +113,34 @@ class ClockFace(object):
         self.IO.output.set_brightness(brightness)
 
 
-    ############################################################################
-    ### Higher level commands, accessible from the chat-bot
-    def external_action(self, command, params):
-        """"""
-        self.commands[command](*params)
+    
 
 
-    def wake_light(self, duration=600):
-        """Simulates a sunris, takes one optional parameter: the duration"""
-        def output(duration):
-            self.set_brightness(value=0.1)
-            start_color = numpy.array([153, 0, 51])
-            end_color = numpy.array([255, 255, 0])
-            empty = numpy.zeros((16,32))
-            ones = empty
-            ones[ones == 0] = 1
-            gradient = end_color - start_color
-            # 20 steps should be fine => sleep_time = duration / 20
-            for i in range(20):
-                ct = i/20 * gradient
-                col = [int(x) for x in ct+start_color]
-                self.IO.set_matrix(ones,colors=[col])
-                time.sleep(int(duration) / 20)
 
-        self.run(output,(duration,))
+#######################################################
+class RepeatedTimer(object):
+  def __init__(self, interval, function, *args, **kwargs):
+    self._timer = None
+    self.interval = interval
+    self.function = function
+    self.args = args
+    self.kwargs = kwargs
+    self.is_running = False
+    self.next_call = time.time()
+    self.start()
 
+  def _run(self):
+    self.is_running = False
+    self.start()
+    self.function(*self.args, **self.kwargs)
 
-    def alarm_blink(self, duration=0, frequency=0):
-        """Blinks the whole screen (red-black). Duration in seconds, frequency in Hertz"""
-        def output(duration, frequency):
-            self.set_brightness(value=1)
-            duration =  int(duration)
-            frequency = int(frequency)
-            n = duration * frequency / 2
-            empty = numpy.zeros((16,32))
-            red = empty.copy()
-            red[red == 0] = 3
-            for i in range(int(n)):
-                self.IO.set_matrix(red)
-                time.sleep(1/frequency)
-                self.IO.set_matrix(empty)
-                time.sleep(1/frequency)
-        if not(duration == 0 or frequency == 0):
-            self.run(output,(duration, frequency))
+  def start(self):
+    if not self.is_running:
+      self.next_call += self.interval
+      self._timer = Timer(self.next_call - time.time(), self._run)
+      self._timer.start()
+      self.is_running = True
 
-
-    def image_show(self, image, duration):
-        """Shows a 16x32 image for duration seconds"""
-        def output(image, duration):
-            self.IO.set_matrix_rgb(red)
-
-        self.run(output,(image, duration))
-
-
-    def show_message(self, *args):
-        """Runs a text message over the screen. Obviously needs the text"""
-        # keep in mind, in this case args is a tuple of all words
-        message_str = " ".join(args)
-        print("SHOWING (CLOCK): " + message_str)
-        self.text_scroll(message_str)
+  def stop(self):
+    self._timer.cancel()
+    self.is_running = False

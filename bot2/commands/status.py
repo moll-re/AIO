@@ -61,7 +61,7 @@ class Status(BotFunc):
         message += "IP (public): `" + ip + "`\n"
         message += "IP (private): `" + str(local_ips) + "`\n"
         u = str(self.get_ngrok_url())
-        message += "URL: [" + u + "](" + u + "]\n"
+        message += "URL: [" + u + "](" + u + ")\n"
         
         tot_r = np.array(self.persistence["bot"]["receive_activity"]["count"]).sum()
         message += "Total messages read: `" + str(tot_r) + "`\n"

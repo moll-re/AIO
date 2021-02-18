@@ -18,6 +18,8 @@ import requests
 
 class DashBoard():
     """"""
+    # added by the launcher, we have self.modules (dict)
+
     def __init__(self, host_ip, prst):
         ## pre-sets
         
@@ -51,7 +53,7 @@ class DashBoard():
             return kids
 
 
-    def START(self):
+    def start(self):
         self.app.run_server(host=self.host_ip, port=80)#, debug=True)
 
 
@@ -173,7 +175,8 @@ class DashBoard():
         body = []
         
         try:
-            content = self.bot.api_weather.show_weather([47.3769, 8.5417]) # still zürich
+            bot = self.modules["bot"]
+            content = bot.api_weather.show_weather([47.3769, 8.5417]) # still zürich
             
             wt = content.pop(0)
             body.append(weather_item("Jetzt", wt["short"], wt["temps"]))
