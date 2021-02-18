@@ -41,9 +41,9 @@ class Launcher():
         self.dashboard_module = dashboard.main.DashBoard(host_ip="0.0.0.0", prst=self.persistence)
 
         self.modules = {
+            "clock" : self.clock_module,
             "bot" : self.bot_module,
             "dashboard" : self.dashboard_module,
-            "clock" : self.clock_module,
         }
 
         for module in self.modules.values():
