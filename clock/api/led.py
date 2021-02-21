@@ -31,10 +31,10 @@ class OutputHandler():
 
         # reshape to the main size: (eg 32x16) (always aligns the given matrix on top left.)
 
-
+        if len(matrix.shape) != 3:
         # add depth (rgb values)
-        r3 = self.matrix_add_depth(matrix,colors)
-        self.set_matrix_rgb(r3,quadrant)
+            matrix = self.matrix_add_depth(matrix,colors)
+        self.set_matrix_rgb(matrix,quadrant)
 
 
     def matrix_add_depth(self, matrix, colors = []):

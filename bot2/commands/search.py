@@ -40,7 +40,7 @@ class Search(BotFunc):
         # formating
         self.results = results
         first = results[0]
-        message = first["text"] + "\n(" + first["url"] + ")\n"
+        message = first["text"] + "\n(" + first["url"] + ")\n\n"
 
         update.message.reply_text(text = message, reply_markup=reply_markup)
         return MORE
@@ -52,7 +52,7 @@ class Search(BotFunc):
 
         message = ""
         for r in self.results:
-            message += r["text"] + "\n(" + r["url"] + ")\n"
+            message += r["text"] + "\n(" + r["url"] + ")\n\n"
 
         query.edit_message_text(message)
         return ConversationHandler.END

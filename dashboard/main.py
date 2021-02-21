@@ -40,6 +40,7 @@ class DashBoard():
 
         @self.app.callback(Output('layout-update','children'), Input('interval-component','n_intervals'))
         def update_layout(n):
+            self.set_stats()
             kids = [
                 self.card_header(),
                 dbc.CardColumns([
@@ -91,61 +92,21 @@ class DashBoard():
 
 
     def card_bot_stats(self):
-        def cleanse_graph(category):
-            x = self.persistence["bot"][category]["hour"]
-            y = self.persistence["bot"][category]["count"]
-            xn = range(x[0], x[-1]+1)
-            yn = []
-            count = 0
-            for x_i in xn:
-                if x_i in x:
-                    yn.append(y[count])
-                    count += 1
-                else:
-                    yn.append(0)
-            xn = [i - int(x[0]) for i in xn]
-            return xn, yn
-
-        xs, ys = cleanse_graph("send_activity")
-        xr, yr = cleanse_graph("receive_activity")
-        xe, ye = cleanse_graph("execute_activity")
-        
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=xr, y=yr, mode="lines", text="Gelesen", line=dict(width=4)))
-        fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines", text="Gesendet", line=dict(width=4)))
-        fig.add_trace(go.Scatter(x=xe, y=ye, mode="lines", text="Ausgeführt", line=dict(width=4)))
-        
-        fig.update_xaxes(showgrid=False)
-        fig.update_yaxes(showgrid=False)
-        fig.layout.update(
-            xaxis = {
-                'showgrid': False, # thin lines in the background
-                'zeroline': False, # thick line at x=0
-                'visible': False,  # numbers below
-            }, # the same for yaxis
-            yaxis = {
-                'showgrid': False, # thin lines in the background
-                'zeroline': False, # thick line at x=0
-                'visible': False,  # numbers below
-            }, # the same for yaxis
-
-            showlegend=False,
-            margin=dict(l=0, r=0, t=0, b=0),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            )
+        if not self.stat_graph:
+            self.set_stats()
 
         card = dbc.Card(
                 [   
                     dbc.CardBody([
                         html.H4("Statistiken", className="card-title"),
-                        dcc.Graph(figure=fig,config={'displayModeBar': False})
+                        dcc.Graph(figure=self.stat_graph, config={'displayModeBar': False})
                     ]),
                 ],
                 color="dark",
                 inverse=True,
                 )
         return card
+
 
     def card_weather(self):
         def weather_item(name, overview, temps):
@@ -258,3 +219,51 @@ class DashBoard():
             )
         return card
 
+
+    ######### helper:
+    def set_stats(self):
+        def cleanse_graph(category):
+            x = self.persistence["bot"][category]["hour"]
+            y = self.persistence["bot"][category]["count"]
+            xn = range(x[0], x[-1]+1)
+            yn = []
+            count = 0
+            for x_i in xn:
+                if x_i in x:
+                    yn.append(y[count])
+                    count += 1
+                else:
+                    yn.append(0)
+            xn = [i - int(x[0]) for i in xn]
+            return xn, yn
+
+        xs, ys = cleanse_graph("send_activity")
+        xr, yr = cleanse_graph("receive_activity")
+        xe, ye = cleanse_graph("execute_activity")
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=xr, y=yr, mode="lines", text="Gelesen", line=dict(width=4)))
+        fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines", text="Gesendet", line=dict(width=4)))
+        fig.add_trace(go.Scatter(x=xe, y=ye, mode="lines", text="Ausgeführt", line=dict(width=4)))
+        
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(showgrid=False)
+        fig.layout.update(
+            xaxis = {
+                'showgrid': False, # thin lines in the background
+                'zeroline': False, # thick line at x=0
+                'visible': False,  # numbers below
+            }, # the same for yaxis
+            yaxis = {
+                'showgrid': False, # thin lines in the background
+                'zeroline': False, # thick line at x=0
+                'visible': False,  # numbers below
+            }, # the same for yaxis
+
+            showlegend=False,
+            margin=dict(l=0, r=0, t=0, b=0),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            )
+        
+        self.stat_graph = fig

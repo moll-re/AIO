@@ -1,5 +1,4 @@
 import requests
-# import api.keys
 import datetime
 
 class WeatherFetch():
@@ -59,3 +58,25 @@ class WeatherFetch():
             ret_weather = self.last_weather
 
         return ret_weather
+
+    # def get_weather_by_city(self, city):
+    #     loc = get_coords_from_city(self, city)
+    #     weather = self.show_weather(loc)
+    #     return weather
+        
+        
+    # def get_coords_from_city(self, city):
+    #     url = "https://devru-latitude-longitude-find-v1.p.rapidapi.com/latlon.php"
+    #     data = {"location": city}
+    #     headers = {
+    #         "x-rapidapi-key" : "d4e0ab7ab3mshd5dde5a282649e0p11fd98jsnc93afd98e3aa",
+    #         "x-rapidapi-host" : "devru-latitude-longitude-find-v1.p.rapidapi.com",
+    #     }
+
+    #     #try:
+    #     resp = requests.request("GET", url, headers=headers, params=data)
+    #     result = resp.text
+    #     #except:
+    #     #    result = "???"
+    #     return result
+

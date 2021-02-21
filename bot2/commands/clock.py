@@ -1,6 +1,8 @@
 from .template import *
 import time
 import numpy
+from PIL import Image
+import io
 
 CHOOSE, ADDARG = range(2)
 MESSAGE, WAKE, ALARM, IMAGE, ART = range(3,8)
@@ -59,7 +61,7 @@ class Clock(BotFunc):
         query.answer()
 
         query.edit_message_text("Ok. How long should it blink? (In seconds)")
-        self.next_state = {"ALARM" : "What frequency (Hertz)"}
+        self.next_state = {ALARM : "What frequency (Hertz)"}
         return ADDARG
 
     def show_message(self, update: Update, context: CallbackContext) -> None:
@@ -74,7 +76,7 @@ class Clock(BotFunc):
         query.answer()
 
         query.edit_message_text("How long (in minutes) should the image be displayed?")
-        self.next_state = {"IMAGE" : "Please send me the photo to display."}
+        self.next_state = {IMAGE : "Please send me the photo to display."}
         return ADDARG
 
     def art_gallery(self, update: Update, context: CallbackContext) -> None:
@@ -98,7 +100,7 @@ class Clock(BotFunc):
         duration = update.message.text
 
         def output(duration):
-            self.clock.set_brightness(value=0.1)
+            self.clock.set_brightness(value=1)
             start_color = numpy.array([153, 0, 51])
             end_color = numpy.array([255, 255, 0])
             empty = numpy.zeros((16,32))
@@ -137,19 +139,37 @@ class Clock(BotFunc):
         if not(duration == 0 or frequency == 0):
             update.message.reply_text("Now blinking")
             self.clock.run(output,(duration, frequency))
-        print("DOOONE")
         return ConversationHandler.END
         
 
 
     def exec_show_image(self, update: Update, context: CallbackContext) -> None:
         duration = self.additional_argument
-        img = update.message.photo
+        i = update.message.photo
+        img = update.message.photo[0]
+        bot = img.bot
+        id = img.file_id
 
+        file = bot.getFile(id).download_as_bytearray()
+        width = self.clock.IO.width
+        height = self.clock.IO.height
+
+        img = Image.open(io.BytesIO(file))
+        im_height = img.height
+        im_width = img.width
+
+        scalex = im_width // width
+        scaley = im_height // height
+        scale = min(scalex, scaley)
+
+        t = img.resize((width, height),box=(0,0,width*scale,height*scale))
+        a = numpy.asarray(t)
+        
         def output(image, duration):
-            self.clock.IO.set_matrix_rgb([100,0,0])
+            self.clock.IO.set_matrix(image)
+            time.sleep(int(duration) * 60)
 
-        self.clock.run(output,("image", duration))
+        self.clock.run(output,(a, duration))
         return ConversationHandler.END
 
 

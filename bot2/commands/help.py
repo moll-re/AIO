@@ -26,7 +26,7 @@ class Help(BotFunc):
                 # ]
             },
             fallbacks=[CommandHandler('help', self.entry_point)],
-            # conversation_timeout=5,
+            conversation_timeout=15,
         )
         return conv_handler
 
@@ -92,10 +92,11 @@ class Help(BotFunc):
 
         query.edit_message_text(
             text= message,
-            #reply_markup = reply_markup,
+            reply_markup = reply_markup,
             parse_mode = ParseMode.MARKDOWN_V2
         )
-        return ConversationHandler.END #EXECUTE
+        return EXECUTE
+
 
     def execute_now(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
@@ -105,9 +106,10 @@ class Help(BotFunc):
         for func in funcs:
             if name == func.entry_points[0].command[0]:
                 break
-        callback = func.entry_points[0].callback
-        func.callback(update, context)
-        return FIRST
+        callback = func.entry_points[0].handle_update
+        callback(update, context.dispatcher, check_result=True, context=context)
+        return ConversationHandler.END
+        
 
     def timeout(self, update: Update, context: CallbackContext) -> None:
         """For dying conversation. Currently unused."""
