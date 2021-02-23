@@ -1,122 +1,91 @@
 import time
 import numpy as np
 
-from clock.api import converter
+
+
 try:
-    from clock.api.hat import unicorn as HAT
+    from . import unicorn
+    output = unicorn.ClockOut
 except ImportError:
-    print("Using the simulator")
-    from clock.api.hat import sim as HAT
+    from . import sim
+    output = sim.ClockOut
 
-
+# import sim
+# output = sim.ClockOut
 
 class OutputHandler():
-    def __init__(self, width, height, primary = [200, 200, 200], secondary = [10, 200, 10], error = [200, 10, 10]):
-        """width is presumed to be larger than height"""
-        self.width = width
-        self.height = height
-        self.output = HAT.UnicornHat(width, height)
-        self.primary = primary
-        self.secondary = secondary
-        self.red = error
+    """Matrix of led-points (RGB- values). It has the two given dimensions + a third which is given by the color values"""
+
+    # def __new__(subtype, shape, dtype=float, buffer=None, offset=0,
+    #             strides=None, order=None, info=None):
+    #     # Create the ndarray instance of our type, given the usual
+    #     # ndarray input arguments.  This will call the standard
+    #     # ndarray constructor, but return an object of our type.
+    #     # It also triggers a call to InfoArray.__array_finalize__
+
+    #     # expand the given tuple (flat display) to a 3d array containing the colors as well
+    #     nshape = (*shape, 3)
+    #     obj = super(OutputHandler, subtype).__new__(subtype, nshape, "int",
+    #                                             buffer, offset, strides,
+    #                                             order)
+    #     # set the new 'info' attribute to the value passed
+    #     obj.info = info
+    #     obj.OUT = output(shape)
+    #     # Finally, we must return the newly created object:
+    #     return obj
+    def __init__(self, shape):
+        nshape = (*shape, 3)
+        self.array = np.array(shape, dtype=np.uint8)
+        self.OUT = output(shape)
+
+
+    # def __array_finalize__(self, obj):
+    #     self.OUT = sim.ClockOut()
+    #     # ``self`` is a new object resulting from
+    #     # ndarray.__new__(), therefore it only has
+    #     # attributes that the ndarray.__new__ constructor gave it -
+    #     # i.e. those of a standard ndarray.
+    #     #
+    #     # We could have got to the ndarray.__new__ call in 3 ways:
+    #     # From an explicit constructor - e.g. InfoArray():
+    #     #    obj is None
+    #     #    (we're in the middle of the InfoArray.__new__
+    #     #    constructor, and self.info will be set when we return to
+    #     #    InfoArray.__new__)
+    #     if obj is None: return
+    #     # From view casting - e.g arr.view(InfoArray):
+    #     #    obj is arr
+    #     #    (type(obj) can be InfoArray)
+    #     # From new-from-template - e.g infoarr[:3]
+    #     #    type(obj) is InfoArray
+    #     #
+    #     # Note that it is here, rather than in the __new__ method,
+    #     # that we set the default value for 'info', because this
+    #     # method sees all creation of default objects - with the
+    #     # InfoArray.__new__ constructor, but also with
+    #     # arr.view(InfoArray).
+    #     self.info = getattr(obj, 'info', None)
+        
+    #     # We do not need to return anything
+        
+
+
+    def SHOW(self):
+        # self.output.set_matrix(self)
+        
+        self.OUT.put(self.array)
+
+
+    # def __init__(self, width, height, primary = [200, 200, 200], secondary = [10, 200, 10], error = [200, 10, 10]):
+    #     """width is presumed to be larger than height"""
+    #     self.width = width
+    #     self.height = height
+    #     self.output = HAT.UnicornHat(width, height)
+    #     self.primary = primary
+    #     self.secondary = secondary
+    #     self.red = error
 
 
 
-    def set_matrix(self, matrix, quadrant = 1, colors = []):
-        """assumes 1 for primary, 2 for secondary color (everything beyond is treated as an error)
-        quadrant: 1,2,3,4 : 4|1
-                            ___
-                            3|2
-        """
+    
 
-        # reshape to the main size: (eg 32x16) (always aligns the given matrix on top left.)
-
-        if len(matrix.shape) != 3:
-        # add depth (rgb values)
-            matrix = self.matrix_add_depth(matrix,colors)
-        self.set_matrix_rgb(matrix,quadrant)
-
-
-    def matrix_add_depth(self, matrix, colors = []):
-        """transforms a 2d-array with 0,1,2 to a 3d-array with the rgb values for primary and secondary color"""
-
-        c1 = self.primary
-        c2 = self.secondary
-        c3 = self.red
-        if len(colors) > 0:
-            c1 = colors[0]
-        if len(colors) > 1:
-            c2 = colors[1]
-        if len(colors) > 2:
-            c3 = colors[2]
-        if len(colors) > 3:
-            print("Too many colors")
-
-
-        r3 = np.zeros((matrix.shape[0],matrix.shape[1],3),dtype=int)
-        for i in range(matrix.shape[0]):
-            for j in range(matrix.shape[1]):
-                t = int(matrix[i, j])
-                if t == 0:
-                    r3[i, j, :] = [0,0,0]
-                elif t == 1:
-                    r3[i, j, :] = c1
-                elif t == 2:
-                    r3[i, j, :] = c2
-                else:
-                    r3[i, j, :] = c3
-        return r3
-
-
-    def set_matrix_rgb(self, matrix, quadrant=1):
-        result = np.zeros((self.height, self.width,3))
-        if quadrant == 1:
-            result[:matrix.shape[0], self.width-matrix.shape[1]:,...] = matrix
-        elif quadrant == 2:
-            result[self.height-matrix.shape[0]:, self.width-matrix.shape[1]:,...] = matrix
-        elif quadrant == 3:
-            result[self.height-matrix.shape[0]:, :matrix.shape[1],...] = matrix
-        else: # 4 or more
-            result[:matrix.shape[0], :matrix.shape[1],...] = matrix
-
-        self.output.set_matrix(result)
-
-
-    def clock_face(self, weather):
-        """weather as a dict"""
-        hour = converter.time_converter()
-        day = converter.date_converter()
-        face1 = hour + day
-        face1_3d = self.matrix_add_depth(face1)
-
-        if weather["show"] == "weather":
-            face2_3d = converter.weather_converter(weather["weather"])
-        else:
-            face2 = converter.time_converter(top=str(weather["low"]), bottom=str(weather["high"]))
-            face2 = np.concatenate((face2[:8,...],2*face2[8:,...]))
-            face2_3d = self.matrix_add_depth(face2,[[0, 102, 255],[255, 102, 0]])
-
-        face = np.zeros((max(face1_3d.shape[0],face2_3d.shape[0]),face1_3d.shape[1]+face2_3d.shape[1],3))
-
-        face[:face1_3d.shape[0],:face1_3d.shape[1],...] = face1_3d
-        face[:face2_3d.shape[0],face1_3d.shape[1]:,...] = face2_3d
-        self.set_matrix_rgb(face)
-
-
-    def text_scroll(self, text, speed, color):
-        pixels = converter.text_converter(text, 12)
-        sleep_time = 1 / speed
-        if color == "":
-            colors = []
-        else:
-            colors = [color]
-
-        frames = pixels.shape[1] - self.width
-        if frames <= 0:
-            frames = 1
-
-        for i in range(frames):
-            visible = pixels[:,i:self.width+i]
-            self.set_matrix(visible,4,colors)
-            time.sleep(sleep_time)
-        time.sleep(10 * sleep_time)

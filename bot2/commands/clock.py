@@ -103,15 +103,16 @@ class Clock(BotFunc):
             self.clock.set_brightness(value=1)
             start_color = numpy.array([153, 0, 51])
             end_color = numpy.array([255, 255, 0])
-            empty = numpy.zeros((16,32))
-            ones = empty
-            ones[ones == 0] = 1
+            col_show = numpy.zeros((*self.clock.shape, 3))
+            col_show[:,:,...] = start_color
+
             gradient = end_color - start_color
             # 20 steps should be fine => sleep_time = duration / 20
             for i in range(20):
                 ct = i/20 * gradient
-                col = [int(x) for x in ct+start_color]
-                self.clock.IO.set_matrix(ones,colors=[col])
+                col_show[:,:,...] = [int(x) for x in ct+start_color]
+                self.clock.IO.array = col_show
+                self.clock.IO.SHOW()
                 time.sleep(int(duration) / 20)
 
         self.clock.run(output,(duration,))
@@ -123,17 +124,19 @@ class Clock(BotFunc):
         frequency = update.message.text
 
         def output(duration, frequency):
-            self.set_brightness(value=1)
+            self.clock.set_brightness(value=1)
             duration =  int(duration)
             frequency = int(frequency)
             n = duration * frequency / 2
-            empty = numpy.zeros((16,32))
+            empty = numpy.zeros((*self.clock.shape,3))
             red = empty.copy()
-            red[red == 0] = 3
+            red[...,0] = 255
             for i in range(int(n)):
-                self.IO.set_matrix(red)
+                self.clock.IO.array = red
+                self.clock.IO.SHOW()
                 time.sleep(1/frequency)
-                self.IO.set_matrix(empty)
+                self.clock.IO.array = empty
+                self.clock.IO.SHOW()
                 time.sleep(1/frequency)
 
         if not(duration == 0 or frequency == 0):
@@ -151,8 +154,8 @@ class Clock(BotFunc):
         id = img.file_id
 
         file = bot.getFile(id).download_as_bytearray()
-        width = self.clock.IO.width
-        height = self.clock.IO.height
+        width = self.clock.shape[1]
+        height = self.clock.shape[0]
 
         img = Image.open(io.BytesIO(file))
         im_height = img.height
@@ -166,7 +169,8 @@ class Clock(BotFunc):
         a = numpy.asarray(t)
         
         def output(image, duration):
-            self.clock.IO.set_matrix(image)
+            self.clock.IO.array = image
+            self.clock.IO.SHOW()
             time.sleep(int(duration) * 60)
 
         self.clock.run(output,(a, duration))
@@ -176,7 +180,7 @@ class Clock(BotFunc):
     def exec_show_message(self, update: Update, context: CallbackContext) -> None:
         message_str = update.message.text
         update.message.reply_text("Now showing: " + message_str)
-        self.clock.run(self.clock.IO.text_scroll,(message_str, self.clock.tspeed, [200,200,200]))
+        self.clock.run(self.clock.text_scroll,(message_str,))
         return ConversationHandler.END
 
 

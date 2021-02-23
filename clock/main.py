@@ -4,20 +4,27 @@ import json
 from threading import Thread, Timer
 import numpy
 
-from clock.api import led
+from . import api, helpers
 
 
 class ClockFace(object):
     """Actual functions one might need for a clock"""
 
-    def __init__(self, text_speed=18, prst=""):
+    def __init__(self, text_speed=18, prst=object):
         """"""
         # added by the launcher, we have self.modules (dict)
 
-        self.persistence = prst
-        self.IO = led.OutputHandler(32,16)
+        # hard coded, but can be changed to taste
         self.tspeed = text_speed
-
+        self.primary = [200, 200, 200]
+        self.secondary = [10, 200, 10]
+        self.error = [200, 10, 10]
+        self.shape = (16,32)
+        # shape: (16,32) is hard-coded for the moment
+        self.persistence = prst
+        self.IO = api.led.OutputHandler(self.shape)
+        self.MOP = helpers.helper.MatrixOperations(self.shape, default_colors={"primary": self.primary, "secondary": self.secondary, "error": self.error})
+        
         self.output_thread = ""
         # Action the thread is currently performing
         self.output_queue = []
@@ -25,11 +32,13 @@ class ClockFace(object):
 
         self.weather = {"weather":"", "high":"", "low":"", "show":"temps"}
         self.weather_raw = {}
-        # different?
+
+        self.brightness = 1
         self.brightness_overwrite = {"value" : 1, "duration" : 0}
 
 
     def start(self):
+        self.clock_loop()
         while datetime.datetime.now().strftime("%H%M%S")[-2:] != "00":
             pass
         RepeatedTimer(60, self.clock_loop)
@@ -61,7 +70,7 @@ class ClockFace(object):
                 next = "weather"
             self.weather["show"] = next
 
-        self.set_face()
+        self.run(self.set_face,())
     
 
     def run(self, command, kw=()):
@@ -76,7 +85,7 @@ class ClockFace(object):
                 n = self.output_queue.pop(0)
                 enhanced_run(n[0],n[1])
             else:
-                self.IO.clock_face(self.weather)
+                self.set_face()
 
         if len(self.output_thread) == 0:
             t = Thread(target=enhanced_run, args=(command, kw))
@@ -88,17 +97,18 @@ class ClockFace(object):
     ############################################################################
     ### basic clock commands
     def set_face(self):
-        """"""
-        self.run(self.IO.clock_face,(self.weather,))
+        """Set the clock face (time + weather) by getting updated info - gets called every minute"""
+        face = self.MOP.clock_face(self.weather)
+        self.IO.array = face * self.brightness
+        self.IO.SHOW()
 
 
-    def set_brightness(self, overwrite=[],value=-1):
+    def set_brightness(self, value=-1, overwrite=[]):
         """Checks, what brightness rules to apply"""
 
         if value != -1:
-            self.IO.output.set_brightness(value)
+            self.brightness = value
             return
-
 
         if len(overwrite) != 0:
             self.brightness_overwrite = overwrite
@@ -110,8 +120,22 @@ class ClockFace(object):
         else:
             brightness = 0.01
 
-        self.IO.output.set_brightness(brightness)
+        self.brightness = brightness
 
+    def text_scroll(self, text, color=[[200,200,200]]):
+        pixels = self.MOP.text_converter(text, 12, color)
+        sleep_time = 1 / self.tspeed
+        width = self.shape[1]
+        frames = pixels.shape[1] - width
+        if frames <= 0:
+            frames = 1
+
+        for i in range(frames):
+            visible = pixels[:,i:width+i]
+            self.IO.array = visible*self.brightness
+            self.IO.SHOW()
+            time.sleep(sleep_time)
+        time.sleep(10 * sleep_time)
 
     
 
