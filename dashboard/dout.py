@@ -113,7 +113,7 @@ class DashBoard():
         fig = go.Figure()
         sensors = self.persistence["clock"]["sensors"]
         time = sensors["time"]
-        time = time - time[0] # rescale
+        time = [t - time[0] for t in time] # rescale
         for sensor in sensors.keys():
             if sensor != "time":
                 fig.add_trace(go.Scatter(x=time, y=sensors[sensor], mode="lines", text=sensor, line=dict(width=4)))
