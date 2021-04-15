@@ -3,46 +3,12 @@ import numpy as np
 import datetime
 import time
 
-
-####### bulky hard-coded values:
-digits = {
-    "1" : [[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
-    "2" : [[1,1,1],[0,0,1],[1,1,1],[1,0,0],[1,1,1]],
-    "3" : [[1,1,1],[0,0,1],[1,1,1],[0,0,1],[1,1,1]],
-    "4" : [[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1]],
-    "5" : [[1,1,1],[1,0,0],[1,1,1],[0,0,1],[1,1,1]],
-    "6" : [[1,1,1],[1,0,0],[1,1,1],[1,0,1],[1,1,1]],
-    "7" : [[1,1,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
-    "8" : [[1,1,1],[1,0,1],[1,1,1],[1,0,1],[1,1,1]],
-    "9" : [[1,1,1],[1,0,1],[1,1,1],[0,0,1],[1,1,1]],
-    "0" : [[1,1,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]],
-    "-" : [[0,0,0],[0,0,0],[1,1,1],[0,0,0],[0,0,0]],
-    "-1" : [[0,0,1],[0,0,1],[1,1,1],[0,0,1],[0,0,1]],
-    "error" : [[1,0,1],[1,0,1],[0,1,0],[1,0,1],[1,0,1]],
-} # these are 2-d arrays as we only work with one or 2 colors, and not the whole rgb spectrum
-
-##place of numbers, invariant (for the given shape of 16x32)
+# bulky hard-coded values:
+from . import shapes
+digits = shapes.digits
+weather_categories = shapes.weather_categories
 digit_position = [[2,4], [2,10], [9,4], [9,10]]
 
-weather_categories = {
-    "Clouds": "cloud",
-    "Rain": "rain and cloud",
-    "Thunderstorm": "thunder and cloud",
-    "Drizzle": "rain and cloud",
-    "Snow": "snow and cloud",
-    "Clear": "sun",
-    "Mist": "fog and clouds",
-    "Smoke": "Smoke",
-    "Haze": "Haze",
-    "Dust": "Dust",
-    "Fog": "fog",
-    "Sand": "Sand",
-    "Dust": "Dust",
-    "Ash": "Ash",
-    "Squal": "Squal",
-    "Tornado": "Tornado",
-    "error" : "moon"
-}
 
 days = np.append(np.zeros((15,16)), np.array([0,1,0,1,0,1,0,1,0,1,0,1,1,0,1,1])).reshape((16,16))
 

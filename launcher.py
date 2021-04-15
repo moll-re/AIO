@@ -1,7 +1,7 @@
 # functionality
-import bot2.main
-import clock.main
-import dashboard.main
+from bot import main
+from clock import cin, cout
+from dashboard import dout
 
 import persistence.main
 
@@ -23,24 +23,26 @@ else:
     )
 
 
-class Launcher():
+class Launcher:
     """Launches all other submodules"""
 
     def __init__(self):
         """"""
         self.persistence = persistence.main.PersistentDict("persistence/prst.json")
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Starting")
+        self.logger.info("Launcher initialized")
 
         if len(self.persistence) == 0:
             self.init_persistence()
         self.persistence["global"]["reboots"] += 1
 
-        self.clock_module = clock.main.ClockFace(prst=self.persistence)
-        self.bot_module = bot2.main.ChatBot(name="Norbit", version="3.0a", prst=self.persistence)
-        self.dashboard_module = dashboard.main.DashBoard(host_ip="0.0.0.0", prst=self.persistence)
+        self.clock_module = cout.ClockFace(prst=self.persistence)
+        self.bot_module = main.ChatBot(name="Norbit", version="3.0a", prst=self.persistence)
+        self.dashboard_module = dout.DashBoard(host_ip="0.0.0.0", prst=self.persistence)
+        self.sensors = cin.SensorReadout(prst=self.persistence)
 
         self.modules = {
+            "sensors" : self.sensors,
             "bot" : self.bot_module,
             "clock" : self.clock_module,
             "dashboard" : self.dashboard_module,
@@ -50,10 +52,10 @@ class Launcher():
             self.logger.info("Starting module "+ module.__class__.__name__)
             module.modules = self.modules
             module.start()
-
+        
 
     def init_persistence(self):
-        self.logger.warn("No persistence found, created a new one")
+        self.logger.warning("No persistence found, created a new one")
 
         self.persistence["bot"] =  {
             "send_activity" : {"hour":[], "count":[]},
@@ -63,7 +65,14 @@ class Launcher():
             "chat_members": {},
             "aliases" : {}
         }
-        self.persistence["clock"] = {}
+        self.persistence["clock"] = {
+            "sensors" : {
+                "time" : [],
+                "temperature":[],
+                "humidity":[],
+                "brightness" : [],
+                }
+        }
         self.persistence["dashboard"] = {}
         self.persistence["global"] = {
             "lists" : {},

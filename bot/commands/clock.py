@@ -9,9 +9,10 @@ MESSAGE, WAKE, ALARM, IMAGE, ART = range(3,8)
 
 class Clock(BotFunc):
     """pass on commands to clock-module"""
-    def __init__(self, prst, clock_module):
+    def __init__(self, prst, clock_module, art_api):
         super().__init__(prst)
         self.clock = clock_module
+        self.api_art = art_api
 
     def create_handler(self):
         handler = ConversationHandler(
@@ -84,7 +85,8 @@ class Clock(BotFunc):
         query.answer()
 
         query.edit_message_text("Ok. How long should we display art? (in hours")
-        return ART
+        self.next_state = {ART : "And how many artworks would you like to see during that time?"}
+        return ADDARG
 
     def get_arg1(self, update: Update, context: CallbackContext) -> None:
         a = update.message.text
@@ -111,8 +113,7 @@ class Clock(BotFunc):
             for i in range(20):
                 ct = i/20 * gradient
                 col_show[:,:,...] = [int(x) for x in ct+start_color]
-                self.clock.IO.array = col_show
-                self.clock.IO.SHOW()
+                self.clock.IO.put(col_show)
                 time.sleep(int(duration) / 20)
 
         self.clock.run(output,(duration,))
@@ -132,11 +133,9 @@ class Clock(BotFunc):
             red = empty.copy()
             red[...,0] = 255
             for i in range(int(n)):
-                self.clock.IO.array = red
-                self.clock.IO.SHOW()
+                self.clock.IO.put(red)
                 time.sleep(1/frequency)
-                self.clock.IO.array = empty
-                self.clock.IO.SHOW()
+                self.clock.IO.put(empty)
                 time.sleep(1/frequency)
 
         if not(duration == 0 or frequency == 0):
@@ -169,8 +168,7 @@ class Clock(BotFunc):
         a = numpy.asarray(t)
         
         def output(image, duration):
-            self.clock.IO.array = image
-            self.clock.IO.SHOW()
+            self.clock.IO.put(image)
             time.sleep(int(duration) * 60)
 
         self.clock.run(output,(a, duration))
@@ -185,5 +183,29 @@ class Clock(BotFunc):
 
 
     def exec_art_gallery(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_text("Puuh, thats tough, I'm not ready for that.")
+        duration = float(self.additional_argument)
+        number = int(update.message.text)
+        
+        def output(number, duration):
+            for i in range(number):
+                img = self.api_art.get_random_art() # returns an PIL.Image object
+                im_height = img.height
+                im_width = img.width
+
+                width = self.clock.shape[1]
+                height = self.clock.shape[0]
+                
+                scalex = im_width // width
+                scaley = im_height // height
+                scale = min(scalex, scaley)
+
+                t = img.resize((width, height),box=(0,0,width*scale,height*scale))
+                a = numpy.asarray(t)
+                self.clock.IO.put(a)
+
+                time.sleep(duration*3600 / number)
+
+
+        update.message.reply_text("Ok. Showing art for the next "+ str(duration) + " hours.")
+        self.clock.run(output,(number, duration))
         return ConversationHandler.END

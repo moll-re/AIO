@@ -12,10 +12,12 @@ class PersistentDict(dict):
 
         self.path = file_name
         self.last_action = ""
-        if not os.path.exists(self.path):
+        try:
+            self.read_dict()
+        except:
             with open(self.path, "a") as f:
                 f.write("{}")
-        self.read_dict()
+        
 
     ## helper - functions
     def write_dict(self):

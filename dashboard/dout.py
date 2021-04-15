@@ -15,6 +15,7 @@ import xmltodict
 
 import requests
 
+from . import helpers
 
 class DashBoard():
     """"""
@@ -44,11 +45,12 @@ class DashBoard():
             kids = [
                 self.card_header(),
                 dbc.CardColumns([
-                    self.card_weather(),
+                    # self.card_weather(),
                     *self.cards_lists(),
                     self.card_bot_stats(),
                     self.card_news(),
                     self.card_xkcd(),
+                    self.card_sensor_stats(),
                 ])
             ]
             return kids
@@ -98,8 +100,47 @@ class DashBoard():
         card = dbc.Card(
                 [   
                     dbc.CardBody([
-                        html.H4("Statistiken", className="card-title"),
+                        html.H4("Chat-Metriken", className="card-title"),
                         dcc.Graph(figure=self.stat_graph, config={'displayModeBar': False})
+                    ]),
+                ],
+                color="dark",
+                inverse=True,
+                )
+        return card
+
+    def card_sensor_stats(self):
+        fig = go.Figure()
+        sensors = self.persistence["clock"]["sensors"]
+        time = sensors["time"]
+        time = time - time[0] # rescale
+        for sensor in sensors.keys():
+            if sensor != "time":
+                fig.add_trace(go.Scatter(x=time, y=sensors[sensor], mode="lines", text=sensor, line=dict(width=4)))
+            
+        fig.layout.update(
+        #     xaxis = {
+        #         'showgrid': False, # thin lines in the background
+        #         'zeroline': False, # thick line at x=0
+        #         'visible': False,  # numbers below
+        #     }, # the same for yaxis
+        #     yaxis = {
+        #         'showgrid': False, # thin lines in the background
+        #         'zeroline': False, # thick line at x=0
+        #         'visible': False,  # numbers below
+        #     }, # the same for yaxis
+
+            showlegend=False,
+        #     margin=dict(l=0, r=0, t=0, b=0),
+        #     paper_bgcolor='rgba(0,0,0,0)',
+        #     plot_bgcolor='rgba(0,0,0,0)',
+            )
+
+        card = dbc.Card(
+                [   
+                    dbc.CardBody([
+                        html.H4("Sensor-Metriken", className="card-title"),
+                        dcc.Graph(figure=fig, config={'displayModeBar': False})
                     ]),
                 ],
                 color="dark",
@@ -222,24 +263,9 @@ class DashBoard():
 
     ######### helper:
     def set_stats(self):
-        def cleanse_graph(category):
-            x = self.persistence["bot"][category]["hour"]
-            y = self.persistence["bot"][category]["count"]
-            xn = range(x[0], x[-1]+1)
-            yn = []
-            count = 0
-            for x_i in xn:
-                if x_i in x:
-                    yn.append(y[count])
-                    count += 1
-                else:
-                    yn.append(0)
-            xn = [i - int(x[0]) for i in xn]
-            return xn, yn
-
-        xs, ys = cleanse_graph("send_activity")
-        xr, yr = cleanse_graph("receive_activity")
-        xe, ye = cleanse_graph("execute_activity")
+        xs, ys = helpers.clean_axis(self.persistence["bot"]["send_activity"]["hour"], self.persistence["bot"]["send_activity"]["count"])
+        xr, yr = helpers.clean_axis(self.persistence["bot"]["receive_activity"]["hour"], self.persistence["bot"]["receive_activity"]["count"])
+        xe, ye = helpers.clean_axis(self.persistence["bot"]["execute_activity"]["hour"], self.persistence["bot"]["execute_activity"]["count"])
         
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=xr, y=yr, mode="lines", text="Gelesen", line=dict(width=4)))

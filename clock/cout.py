@@ -1,13 +1,12 @@
 import datetime
 import time
-import json
-from threading import Thread, Timer
+from threading import Thread
 import numpy
 
-from . import api, helpers
+from . import hardware, helpers
 
 
-class ClockFace(object):
+class ClockFace:
     """Actual functions one might need for a clock"""
 
     def __init__(self, text_speed=18, prst=object):
@@ -19,10 +18,10 @@ class ClockFace(object):
         self.primary = [200, 200, 200]
         self.secondary = [10, 200, 10]
         self.error = [200, 10, 10]
-        self.shape = (16,32)
-        # shape: (16,32) is hard-coded for the moment
+        
         self.persistence = prst
-        self.IO = api.led.OutputHandler(self.shape)
+        self.IO = hardware.led.get_handler()
+        self.shape = self.IO.shape # (16,32) for now
         self.MOP = helpers.helper.MatrixOperations(self.shape, default_colors={"primary": self.primary, "secondary": self.secondary, "error": self.error})
         
         self.output_thread = ""
@@ -41,7 +40,8 @@ class ClockFace(object):
         self.clock_loop()
         while datetime.datetime.now().strftime("%H%M%S")[-2:] != "00":
             pass
-        RepeatedTimer(60, self.clock_loop)
+        helpers.timer.RepeatedTimer(60, self.clock_loop)
+        self.clock_loop()
 
 
     def clock_loop(self):
@@ -99,8 +99,7 @@ class ClockFace(object):
     def set_face(self):
         """Set the clock face (time + weather) by getting updated info - gets called every minute"""
         face = self.MOP.clock_face(self.weather)
-        self.IO.array = face * self.brightness
-        self.IO.SHOW()
+        self.IO.put(face * self.brightness)
 
 
     def set_brightness(self, value=-1, overwrite=[]):
@@ -122,6 +121,7 @@ class ClockFace(object):
 
         self.brightness = brightness
 
+
     def text_scroll(self, text, color=[[200,200,200]]):
         pixels = self.MOP.text_converter(text, 12, color)
         sleep_time = 1 / self.tspeed
@@ -132,39 +132,7 @@ class ClockFace(object):
 
         for i in range(frames):
             visible = pixels[:,i:width+i]
-            self.IO.array = visible*self.brightness
-            self.IO.SHOW()
+            self.IO.put(visible*self.brightness)
             time.sleep(sleep_time)
         time.sleep(10 * sleep_time)
 
-    
-
-
-
-#######################################################
-class RepeatedTimer(object):
-  def __init__(self, interval, function, *args, **kwargs):
-    self._timer = None
-    self.interval = interval
-    self.function = function
-    self.args = args
-    self.kwargs = kwargs
-    self.is_running = False
-    self.next_call = time.time()
-    self.start()
-
-  def _run(self):
-    self.is_running = False
-    self.start()
-    self.function(*self.args, **self.kwargs)
-
-  def start(self):
-    if not self.is_running:
-      self.next_call += self.interval
-      self._timer = Timer(self.next_call - time.time(), self._run)
-      self._timer.start()
-      self.is_running = True
-
-  def stop(self):
-    self._timer.cancel()
-    self.is_running = False
