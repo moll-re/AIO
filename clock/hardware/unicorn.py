@@ -3,6 +3,7 @@ import time
 import numpy
 try:
     import RPi.GPIO as GPIO
+    SETUP_FAIL = False
 except ImportError:
     from unittest.mock import Mock
     GPIO = Mock()
