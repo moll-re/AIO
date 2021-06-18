@@ -2,7 +2,6 @@ import json
 import os
 
 
-
 class PersistentDict(dict):
     """Extended dict that writes its content to a file every time a value is changed"""
 
@@ -32,6 +31,7 @@ class PersistentDict(dict):
                 super().__setitem__(key, tmp[key])
         self.last_action = "r"
 
+
     ## extended dictionary - logic
     def __setitem__(self, key, value):
         if self.last_action != "r":
@@ -45,8 +45,8 @@ class PersistentDict(dict):
             self.read_dict()
         
         ret_val = super().__getitem__(key)
-        if type(ret_val) == dict:
-            ret_val = HookedDict(key, self, ret_val)
+        if type(ret_val) != int and type(ret_val) != str:
+            ret_val = create_struct(type(ret_val), key, self, ret_val)
 
         return ret_val
     
@@ -57,25 +57,31 @@ class PersistentDict(dict):
 
 
 
-class HookedDict(dict):
-    """helper class to detect writes to a child-dictionary and triger a write in PersistentDict"""
+def create_struct(struct_type, own_name, parent_name, *args, **kwargs):
+    class HookedStruct(struct_type):
 
-    def __init__(self, own_name, parent_dict, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.name = own_name
-        self.parent = parent_dict
-    
-    def __setitem__(self, key, value):
-        super().__setitem__(key, value)
-        self.parent.__setitem__(self.name, self)
+        def __init__(self, own_name, parent_name, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.name = own_name
+            self.parent = parent_name
+        
+        def __setitem__(self, *args, **kwargs):
+            super().__setitem__(*args, **kwargs)
+            self.parent.__setitem__(self.name, self)
 
-    def __getitem__(self, key):
-        ret_val = super().__getitem__(key)
-        if type(ret_val) == dict:
-            ret_val = HookedDict(key, self, ret_val)
-        return ret_val
-    
-    def pop(self, k, d=None):
-        retvalue = super().pop(k, d)
-        self.parent.__setitem__(self.name, self)
-        return retvalue
+        def __getitem__(self, *args, **kwargs):
+            ret_val = super().__getitem__(*args, **kwargs)
+            if type(ret_val) != int and type(ret_val) != str:
+                ret_val = create_struct(type(ret_val), args[0], self, ret_val)
+            return ret_val
+
+        def pop(self, *args):
+            retvalue = super().pop(*args)
+            self.parent.__setitem__(self.name, self)
+            return retvalue
+
+        def append(self, *args):
+            super().append(*args)
+            self.parent.__setitem__(self.name, self)
+    print(*args)
+    return HookedStruct(own_name, parent_name, *args, **kwargs)

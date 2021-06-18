@@ -17,19 +17,20 @@ days = np.append(np.zeros((15,16)), np.array([0,1,0,1,0,1,0,1,0,1,0,1,1,0,1,1]))
 
 class MatrixOperations():
     """Helper functions to generate frequently-used images"""
-    def __init__(self, shape, default_colors):
+    def __init__(self, shape=[16,16]):
         self.shape = shape
         # shape is going to be (16,32) for the moment
-        self.primary = default_colors["primary"]
-        self.secondary = default_colors["secondary"]
-        self.error = default_colors["error"]
+        self.primary = [200, 200, 200]
+        self.secondary = [10, 200, 10]
+        self.error = [200, 10, 10]
 
 
     def time_converter(self, top="", bottom=""):
-        """Converts 4-digit time to a pixel-matrix
-        returns: np.array wich fills one half of self.shape (horizontally)"""
-        nshape = (self.shape[0], int(self.shape[1]/2))
-        pixels = np.zeros(nshape,dtype=np.uint8)
+        """Converts 4-digit time to a 16x16 pixel-matrix
+        returns: np.array"""
+        # nshape = (self.shape[0], int(self.shape[1]/2))
+        nshape = (16, 16)
+        pixels = np.zeros(nshape, dtype=np.uint8)
 
         if bottom == "" or top == "":
             top = datetime.datetime.now().strftime("%H")
@@ -62,7 +63,8 @@ class MatrixOperations():
 
 
     def date_converter(self):
-        nshape = (self.shape[0], int(self.shape[1]/2))
+        # nshape = (self.shape[0], int(self.shape[1]/2))
+        nshape = (16, 16)
         today = datetime.datetime.today()
         weekday = datetime.datetime.weekday(today)
         # size of the reduced array according to weekday
@@ -77,7 +79,8 @@ class MatrixOperations():
 
     def weather_converter(self, name):
         """Fills one half of the screen with weather info."""
-        nshape = (self.shape[0], int(self.shape[1]/2))
+        # nshape = (self.shape[0], int(self.shape[1]/2))
+        nshape = (16, 16)
         result = np.zeros(nshape)
         cwd = __file__.replace("\\","/") # for windows
         cwd = cwd.rsplit("/", 1)[0]  # the current working directory (where this file is)
@@ -90,6 +93,8 @@ class MatrixOperations():
 
         icon_loc = ["sun","moon","sun and clouds", "moon and clouds", "cloud","fog and clouds","2 clouds", "3 clouds", "rain and cloud", "rain and clouds", "rain and cloud and sun", "rain and cloud and moon", "thunder and cloud", "thunder and cloud and moon", "snow and cloud", "snow and cloud and moon", "fog","fog night"]
         #ordered 1 2 \n 3 4 \ 5 5 ...
+        if name == "":
+            name = "error"
         name = weather_categories[name]
         try:
             iy, ix = int(icon_loc.index(name)/2), icon_loc.index(name)%2
@@ -137,21 +142,16 @@ class MatrixOperations():
         hour = self.time_converter()
         day = self.date_converter()
         face1 = hour + day
+        # time + date:
         face1_3d = self.matrix_add_depth(face1)
-
-        if weather["show"] == "weather":
-            face2_3d = self.weather_converter(weather["weather"])
-        else:
-            face2 = self.time_converter(top=str(weather["low"]), bottom=str(weather["high"]))
-            face2 = np.concatenate((face2[:8,...],2*face2[8:,...]))
-            face2_3d = self.matrix_add_depth(face2,[[0, 102, 255],[255, 102, 0]])
-
-        face = np.zeros((max(face1_3d.shape[0],face2_3d.shape[0]),face1_3d.shape[1]+face2_3d.shape[1],3))
-
-        face[:face1_3d.shape[0],:face1_3d.shape[1],...] = face1_3d
-        face[:face2_3d.shape[0],face1_3d.shape[1]:,...] = face2_3d
+        # weather icons
+        face2_3d = self.weather_converter(weather["weather"])
+        # weather temps
+        face3 = self.time_converter(top=str(weather["low"]), bottom=str(weather["high"]))
+        face3 = np.concatenate((face3[:8,...],2*face3[8:,...]))
+        face3_3d = self.matrix_add_depth(face3,[[0, 102, 255],[255, 102, 0]])
         
-        return face
+        return [face1_3d, face2_3d, face3_3d]
 
     
     def text_converter(self, text, height, color):
@@ -166,3 +166,13 @@ class MatrixOperations():
         pixels = np.array(img, dtype=np.uint8)
         pixels3d = self.matrix_add_depth(pixels, color)
         return pixels3d
+
+
+    def get_fallback(self):
+        hour = self.time_converter()
+        day = self.date_converter()
+        face1 = hour + day
+        face1_3d = self.matrix_add_depth(face1)
+
+        face2_3d = face3_3d = np.zeros((16,16,3))
+        return [face1_3d, face2_3d, face3_3d]

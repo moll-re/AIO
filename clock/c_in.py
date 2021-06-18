@@ -8,9 +8,8 @@ from . import hardware, helpers
 class SensorReadout:
     """Overview class for (actual and potential) sensor sources"""
 
-    def __init__(self, prst=object):
+    def __init__(self):
         """"""
-        self.persistence = prst
         self.sensor_modules = { # we already call them, they are objects and not classes anymore
             "temperature" : hardware.sensors.TemperatureModule(),
             "humidity" : hardware.sensors.HumidityModule(),

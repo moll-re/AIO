@@ -14,6 +14,8 @@ import time
 import xmltodict
 
 import requests
+from threading import Thread
+
 
 from . import helpers
 
@@ -21,12 +23,13 @@ class DashBoard():
     """"""
     # added by the launcher, we have self.modules (dict)
 
-    def __init__(self, host_ip, prst):
+    def __init__(self, port):
         ## pre-sets
         
         self.inter_margin = "1em"
-        self.persistence = prst
-        self.host_ip = host_ip
+        self.host_ip = "0.0.0.0"
+        self.port = port
+
         ex_css = [dbc.themes.BOOTSTRAP]
         self.app = dash.Dash(__name__, external_stylesheets=ex_css)
         self.app.layout = html.Div([
@@ -57,7 +60,8 @@ class DashBoard():
 
 
     def start(self):
-        self.app.run_server(host=self.host_ip, port=80)#, debug=True)
+        flaskThread = Thread(target=app.run_server, kwargs={"host": self.host_ip, "port": self.port}).start()
+        #self.app.run_server()#, debug=True)
 
 
     def card_header(self):

@@ -1,6 +1,6 @@
 import colorsys
 import time
-import numpy
+import numpy as np
 try:
     import RPi.GPIO as GPIO
     SETUP_FAIL = False
@@ -68,9 +68,10 @@ class ClockOut:
             GPIO.output(self.PIN_CLK, GPIO.LOW)
 
 
-    def put(self, matrix):
+    def put(self, matrices):
         """Sets a height x width matrix directly"""
         self.reset_clock()
+        matrix = np.concatenate((matrices[0], matrices[1]), axis=0) # or 1??
         self.show(matrix)
 
 

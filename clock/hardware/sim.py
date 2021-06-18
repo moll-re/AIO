@@ -3,7 +3,7 @@ import colorsys
 import pygame.gfxdraw
 import time
 import pygame
-import numpy
+import numpy as np
 
 class ClockOut:
     """Creates a drawable window in case the real hardware is not accessible. For development"""
@@ -11,7 +11,7 @@ class ClockOut:
         self.pixel_size = 20
 
         self.shape = shape
-        self.pixels = numpy.zeros((*shape,3), dtype=int)
+        self.pixels = np.zeros((*shape,3), dtype=int)
         self.WIDTH = shape[1]
         self.HEIGHT = shape[0]
         self.window_width = self.WIDTH * self.pixel_size
@@ -22,13 +22,17 @@ class ClockOut:
         self.screen = pygame.display.set_mode([self.window_width, self.window_height])
 
 
-    def put(self, matrix):
+    def put(self, matrices):
         self.screen.fill((0, 0, 0))
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT:
                 print("Exiting...")
                 pygame.quit()
                 sys.exit()
+            
+        if self.shape == (16, 32):
+            matrix = np.concatenate((matrices[0], matrices[1]), axis=1)
+
         self.pixels = matrix
         self.draw_pixels()
         
