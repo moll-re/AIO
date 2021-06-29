@@ -22,9 +22,7 @@ class ClockBackend:
 
 
     
-    def clock_loop(self):
-        print("looping")
-        
+    def clock_loop(self):        
         t = int(datetime.datetime.now().strftime("%H%M"))
 
         if t % 5 == 0:

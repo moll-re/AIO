@@ -15,6 +15,11 @@ class FetchUpdates:
         self.last_fetch = {}
 
 
+    def start(self):
+        # dummy for errorless launching
+        pass
+    
+
     def get_updates(self):
         update_url = "http://" + self.base_url + "/getupdates"
         result = self.call_api(update_url)
@@ -30,15 +35,16 @@ class FetchUpdates:
     
 
     def fetch_data(self):
-        if self.update_calls == 0:
-            fetch = self.get_last()   
-        else:
-            fetch = self.get_updates()
-            if not fetch["is_new"]:
-                fetch = self.last_fetch
-            else:
-                self.last_fetch = fetch
         try:
+            if self.update_calls == 0:
+                fetch = self.get_last()   
+            else:
+                fetch = self.get_updates()
+                if not fetch["is_new"]:
+                    fetch = self.last_fetch
+                else:
+                    self.last_fetch = fetch
+            
             data = fetch["data"]
             has_queue = fetch["has_queue"]
         except:
@@ -60,6 +66,6 @@ class FetchUpdates:
             if result.pop("status") == "ok":
                 ret = result
         except:
-            logger.error("Bad api call for method {}.".format(url[:url.rfind("/")]))
+            logger.error("Bad api call for method {}.".format(url[url.rfind("/"):]))
 
         return ret

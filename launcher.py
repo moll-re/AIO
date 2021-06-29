@@ -1,4 +1,4 @@
-from persistence import p_io
+from persistence import p_io, p_out
 
 import logging
 import os
@@ -24,6 +24,8 @@ class Launcher:
     def __init__(self, **modules):
         """"""
         self.persistence = p_io.PersistentDict("persistence/prst.json")
+        self.db = p_out.DBLogging()
+
         self.logger = logging.getLogger(__name__)
         self.logger.info(self.__class__.__name__ + " initialized")
 
@@ -42,6 +44,7 @@ class Launcher:
             self.logger.info("Starting module "+ module.__class__.__name__)
             module.modules = self.modules
             module.persistence = self.persistence
+            module.db = self.db
             module.start()
 
 

@@ -13,8 +13,8 @@ FIRST = 1
 class Status(BotFunc):
     """Shows a short status of the program."""
     
-    def __init__(self, name, version, prst):
-        super().__init__(prst)
+    def __init__(self, name, version, db):
+        super().__init__(db)
         self.start_time = datetime.datetime.now()
         self.name = name
         self.version = version
@@ -33,7 +33,6 @@ class Status(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-        super().entry_point()
         keyboard = [
             [
                 InlineKeyboardButton("And the log?", callback_data="full"),
@@ -75,6 +74,8 @@ class Status(BotFunc):
             update.message.reply_text(message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
         else:
             update._effective_chat.send_message(message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
+        
+        super().log_activity(read = True, execute = True, send = True)
         return FIRST
 
 
@@ -85,6 +86,7 @@ class Status(BotFunc):
         with open("persistence/complete.log") as l:
             query.message.reply_document(l)
 
+        super().log_activity(read = False, execute = False, send = True)
         return ConversationHandler.END
 
 

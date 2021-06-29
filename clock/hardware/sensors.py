@@ -5,17 +5,23 @@ logger = logging.getLogger(__name__)
 class TempSim:
     """Simulates a temperature for running on windows"""
     temperature = 23 # return a celsius value
-    humidity = 0.3
+    humidity = 30
+    
+
+class LightSim:
+    def input(self, *args):
+        return 1
+
+
 
 
 class SensorModule:
     def __init__(self):
         logger.info("Using module " + self.__class__.__name__)
-    
-class LightSim:
-    def input(self, *args):
-        return 1
 
+
+
+## Real sensors!
 try:
     import board
     import adafruit_dht 

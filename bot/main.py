@@ -16,7 +16,7 @@ class ChatBot():
                 -> prst:dict - persistence (overloaded dict that writes to json file)
                 -> logger - logging object to unify log messages
         """
-        # added by the launcher, we have self.modules (dict) and persistence
+        # added by the launcher, we have self.modules (dict) and persistence and db
 
         self.name = name
         self.version = version
@@ -36,22 +36,22 @@ class ChatBot():
         
     def add_commands(self):
         # Mark modules as available
-        prst = self.persistence
-        self.help_module = self.commands.help.Help(prst)
+        db = self.db
+        self.help_module = self.commands.help.Help(db)
         self.sub_modules = {
-            "weather": self.commands.weather.Weather(self.api_weather, prst),
+            "weather": self.commands.weather.Weather(self.api_weather, db),
             "help" : self.help_module,
-            "status" : self.commands.status.Status(self.name, self.version, prst),
-            "zvv" : self.commands.zvv.Zvv(prst),
-            "list" : self.commands.lists.Lists(prst),
-            # "alias" : commands.alias.Alias(self.dispatcher, prst),
-            "joke" : self.commands.reddit.Joke(self.api_reddit, prst),
-            "meme" : self.commands.reddit.Meme(self.api_reddit, prst),
-            # "news" : self.commands.reddit.News(self.api_reddit, prst),
-            "search" : self.commands.search.Search(self.api_search, prst),
+            "status" : self.commands.status.Status(self.name, self.version, db),
+            "zvv" : self.commands.zvv.Zvv(db),
+            "list" : self.commands.lists.Lists(db),
+            # "alias" : commands.alias.Alias(self.dispatcher, db),
+            "joke" : self.commands.reddit.Joke(self.api_reddit, db),
+            "meme" : self.commands.reddit.Meme(self.api_reddit, db),
+            # "news" : self.commands.reddit.News(self.api_reddit, db),
+            "search" : self.commands.search.Search(self.api_search, db),
             # ...
 
-            "plaintext" : self.commands.plaintext.Plain(prst) # for handling non-command messages that should simply contribute to statistics
+            "plaintext" : self.commands.plaintext.Plain(db) # for handling non-command messages that should simply contribute to statistics
             }
         # must be a class that has a method create_handler
     
@@ -61,7 +61,7 @@ class ChatBot():
         self.help_module.add_commands(self.sub_modules)
     	
     def start(self):
-        self.sub_modules = {"clock" : self.commands.clock.Clock(self.persistence, self.modules["clock"], self.api_art)}
+        self.sub_modules = {"clock" : self.commands.clock.Clock(self.db, self.modules["clock"], self.api_art)}
         self.add_commands()
         self.telegram.start_polling()
         # self.telegram.idle()

@@ -8,8 +8,8 @@ START, DEST = range(2)
 class Zvv(BotFunc):
     """Connects to the swiss travel-api to get public transport routes"""
 
-    def __init__(self, prst):
-        super().__init__(prst)
+    def __init__(self, db):
+        super().__init__(db)
         self.start = ""
         self.dest = ""
         pass
@@ -27,7 +27,6 @@ class Zvv(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-        super().entry_point()
         update.message.reply_text("What is the start point?")
         return START
 
@@ -43,7 +42,8 @@ class Zvv(BotFunc):
         loc = update.message.text
         self.dest = loc
         route = self.get_result()
-        update.message.reply_text("Her are the routes I've got:\n" + route)
+        update.message.reply_text("Here are the routes I've got:\n" + route)
+        super().log_activity(read=True, execute=True, send=True)
         return ConversationHandler.END
 
 

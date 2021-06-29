@@ -37,7 +37,6 @@ class Clock(BotFunc):
         return handler
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-        super().entry_point()
         keyboard = [
             [InlineKeyboardButton("Make a wake-light", callback_data="wake")],
             [InlineKeyboardButton("Blink as alarm", callback_data="alarm")],
@@ -209,3 +208,11 @@ class Clock(BotFunc):
         update.message.reply_text("Ok. Showing art for the next "+ str(duration) + " hours.")
         self.clock.run(output,(number, duration))
         return ConversationHandler.END
+
+
+
+
+
+
+
+# TODO FIx this to work with the new backend

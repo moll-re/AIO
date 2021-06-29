@@ -24,9 +24,10 @@ class Joke(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-        super().entry_point()
+        
         keyboard = [[InlineKeyboardButton(str(i), callback_data=str(i)) for i in range(1,11)]]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        super().log_activity(read=True, execute=True, send=True) # at this point every step has been fulfilled
         update.message.reply_text("How many jokes?", reply_markup=reply_markup)
         return CHOOSE_NUM
 
@@ -71,7 +72,6 @@ class Meme(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-        super().entry_point()
 
         keyboard = [
             [InlineKeyboardButton("General", callback_data="memes"),],
@@ -81,6 +81,7 @@ class Meme(BotFunc):
             [InlineKeyboardButton("Biology", callback_data="biologymemes"),],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        super().log_activity(read=True, execute=True, send=True) # at this point every step has been fulfilled
         update.message.reply_text("What kind of memes?", reply_markup=reply_markup)
         return CHOOSE_TOPIC
 
@@ -105,6 +106,7 @@ class Meme(BotFunc):
         memes = self.api.get_random_rising(data[0], int(data[1]), "photo")
         if len(memes) != 0:
             for m in memes:
+                super().log_activity(read=False, execute=False, send=True) # we just sent an additional message
                 update.effective_chat.send_photo(photo = m["image"],caption = m["caption"])
         else:
            update.effective_chat.send_message("Sorry, the meme won't yeet.")

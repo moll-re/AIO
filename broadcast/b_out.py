@@ -73,6 +73,6 @@ class BroadcastUpdates:
             "status" : "ok",
             **kwargs
         }
-        print(ret)
+        
         return jsonify(ret)
 

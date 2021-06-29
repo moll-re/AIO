@@ -14,7 +14,7 @@ class ReceiverLauncher(launcher.Launcher):
         # active: periodically takes readouts
         self.clock_hardware_module = c_out.ClockFace()
         # active: periodically calls fetcher
-        self.receive_module = b_in.FetchUpdates(server_ip="192.168.1.110", port="1111")
+        self.receive_module = b_in.FetchUpdates(server_ip="localhost", port="1111")
         # passive: fetches data on demand
 
         super().__init__(

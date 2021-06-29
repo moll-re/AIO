@@ -1,15 +1,39 @@
 from peewee import *
+import datetime
+import logging
+logger = logging.getLogger(__name__)
+from threading import Thread
 
-#db = SqliteDatabase('data.db')
-db = MySQLDatabase("AIO_sensors", host="192.168.1.101", port=3306, user="pi", passwd="supersecret")
-# whyyy?
-
-class Metric(Model):
-    time = DateTimeField()
+from . import keys
+dbk = keys.db_keys
 
 
+db = PostgresqlDatabase(dbk["name"], user=dbk["username"], password=dbk["password"], host=dbk["url"], port=dbk["port"], autorollback=True)
+
+
+
+class DBModel(Model):
+    # specific to the above DB
     class Meta:
         database = db
+
+    def save(self):
+        # fail-safe writing of the db-object. Usually threaded because the caller is threaded
+        try:
+            # db.connect()
+            super().save()
+            # db.close()
+        except Exception as e:
+            logger.error("Could not write to db. Dropping content of {}".format(self.__class__.__name__))
+            print(e)
+            # db.atomic().rollback()
+
+
+class Metric(DBModel):
+    time = DateTimeField()
+        
+
+
 
 class SensorMetric(Metric):
     # this is a continuous metric
@@ -19,11 +43,16 @@ class SensorMetric(Metric):
 
 
 class ChatMetric(Metric):
-    # this gets cumulated over one hour (or one day, or...)
-    activity = CharField()
+    read = BooleanField()
+    send = BooleanField()
+    execute = BooleanField()
 
 
 class ErrorMetric(Metric):
     # same as above
-    error = CharField()
+    error = TextField()
 
+
+class List(DBModel):
+    name = CharField(unique=True)
+    content = TextField() # unlimited length, use to serialise list into

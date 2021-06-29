@@ -4,8 +4,8 @@ FIRST = range(1)
 class Alias(BotFunc):
     """create a new command for command-paths you often use"""
 
-    def __init__(self, dispatcher, prst):
-        super().__init__(prst)
+    def __init__(self, dispatcher, db):
+        super().__init__(db)
         self.dispatcher = dispatcher
         # do not interact with him yet!
 
@@ -25,7 +25,6 @@ class Alias(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-        super().entry_point()
         test = self.dispatcher
         print(self.dispatcher.handlers[0])
         keyboard = [
@@ -34,6 +33,7 @@ class Alias(BotFunc):
             [InlineKeyboardButton("Delete alias", callback_data="delete")],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        super().log_activity(receive=True, execute=False, send=True)
         update.message.reply_text("What exactly do you want?", reply_markup=reply_markup)
         return FIRST
     

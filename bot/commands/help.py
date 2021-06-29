@@ -6,8 +6,8 @@ FIRST, EXECUTE = range(2)
 class Help(BotFunc):
     """Shows the functions and their usage"""
     
-    def __init__(self, prst):
-        super().__init__(prst)
+    def __init__(self, db):
+        super().__init__(db)
         self.available_commands = {}
 
 
@@ -39,7 +39,6 @@ class Help(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-        super().entry_point()
         keyboard = [
             [
                 InlineKeyboardButton("All commands", callback_data="all"),
@@ -47,6 +46,7 @@ class Help(BotFunc):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        super().log_activity(read=True, execute=True, send=True) # at this point every step has been fulfilled
         if update.message:
             update.message.reply_text("What exactly do you want?", reply_markup=reply_markup)
         else:

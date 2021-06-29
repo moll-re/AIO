@@ -5,8 +5,8 @@ SEARCH, MORE = range(2)
 class Search(BotFunc):
     """Browse the web for a topic."""
     
-    def __init__(self, api, prst):
-        super().__init__(prst)
+    def __init__(self, api, db):
+        super().__init__(db)
         self.available_commands = {}
         self.api = api
 
@@ -25,7 +25,6 @@ class Search(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-        super().entry_point()
 
         update.message.reply_text("What are we searching?")
         return SEARCH
@@ -43,6 +42,7 @@ class Search(BotFunc):
         message = first["text"] + "\n(" + first["url"] + ")\n\n"
 
         update.message.reply_text(text = message, reply_markup=reply_markup)
+        super().log_activity(read = True, execute = True, send = True)
         return MORE
     
 
@@ -55,4 +55,5 @@ class Search(BotFunc):
             message += r["text"] + "\n(" + r["url"] + ")\n\n"
 
         query.edit_message_text(message)
+        super().log_activity(read = False, execute = False, send = True)
         return ConversationHandler.END

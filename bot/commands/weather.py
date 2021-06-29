@@ -6,9 +6,9 @@ FIRST = 1
 
 class Weather(BotFunc):
     """Shows a weatherforecast for a given location"""
-    def __init__(self, api, prst):
+    def __init__(self, api, db):
         """initialize api and persistence"""
-        super().__init__(prst)
+        super().__init__(db)
         self.api = api
         self.city = ""
 
@@ -31,7 +31,6 @@ class Weather(BotFunc):
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
         """Reacts the call of the command. Prints the first buttons"""
-        super().entry_point()
         keyboard = [
             [
                 InlineKeyboardButton("Zürich", callback_data="city-zurich"),
@@ -78,6 +77,7 @@ class Weather(BotFunc):
             text = "Weather: \n\n" + weather,
             parse_mode = ParseMode.HTML
         )
+        super().log_activity(read = True, execute = True, send = True)
         return ConversationHandler.END
 
 
