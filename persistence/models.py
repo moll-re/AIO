@@ -8,7 +8,7 @@ from . import keys
 dbk = keys.db_keys
 
 
-db = PostgresqlDatabase(dbk["name"], user=dbk["username"], password=dbk["password"], host=dbk["url"], port=dbk["port"], autorollback=True)
+db = MySQLDatabase(dbk["name"], user=dbk["username"], password=dbk["password"], host=dbk["url"], port=dbk["port"], autorollback=True)
 
 
 

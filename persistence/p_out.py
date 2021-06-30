@@ -11,11 +11,10 @@ class DBLogging:
         self.errors = models.ErrorMetric
         self.lists = models.List
 
-    #     self.create_tables()
+        self.create_tables()
 
-    # def create_tables(self):
-    #     with self.db as db:
-    #         db.create_tables([self.sensors, self.chats, self.errors, self.lists])
+    def create_tables(self):
+        self.db.create_tables([self.sensors, self.chats, self.errors, self.lists])
 
 
 

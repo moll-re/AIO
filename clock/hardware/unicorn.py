@@ -71,7 +71,7 @@ class ClockOut:
     def put(self, matrices):
         """Sets a height x width matrix directly"""
         self.reset_clock()
-        matrix = np.concatenate((matrices[0], matrices[1]), axis=0) # or 1??
+        matrix = np.concatenate((matrices[0], matrices[1]), axis=1) # or 1??
         self.show(matrix)
 
 
@@ -85,11 +85,11 @@ class ClockOut:
         """Output the contents of the buffer to Unicorn HAT HD."""
         ##########################################################
         ## Change to desire
-        buff2 = numpy.rot90(matrix[:self.HEIGHT,:16],3)
-        buff1 = numpy.rot90(matrix[:self.HEIGHT,16:32],1)
+        buff2 = np.rot90(matrix[:self.HEIGHT,:16],3)
+        buff1 = np.rot90(matrix[:self.HEIGHT,16:32],1)
         ##########################################################
         # separated these are: 16x16x3 arrays
-        buff1, buff2 = [(x.reshape(768)).astype(numpy.uint8).tolist() for x in (buff1, buff2)]
+        buff1, buff2 = [(x.reshape(768)).astype(np.uint8).tolist() for x in (buff1, buff2)]
 
         self.spi_write(buff1, buff2)
 
