@@ -55,20 +55,20 @@ class Status(BotFunc):
 
         message += "Status: Running 🟢\n"
         message += "Uptime: `" + delta[:delta.rfind(".")] + "`\n"
-        message += "Reboots: `" + str(self.persistence["global"]["reboots"]) + "`\n"
+        # message += "Reboots: `" + str(self.persistence["global"]["reboots"]) + "`\n"
         message += "IP (public): `" + ip + "`\n"
         message += "IP (private): `" + str(local_ips) + "`\n"
         u = str(self.get_ngrok_url())
         message += "URL: [" + u + "](" + u + ")\n"
         
-        tot_r = np.array(self.persistence["bot"]["receive_activity"]["count"]).sum()
-        message += "Total messages read: `" + str(tot_r) + "`\n"
+        tot_r = self.db.chats.select().where(self.db.chats.read == True).count()
+        message += "Total messages read: `{}`\n".format(tot_r)
 
-        tot_s = np.array(self.persistence["bot"]["send_activity"]["count"]).sum()
-        message += "Total messages sent: `" + str(tot_s) + "`\n"
+        tot_s = self.db.chats.select().where(self.db.chats.send == True).count()
+        message += "Total messages sent: `{}`\n".format(tot_s)
 
-        tot_e = np.array(self.persistence["bot"]["execute_activity"]["count"]).sum()
-        message += "Commands executed `" + str(tot_e) + "`\n"
+        tot_e = self.db.chats.select().where(self.db.chats.execute == True).count()
+        message += "Total commands executed: `{}`\n".format(tot_e)
 
         if update.message:
             update.message.reply_text(message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)

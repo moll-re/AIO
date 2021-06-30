@@ -59,7 +59,7 @@ class HumidityModule(SensorModule):
     Returns: humidity"""
     def __init__(self):
         super().__init__()
-        self.device = self.device = dht11
+        self.device = dht11
         
     def readout(self):
         try:
