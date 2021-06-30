@@ -7,6 +7,22 @@ from broadcast import b_out
 import launcher
 
 
+import logging
+import os
+
+if os.name == "nt":
+    # development
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+    )
+else:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO,
+        filename='persistence/server.log',
+    )
+
+
 
 class BroadcastLauncher(launcher.Launcher):
     """Launcher for all server-side modules. The hard-computations"""

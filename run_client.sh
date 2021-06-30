@@ -1,6 +1,6 @@
-#!/home/pi/AIO/VE/bin/python3
+#!/bin/bash
 
 sleep 15 # gpio not inited right after boot?
 
 cd /home/pi/AIO/
-python3 client.py
+VE/bin/python3 client.py

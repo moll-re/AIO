@@ -1,22 +1,5 @@
 from persistence import p_io, p_out
 
-import logging
-import os
-
-
-
-if os.name == "nt":
-    # development
-    logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-    )
-else:
-    logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO,
-        filename='persistence/complete.log',
-    )
-
 
 class Launcher:
     """base launcher that launches other submodules"""

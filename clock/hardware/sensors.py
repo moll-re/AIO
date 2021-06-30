@@ -30,6 +30,7 @@ try:
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(4, GPIO.IN)
 except ImportError:
+    logger.warn("Simulating sensor modules")
     dht11 = TempSim()
     GPIO = LightSim()
 
