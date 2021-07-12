@@ -83,5 +83,5 @@ def create_struct(struct_type, own_name, parent_name, *args, **kwargs):
         def append(self, *args):
             super().append(*args)
             self.parent.__setitem__(self.name, self)
-    print(*args)
+
     return HookedStruct(own_name, parent_name, *args, **kwargs)

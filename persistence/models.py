@@ -25,7 +25,7 @@ class DBModel(Model):
             # db.close()
         except Exception as e:
             logger.error("Could not write to db. Dropping content of {}".format(self.__class__.__name__))
-            print(e)
+            logger.error(e)
             # db.atomic().rollback()
 
 
@@ -33,7 +33,7 @@ class Metric(DBModel):
     time = DateTimeField()
         
 
-
+### Actual metrics:
 
 class SensorMetric(Metric):
     # this is a continuous metric

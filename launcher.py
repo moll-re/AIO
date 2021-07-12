@@ -3,6 +3,9 @@ import logging
 from persistence import p_io, p_out
 
 
+logger = logging.getLogger(__name__)
+
+
 class Launcher:
     """base launcher that launches other submodules"""
 
@@ -11,8 +14,7 @@ class Launcher:
         self.persistence = p_io.PersistentDict("persistence/prst.json")
         self.db = p_out.DBLogging()
 
-        self.logger = logging.getLogger(__name__)
-        self.logger.info(self.__class__.__name__ + " initialized")
+        logger.info(self.__class__.__name__ + " initialized")
 
         self.modules = modules
         if len(self.persistence) == 0:
@@ -26,7 +28,7 @@ class Launcher:
     def launch_modules(self):
 
         for module in self.modules.values():
-            self.logger.info("Starting module "+ module.__class__.__name__)
+            logger.info("Starting module "+ module.__class__.__name__)
             module.modules = self.modules
             module.persistence = self.persistence
             module.db = self.db
@@ -34,7 +36,7 @@ class Launcher:
 
 
     def init_persistence(self):
-        self.logger.warning("No persistence found, created a new one")
+        logger.warning("No persistence found, created a new one")
 
         self.persistence["global"] ={
             "lists" : {},

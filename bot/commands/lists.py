@@ -163,7 +163,6 @@ class Lists(BotFunc):
         item = update.message.text
         it = self.db.lists.get(self.db.lists.name == self.current_name)
         sl = it.content
-        print("SLSLLLL: {} -- {}".format(sl, type(sl)))
         sl += item + "<-->"
         self.db.lists.update(content=sl).where(self.db.lists.name == self.current_name).execute()
 

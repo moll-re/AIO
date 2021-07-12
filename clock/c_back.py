@@ -12,14 +12,10 @@ class ClockBackend:
         self.weather_raw = {}
         self.weather_face_swap = False
 
-        self.brightness = 1
-        self.brightness_overwrite = {"value" : 1, "duration" : 0}
-
 
     def start(self):
         self.out = self.modules["broadcast"]
         helpers.timer.RepeatedTimer(15, self.clock_loop)
-
 
     
     def clock_loop(self):        
@@ -40,7 +36,7 @@ class ClockBackend:
                 self.weather["weather"] = "error"
                 self.weather["high"] = "error"
                 self.weather["low"] = "error"
-            # if weather == self.weather.raw do nothing
+
             self.weather_face_swap = not self.weather_face_swap
 
         self.send_face()
@@ -54,23 +50,10 @@ class ClockBackend:
         if self.weather_face_swap:
             matrices = [matrices[0], matrices[2], matrices[1]]
 
-        # apply brightness
-        b = self.get_brightness()
-        matrices = [(b * m).tolist() for m in matrices]
+        matrices = [m.tolist() for m in matrices]
         self.out.queue.append({"matrices" : matrices})
 
 
-    def get_brightness(self):
-        """Checks, what brightness rules to apply"""
-
-        is_WE = datetime.datetime.now().weekday() > 4
-        now = int(datetime.datetime.now().strftime("%H%M"))
-        if (is_WE and (now > 1000 and now < 2200)) or ((not is_WE) and (now > 800 and now < 2130)):
-            brightness = 0.8
-        else:
-            brightness = 0.01
-
-        return brightness
 
 
     # def text_scroll(self, text, color=[[200,200,200]]):

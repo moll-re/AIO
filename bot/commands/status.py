@@ -83,7 +83,7 @@ class Status(BotFunc):
         query = update.callback_query
         wanted = query.data.replace("status-","")
         query.answer()
-        with open("persistence/complete.log") as l:
+        with open("persistence/server.log") as l:
             query.message.reply_document(l)
 
         super().log_activity(read = False, execute = False, send = True)

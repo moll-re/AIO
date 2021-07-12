@@ -26,7 +26,6 @@ class Alias(BotFunc):
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
         test = self.dispatcher
-        print(self.dispatcher.handlers[0])
         keyboard = [
             [InlineKeyboardButton("All aliases", callback_data="all")],
             [InlineKeyboardButton("Create new alias", callback_data="new")],

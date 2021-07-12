@@ -1,10 +1,13 @@
 import requests
 import datetime
 
+import logging
+logger = logging.getLogger(__name__)
 class WeatherFetch():
     def __init__(self, key):
         self.last_fetch = datetime.datetime.fromtimestamp(0)
         self.last_weather = ""
+        self.calls = 0
 
         self.url = "https://api.openweathermap.org/data/2.5/onecall?"
         self.key = key
@@ -15,6 +18,8 @@ class WeatherFetch():
 
             
             data = {"lat" : location[0], "lon" : location[1], "exclude" : "minutely,hourly", "appid" : self.key, "units" : "metric"}
+            self.calls += 1
+            logger.info("Just fetched weather. ({}th time)".format(self.calls))
             # today = datetime.datetime.today().weekday()
             # days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 

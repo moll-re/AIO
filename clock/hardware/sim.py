@@ -26,7 +26,6 @@ class ClockOut:
         self.screen.fill((0, 0, 0))
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT:
-                print("Exiting...")
                 pygame.quit()
                 sys.exit()
             
