@@ -59,7 +59,7 @@ class Help(BotFunc):
         query.answer()
         all_cmd = ""
         for h in self.available_commands:
-            all_cmd += h + " - `" + self.available_commands[h] + "`\n"
+            all_cmd += "{} - `{}`\n".format(h, self.available_commands[h])
 
         query.edit_message_text(text="List of all commands:\n" + all_cmd, parse_mode = ParseMode.MARKDOWN)
         return ConversationHandler.END
@@ -120,7 +120,7 @@ class Help(BotFunc):
 
         message = name + ": `" + self.available_commands[name] + "`"
         query.edit_message_text(
-            text= "EHHHHH",
+            text= "Timed out...",
             parse_mode = ParseMode.MARKDOWN_V2
         )
         return ConversationHandler.END

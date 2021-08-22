@@ -4,6 +4,14 @@ import numpy as np
 from threading import Thread
 
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+# hide the info-messages of each GET-request
+
+
+
+
 class BroadcastUpdates:
     """Broadcasts (out) updates for the hw-handler to be fetched periodically"""
     

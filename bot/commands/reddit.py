@@ -5,8 +5,8 @@ CHOOSE_NUM = 1
 class Joke(BotFunc):
     """Tells a joke from reddit."""
     
-    def __init__(self, api, prst):
-        super().__init__(prst)
+    def __init__(self, api, db):
+        super().__init__(db)
         self.available_commands = {}
         self.api = api
 
@@ -53,8 +53,8 @@ CHOOSE_TOPIC = 0
 class Meme(BotFunc):
     """Gets the latest memes from reddit"""
     
-    def __init__(self, api, prst):
-        super().__init__(prst)
+    def __init__(self, api, db):
+        super().__init__(db)
         self.available_commands = {}
         self.api = api
 
@@ -87,7 +87,6 @@ class Meme(BotFunc):
 
 
     def choose_topic(self, update: Update, context: CallbackContext) -> None:
-        super().entry_point()
         query = update.callback_query
         d = query.data
         query.answer()

@@ -50,7 +50,6 @@ class ChatBot():
             # "news" : self.commands.reddit.News(self.api_reddit, db),
             "search" : self.commands.search.Search(self.api_search, db),
             # ...
-
             "plaintext" : self.commands.plaintext.Plain(db) # for handling non-command messages that should simply contribute to statistics
             }
         # must be a class that has a method create_handler

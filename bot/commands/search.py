@@ -38,9 +38,11 @@ class Search(BotFunc):
         
         # formating
         self.results = results
-        first = results[0]
-        message = first["text"] + "\n(" + first["url"] + ")\n\n"
-
+        if results:
+            first = results[0]
+            message = first["text"] + "\n(" + first["url"] + ")\n\n"
+        else:
+            message = "No results for search query."
         update.message.reply_text(text = message, reply_markup=reply_markup)
         super().log_activity(read = True, execute = True, send = True)
         return MORE
