@@ -12,7 +12,7 @@ class Launcher:
     def __init__(self, **modules):
         """"""
         self.persistence = p_io.PersistentDict("persistence/prst.json")
-        self.db = p_out.DBLogging
+        self.db = p_out.DBConnector()
 
         logger.info(self.__class__.__name__ + " initialized")
 
@@ -31,7 +31,7 @@ class Launcher:
             logger.info("Starting module "+ module.__class__.__name__)
             module.modules = self.modules
             module.persistence = self.persistence
-            module.db = self.db() # newly initialized for every module
+            module.db = self.db # pooled ie multithreaded
             module.start()
 
 

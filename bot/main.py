@@ -62,5 +62,7 @@ class ChatBot():
     def start(self):
         self.sub_modules = {"clock" : self.commands.clock.Clock(self.db, self.modules["clock"], self.api_art)}
         self.add_commands()
-        self.telegram.start_polling()
+        self.telegram.start_polling(
+            poll_interval=0.2,
+        )
         # self.telegram.idle()
