@@ -25,7 +25,7 @@ class Search(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-
+        super().entry_point(update, context)
         update.message.reply_text("What are we searching?")
         return SEARCH
 

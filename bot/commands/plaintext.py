@@ -11,6 +11,7 @@ class Plain(BotFunc):
         return h
 
     def add_to_log(self, update: Update, context: CallbackContext) -> None:
+        super().entry_point(update, context)
         super().log_activity(
             read = True,
             send = False,

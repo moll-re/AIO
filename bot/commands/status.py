@@ -33,6 +33,7 @@ class Status(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
+        super().entry_point(update, context)
         keyboard = [
             [
                 InlineKeyboardButton("And the log?", callback_data="full"),

@@ -39,6 +39,8 @@ class Help(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
+        super().entry_point(update, context)
+
         keyboard = [
             [
                 InlineKeyboardButton("All commands", callback_data="all"),

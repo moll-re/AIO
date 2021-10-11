@@ -39,12 +39,12 @@ class DBModel(Model):
             logger.error(e)
             # db.atomic().rollback()
 
-    def get(self, *query, **filters):
-        try:
-            return super().get(*query, **filters)
-        except:
-            logger.error("Error while 'getting' from db.")
-            print(query, filters)
+    # def get(self, *query, **filters):
+    #     try:
+    #         return super().get(*query, **filters)
+    #     except Exception as e:
+    #         logger.error("Error while executing get: {}".format(e))
+    #         print(query, filters)
 
 
 class Metric(DBModel):

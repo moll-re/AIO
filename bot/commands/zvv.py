@@ -27,6 +27,7 @@ class Zvv(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
+        super().entry_point(update, context)
         update.message.reply_text("What is the start point?")
         return START
 

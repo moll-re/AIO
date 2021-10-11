@@ -30,6 +30,7 @@ class Weather(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
+        super().entry_point(update, context)
         """Reacts the call of the command. Prints the first buttons"""
         keyboard = [
             [

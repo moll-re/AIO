@@ -1,3 +1,4 @@
+from re import U
 from .template import *
 
 
@@ -24,7 +25,7 @@ class Joke(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
-        
+        super().entry_point(update, context)
         keyboard = [[InlineKeyboardButton(str(i), callback_data=str(i)) for i in range(1,11)]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         super().log_activity(read=True, execute=True, send=True) # at this point every step has been fulfilled

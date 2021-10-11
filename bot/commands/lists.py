@@ -40,6 +40,7 @@ class Lists(BotFunc):
 
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
+        super().entry_point(update, context)
         lists = self.db.lists.select()
         sl = [l.name for l in lists]
         keyboard = [[InlineKeyboardButton(k, callback_data="list-"+k)] for k in sl] + [[InlineKeyboardButton("New list", callback_data="new")]]
@@ -151,8 +152,12 @@ class Lists(BotFunc):
         query = update.callback_query
         query.answer()
         it = self.db.lists.get(self.db.lists.name == self.current_name)
-        content = it.content.split("<-->")
-        content = "\n".join(content)
+        if it:
+            content = it.content.split("<-->")
+            content = "\n".join(content)
+        else:
+            content = "List empty"
+        
         keyboard = [[InlineKeyboardButton("Add an item", callback_data="add"), InlineKeyboardButton("Back to the menu", callback_data="overview")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text("Content of " + self.current_name + ":\n" + content, reply_markup=reply_markup)
@@ -162,7 +167,10 @@ class Lists(BotFunc):
     def list_add_item(self, update: Update, context: CallbackContext) -> None:
         item = update.message.text
         it = self.db.lists.get(self.db.lists.name == self.current_name)
-        sl = it.content
+        if it:
+            sl = it.content
+        else:
+            sl = ""
         sl += item + "<-->"
         self.db.lists.update(content=sl).where(self.db.lists.name == self.current_name).execute()
 
