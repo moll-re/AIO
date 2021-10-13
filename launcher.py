@@ -12,7 +12,7 @@ class Launcher:
     def __init__(self, **modules):
         """"""
         self.persistence = p_io.PersistentDict("persistence/prst.json")
-        self.db = p_out.DBConnector()
+        self.db = p_out.DataBaseConnector()
 
         logger.info(self.__class__.__name__ + " initialized")
 

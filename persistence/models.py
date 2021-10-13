@@ -4,24 +4,14 @@ from playhouse.shortcuts import ReconnectMixin
 import logging
 logger = logging.getLogger(__name__)
 
-from . import keys
-dbk = keys.db_keys
 
 
+db = DatabaseProxy()
+# set the nature of the db at runtime
 
 class ReconnectDataBase(ReconnectMixin, MySQLDatabase):
     pass
 
-
-
-db = ReconnectDataBase(
-    dbk["name"],
-    user=dbk["username"],
-    password=dbk["password"],
-    host=dbk["url"],
-    port=dbk["port"],
-    autorollback=True
-)
 
 class DBModel(Model):
     # specific to the above DB
