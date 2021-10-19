@@ -70,10 +70,11 @@ class DataBaseConnector:
         self.connect_first()
         return models.List
 
-
     def connect_first(self):
-        if self.db_object.is_closed():
-            self.db_object.connect()
+        # if self.db_object.is_closed():
+        #    self.db_object.connect()
+        self.db_object.connect(reuse_if_open=True)
+
 
 
 
