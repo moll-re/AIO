@@ -1,5 +1,4 @@
 import logging
-import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ParseMode
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, Filters
 from telegram.ext import (
@@ -21,20 +20,20 @@ class BotFunc():
         self.db = db
 
 
-    def log_activity(self, **kwargs):
-        # mark that a new command has been executed
-        try:
-            data = self.db.chats(
-                time=datetime.datetime.now(),
-                **kwargs
-                )
-            # kwargs can look like
-            # receive=True,
-            # execute=True,
-            # send=False,
-            data.save()
-        except Exception as e:
-            self.logger.error("sql error: {}".format(e))
+    # def log_activity(self, **kwargs):
+    #     # mark that a new command has been executed
+    #     try:
+    #         data = self.db.chats(
+    #             time=datetime.datetime.now(),
+    #             **kwargs
+    #             )
+    #         # kwargs can look like
+    #         # receive=True,
+    #         # execute=True,
+    #         # send=False,
+    #         data.save()
+    #     except Exception as e:
+    #         self.logger.error("sql error: {}".format(e))
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
         if update.message.text:

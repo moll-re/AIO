@@ -62,6 +62,7 @@ class Status(BotFunc):
         u = str(self.get_ngrok_url())
         message += "URL: [" + u + "](" + u + ")\n"
         
+        # TODO new DB
         tot_r = self.db.chats.select().where(self.db.chats.read == True).count()
         message += "Total messages read: `{}`\n".format(tot_r)
 

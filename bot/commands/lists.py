@@ -1,8 +1,5 @@
 from .template import *
 
-import datetime
-import requests
-
 NAME, NEW, ACTION, ITEMADD, ITEMREMOVE = range(5)
 
 
@@ -41,6 +38,7 @@ class Lists(BotFunc):
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
         super().entry_point(update, context)
+        # TODO Change DB
         lists = self.db.lists.select()
         sl = [l.name for l in lists]
         keyboard = [[InlineKeyboardButton(k, callback_data="list-"+k)] for k in sl] + [[InlineKeyboardButton("New list", callback_data="new")]]
