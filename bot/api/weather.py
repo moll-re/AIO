@@ -6,7 +6,8 @@ logger = logging.getLogger(__name__)
 class WeatherFetch():
     def __init__(self, key):
         self.last_fetch = datetime.datetime.fromtimestamp(0)
-        self.last_weather = ""
+        self.last_fetch_location = []
+        self.last_weather = []
         self.calls = 0
 
         self.url = "https://api.openweathermap.org/data/2.5/onecall?"
@@ -14,8 +15,10 @@ class WeatherFetch():
 
     def show_weather(self, location):
         delta = datetime.datetime.now() - self.last_fetch
-        if delta.total_seconds()/60 > 60 or "\n" not in self.last_weather: # 1 hour passed:
-
+         # 1 hour passed, error, or location change
+        if delta.total_seconds() > 3600 \
+            or len(self.last_weather) == 0\
+            or self.last_fetch_location != location:
             
             data = {"lat" : location[0], "lon" : location[1], "exclude" : "minutely,hourly", "appid" : self.key, "units" : "metric"}
             self.calls += 1
@@ -35,11 +38,12 @@ class WeatherFetch():
                         "short" : day["weather"][0]["main"],
                         "temps" : [int(day["temp"]["min"]),int(day["temp"]["max"])]
                         })
+            
+                self.last_fetch_location = location
+                self.last_weather = ret_weather
+                self.last_fetch = datetime.datetime.now()
             except:
                 ret_weather = []
-
-            self.last_weather = ret_weather
-            self.last_fetch = datetime.datetime.now()
         else:
             ret_weather = self.last_weather
 

@@ -36,7 +36,7 @@ class ChatBot():
         
     def add_commands(self):
         # Mark modules as available
-        db = self.db
+        db = self.db_utils
         self.help_module = self.commands.help.Help(db)
         self.sub_modules = {
             "weather": self.commands.weather.Weather(self.api_weather, db),
@@ -60,7 +60,7 @@ class ChatBot():
         self.help_module.add_commands(self.sub_modules)
     	
     def start(self):
-        self.sub_modules = {"clock" : self.commands.clock.Clock(self.db, self.modules["clock"], self.api_art)}
+        self.sub_modules = {"clock" : self.commands.clock.Clock(self.db_utils, self.modules["clock"], self.api_art)}
         self.add_commands()
         self.telegram.start_polling(
             poll_interval=0.2,

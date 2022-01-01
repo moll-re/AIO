@@ -3,8 +3,6 @@ from .template import *
 import datetime
 import requests
 import socket
-import numpy as np
-import os
 import json
 
 
@@ -13,8 +11,8 @@ FIRST = 1
 class Status(BotFunc):
     """Shows a short status of the program."""
     
-    def __init__(self, name, version, db):
-        super().__init__(db)
+    def __init__(self, name, version, db_utils):
+        super().__init__(db_utils)
         self.start_time = datetime.datetime.now()
         self.name = name
         self.version = version
@@ -63,13 +61,13 @@ class Status(BotFunc):
         message += "URL: [" + u + "](" + u + ")\n"
         
         # TODO new DB
-        tot_r = self.db.chats.select().where(self.db.chats.read == True).count()
+        tot_r = self.db_utils.chat_count("read")
         message += "Total messages read: `{}`\n".format(tot_r)
 
-        tot_s = self.db.chats.select().where(self.db.chats.send == True).count()
+        tot_s = self.db_utils.chat_count("send")
         message += "Total messages sent: `{}`\n".format(tot_s)
 
-        tot_e = self.db.chats.select().where(self.db.chats.execute == True).count()
+        tot_e = self.db_utils.chat_count("execute")
         message += "Total commands executed: `{}`\n".format(tot_e)
 
         if update.message:
@@ -101,6 +99,5 @@ class Status(BotFunc):
             for i in res_json["tunnels"]:
                 if i['name'] == 'command_line':
                     return i['public_url']
-                    break
         except:
             return "Not available"

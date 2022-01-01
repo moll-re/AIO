@@ -15,25 +15,13 @@ import datetime
 
 class BotFunc():
     """Base class for a specific bot-functionality"""
-    def __init__(self, db):
+    def __init__(self, db_utils):
         self.logger = logging.getLogger(__name__)
-        self.db = db
+        self.db_utils = db_utils
 
-
-    # def log_activity(self, **kwargs):
-    #     # mark that a new command has been executed
-    #     try:
-    #         data = self.db.chats(
-    #             time=datetime.datetime.now(),
-    #             **kwargs
-    #             )
-    #         # kwargs can look like
-    #         # receive=True,
-    #         # execute=True,
-    #         # send=False,
-    #         data.save()
-    #     except Exception as e:
-    #         self.logger.error("sql error: {}".format(e))
+    def log_activity(self, **kwargs):
+        # mark that a new command has been executed
+        self.db_utils.sensor_log(**kwargs)
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
         if update.message.text:

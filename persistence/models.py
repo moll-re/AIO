@@ -45,11 +45,12 @@ class ErrorMetric(Metric):
 
 class List(DBModel):
     name = CharField(unique=True)
-    content = TextField() # unlimited length, use to serialise list into
+    content = TextField(default="") # unlimited length, use to serialise list into
 
     @property
     def content_as_list(self):
-        return json.loads(self.content)
+        return json.loads(self.content or '[]')
     
     def set_content(self, list_content):
         self.content = json.dumps(list_content)
+        self.save()

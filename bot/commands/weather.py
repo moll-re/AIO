@@ -75,7 +75,7 @@ class Weather(BotFunc):
         forecast_time = query.data.replace("time-","")
         weather = self.get_weather(self.city, forecast_time)
         query.edit_message_text(
-            text = "Weather: \n\n" + weather,
+            text = "Broadcast for {}: \n\n{}".format(self.city, weather),
             parse_mode = ParseMode.HTML
         )
         super().log_activity(read = True, execute = True, send = True)

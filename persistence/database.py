@@ -22,19 +22,17 @@ db_connection = PooledMySQLDatabase(
 )
 
 
-def auto_connect_db(action):
-    def decorated(func):
-        def wrapper(*args, **kwargs):
-            #before:
-            db_connection.connect()
-            ret = func(*args, **kwargs)
-            #after:
-            db_connection.close()
-            # also, action is in scope now
-            return ret
-        
-        return wrapper
-    return decorated
+def auto_connect_db(func):
+    def wrapper(*args, **kwargs):
+        #before:
+        db_connection.connect()
+        ret = func(*args, **kwargs)
+        #after:
+        db_connection.close()
+        # also, action is in scope now
+        return ret
+    
+    return wrapper
 
 
 
@@ -57,20 +55,21 @@ class DatabaseUtils:
         else: # does not exist
             return -1
 
-
+    @auto_connect_db
     def chat_log(self, **kwargs):
         models.ChatMetric(**kwargs)
 
-
+    @auto_connect_db
     def list_get(self, list_name=""):
         if not list_name: # return all
-            return models.List.select()
+            cursor = models.List.select(models.List.name).execute()
+            return [k.name for k in cursor]
         else:
-            return models.List.get(models.List.name == list_name)
+            return models.List.get(models.List.name == list_name).content_as_list
         
-    
-    def list_update(self, list_name, append="", replace=[]):
-        if replace:
+    @auto_connect_db    
+    def list_update(self, list_name, append="", replace=None):
+        if replace != None:
             models.List.get(models.List.name == list_name).set_content(replace)
         elif append:
             l_obj = models.List.get(models.List.name == list_name)
@@ -80,9 +79,14 @@ class DatabaseUtils:
         else:
             logger.warning("Empty update_list() query was made. Ignoring")
 
+    @auto_connect_db
+    def list_create(self, list_name):
+        models.List(name=list_name).save()
 
+    @auto_connect_db
     def list_delete(self, list_name):
-        models.List.delete().where(self.db.lists.name == list_name).execute()
+        models.List.delete().where(models.List.name == list_name).execute()
 
+    @auto_connect_db
     def sensor_log(self, **kwargs):
         models.SensorMetric(**kwargs).save()

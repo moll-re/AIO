@@ -6,9 +6,10 @@ NAME, NEW, ACTION, ITEMADD, ITEMREMOVE = range(5)
 class Lists(BotFunc):
     """Create and edit lists"""
 
-    def __init__(self, db):
-        super().__init__(db)
+    def __init__(self, db_utils):
+        super().__init__(db_utils)
         self.current_name = ""
+        # self.db_utils set through super()
 
 
     def create_handler(self):
@@ -38,10 +39,8 @@ class Lists(BotFunc):
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
         super().entry_point(update, context)
-        # TODO Change DB
-        lists = self.db.lists.select()
-        sl = [l.name for l in lists]
-        keyboard = [[InlineKeyboardButton(k, callback_data="list-"+k)] for k in sl] + [[InlineKeyboardButton("New list", callback_data="new")]]
+        lists = self.db_utils.list_get()
+        keyboard = [[InlineKeyboardButton(k, callback_data="list-"+k)] for k in lists] + [[InlineKeyboardButton("New list", callback_data="new")]]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
         super().log_activity(read=True, execute=False, send=True)
@@ -96,12 +95,12 @@ class Lists(BotFunc):
     def new_listname(self, update: Update, context: CallbackContext) -> None:
         name = update.message.text
         try:
-            data = self.db.lists(name=name, content="")
-            data.save()
+            self.db_utils.list_create(name)
             keyboard = [[InlineKeyboardButton("Add an item", callback_data="add"), InlineKeyboardButton("To the menu!", callback_data="overview")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             self.current_name = name
             update.message.reply_text("Thanks. List " + name + " was successfully created.", reply_markup=reply_markup)
+            super().log_activity(read=False, execute=True, send=True)
             return ACTION
         except Exception as e:
             update.message.reply_text("Oh no! Encountered exception: {}".format(e))
@@ -118,8 +117,7 @@ class Lists(BotFunc):
     def list_remove(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
         query.answer()
-        it = self.db.lists.get(self.db.lists.name == self.current_name)
-        sl = it.content.split("<-->")
+        sl = self.db_utils.list_get(self.current_name)
 
         keyboard = [[InlineKeyboardButton(k, callback_data=i)] for i,k in enumerate(sl)]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -131,7 +129,7 @@ class Lists(BotFunc):
     def list_clear(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
         query.answer()
-        self.db.lists.update(content="").where(self.db.lists.name == self.current_name).execute()
+        self.db_utils.list_update(self.current_name, replace=[])
         keyboard = [[InlineKeyboardButton("Add an item", callback_data="add"), InlineKeyboardButton("Back to the menu", callback_data="overview")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text("List " + self.current_name + " cleared", reply_markup=reply_markup)
@@ -141,7 +139,7 @@ class Lists(BotFunc):
     def list_delete(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
         query.answer()
-        self.db.lists.delete().where(self.db.lists.name == self.current_name).execute()
+        self.db_utils.list_delete(self.current_name)
         query.edit_message_text("List " + self.current_name + " deleted")
         return ConversationHandler.END
 
@@ -149,10 +147,9 @@ class Lists(BotFunc):
     def list_print(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
         query.answer()
-        it = self.db.lists.get(self.db.lists.name == self.current_name)
+        it = self.db_utils.list_get(self.current_name)
         if it:
-            content = it.content.split("<-->")
-            content = "\n".join(content)
+            content = "\n".join(it)
         else:
             content = "List empty"
         
@@ -164,14 +161,7 @@ class Lists(BotFunc):
 
     def list_add_item(self, update: Update, context: CallbackContext) -> None:
         item = update.message.text
-        it = self.db.lists.get(self.db.lists.name == self.current_name)
-        if it:
-            sl = it.content
-        else:
-            sl = ""
-        sl += item + "<-->"
-        self.db.lists.update(content=sl).where(self.db.lists.name == self.current_name).execute()
-
+        self.db_utils.list_update(self.current_name, append=item)
         keyboard = [[InlineKeyboardButton("Add some more", callback_data="add"), InlineKeyboardButton("Back to the menu", callback_data="overview")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         update.message.reply_text("Added " + item, reply_markup=reply_markup)
@@ -183,13 +173,9 @@ class Lists(BotFunc):
         ind = int(query.data)
         query.answer()
 
-        it = self.db.lists.get(self.db.lists.name == self.current_name)
-        old = it.content.split("<-->")
-        # todo make better
-
+        old = self.db_utils.list_get(self.current_name)
         name = old.pop(ind)
-        new = "<-->".join(old)
-        self.db.lists.update(content=new).where(self.db.lists.name == self.current_name).execute()
+        self.db_utils.list_update(self.current_name, replace=old)
 
         keyboard = [[InlineKeyboardButton("Remove another", callback_data="remove"), InlineKeyboardButton("Back to the menu", callback_data="overview")]]
         reply_markup = InlineKeyboardMarkup(keyboard)      
