@@ -8,9 +8,9 @@ import launcher
 
 
 import logging
-import os
+import platform
 
-if os.name == "nt":
+if platform.uname().node == "ArchSpectre":
     # development
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO

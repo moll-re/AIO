@@ -1,6 +1,4 @@
-import datetime
 import time
-from threading import Thread, Timer
 
 from . import hardware, helpers
 
@@ -16,9 +14,10 @@ class SensorReadout:
             "luminosity" : hardware.sensors.BrightnessModule(),
             # more to come?
         }
+        # self db_utils set externally
 
     def start(self):
-        helpers.timer.RepeatedTimer(300, self.spread_measure)
+        helpers.timer.RepeatedTimer(120, self.spread_measure)
 
     def spread_measure(self):
         measurements = dict((el,[]) for el in self.sensor_modules.keys())
@@ -33,24 +32,7 @@ class SensorReadout:
         results = {}
         for e in measurements.keys():
             lst = measurements[e]
-            results[e] = int(sum(lst) / len(lst))
+            results[e] = sum(lst) / len(lst)
 
-        self.save_results(**results)
+        self.db_utils.sensor_log(**results)
 
-
-    # def save_results(self, results):
-    #     current_minute = int(datetime.datetime.now().timestamp() // 60)
-        
-    #     self.persistence["clock"]["sensors"]["time"] += [current_minute]
-
-    #     for name in results.keys():
-    #         keep_value = sum(results[name]) / len(results[name])
-    #         self.persistence["clock"]["sensors"][name] += [keep_value]
-
-    
-    def save_results(self, **results):
-        data = self.db.sensors(
-            time=datetime.datetime.now(),
-            **results,
-            )
-        data.save()

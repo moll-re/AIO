@@ -4,8 +4,8 @@ logger = logging.getLogger(__name__)
 
 class TempSim:
     """Simulates a temperature for running on windows"""
-    temperature = 23 # return a celsius value
-    humidity = 30
+    temperature = 23.23 # return a celsius value
+    humidity = 30.4
     
 
 class LightSim:

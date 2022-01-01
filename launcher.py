@@ -1,22 +1,22 @@
 import logging
 
-from persistence import p_io, p_out
+from persistence import local_io, database
 
 
 logger = logging.getLogger(__name__)
 
 
 class Launcher:
-    """base launcher that launches other submodules"""
+    """Template for launching collections of modules"""
 
     def __init__(self, **modules):
         """"""
-        self.persistence = p_io.PersistentDict("persistence/prst.json")
-        self.db = p_out.DataBaseConnector()
+        self.persistence = local_io.PersistentDict("persistence/prst.json")
+        self.db_utils = database.DatabaseUtils
+        self.modules = modules
 
         logger.info(self.__class__.__name__ + " initialized")
 
-        self.modules = modules
         if len(self.persistence) == 0:
             self.init_persistence()
         self.persistence["global"]["reboots"] += 1
@@ -26,12 +26,11 @@ class Launcher:
         
         
     def launch_modules(self):
-
         for module in self.modules.values():
-            logger.info("Starting module "+ module.__class__.__name__)
+            logger.info("Starting module {}".format(module.__class__.__name__))
             module.modules = self.modules
             module.persistence = self.persistence
-            module.db = self.db # pooled ie multithreaded
+            module.db_utils = self.db_utils()
             module.start()
 
 
@@ -67,7 +66,3 @@ class Launcher:
             self.persistence[m_name] = data
 
         
-
-########################################################################
-## Aand liftoff!
-# Launcher()

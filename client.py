@@ -1,9 +1,7 @@
 # functionality
 from clock import c_in, c_out
 from broadcast import b_in
-
 import launcher
-
 
 import logging
 import os

@@ -27,9 +27,9 @@ class Metric(DBModel):
 
 class SensorMetric(Metric):
     # this is a continuous metric
-    temperature = IntegerField()
-    humidity = IntegerField()
-    luminosity = IntegerField()
+    temperature = FloatField()
+    humidity = FloatField()
+    luminosity = FloatField()
 
 
 class ChatMetric(Metric):

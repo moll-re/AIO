@@ -82,5 +82,7 @@ class DatabaseUtils:
 
 
     def list_delete(self, list_name):
-        models.List.delete().where(self.db.lists.name == self.current_name).execute()
+        models.List.delete().where(self.db.lists.name == list_name).execute()
 
+    def sensor_log(self, **kwargs):
+        models.SensorMetric(**kwargs).save()

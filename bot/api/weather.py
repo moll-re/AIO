@@ -20,12 +20,9 @@ class WeatherFetch():
             data = {"lat" : location[0], "lon" : location[1], "exclude" : "minutely,hourly", "appid" : self.key, "units" : "metric"}
             self.calls += 1
             logger.info("Just fetched weather. ({}th time)".format(self.calls))
-            # today = datetime.datetime.today().weekday()
-            # days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
             try:
                 weather = requests.get(self.url,params=data).json()
-                # categories = {"Clouds": ":cloud:", "Rain": ":cloud_with_rain:", "Thunderstorm": "thunder_cloud_rain", "Drizzle": ":droplet:", "Snow": ":cloud_snow:", "Clear": ":sun:", "Mist": "Mist", "Smoke": "Smoke", "Haze": "Haze", "Dust": "Dust", "Fog": "Fog", "Sand": "Sand", "Dust": "Dust", "Ash": "Ash", "Squall": "Squall", "Tornado": "Tornado",}
                 now = weather["current"]
                 ret_weather = []
                 ret_weather.append({
@@ -41,47 +38,9 @@ class WeatherFetch():
             except:
                 ret_weather = []
 
-            
-            #     now = weather["current"]
-            #     message = "<b>Now:</b> " + categories[now["weather"][0]["main"]] + "\n"
-            #     message += ":thermometer: " + str(int(now["temp"])) + "°\n\n"
-
-            #     weather_days = weather["daily"]
-                
-            #     for i, day in enumerate(weather_days):
-            #         if i == 0:
-            #             message += "<b>" + "Today" + ":</b> " + categories[day["weather"][0]["main"]] + "\n"
-            #         else:
-            #             message += "<b>" + days[(today + i + 1) % 7] + ":</b> " + categories[day["weather"][0]["main"]] + "\n"
-            #         message += ":thermometer: :fast_down_button: " + str(int(day["temp"]["min"])) + "° , :thermometer: :fast_up_button: " + str(int(day["temp"]["max"])) + "°\n\n"
-            # except:
-            #     message = "Query failed, it's my fault, I'm sorry :sad:"
-            
             self.last_weather = ret_weather
             self.last_fetch = datetime.datetime.now()
         else:
             ret_weather = self.last_weather
 
         return ret_weather
-
-    # def get_weather_by_city(self, city):
-    #     loc = get_coords_from_city(self, city)
-    #     weather = self.show_weather(loc)
-    #     return weather
-        
-        
-    # def get_coords_from_city(self, city):
-    #     url = "https://devru-latitude-longitude-find-v1.p.rapidapi.com/latlon.php"
-    #     data = {"location": city}
-    #     headers = {
-    #         "x-rapidapi-key" : "d4e0ab7ab3mshd5dde5a282649e0p11fd98jsnc93afd98e3aa",
-    #         "x-rapidapi-host" : "devru-latitude-longitude-find-v1.p.rapidapi.com",
-    #     }
-
-    #     #try:
-    #     resp = requests.request("GET", url, headers=headers, params=data)
-    #     result = resp.text
-    #     #except:
-    #     #    result = "???"
-    #     return result
-
