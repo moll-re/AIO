@@ -11,7 +11,7 @@ Just like AIO-coolers, this little program aims to tackle many problems at once.
 
 
 ### Chatbot
-Periodically calls the telegram api and reacts to sent commands. Also handles basic calls to the hardware: it allows you to control certain aspects of the clock.
+Periodically calls the telegram api and reacts to sent commands. Also handles basic calls to the hardware: it allows you to control certain aspects of the leds (TODO: implement this correctly)
 
 
 ### Clock
@@ -30,5 +30,3 @@ This program makes use of git submodules, namely `sql_as_rest_api`. This implies
 * Enter the repo
 * Type `git submodule init` which creates a `.gitmodules` file
 * Type `git submodule update` which fetches the newest version of these submodules
-
-TODO Describe dev process

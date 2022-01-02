@@ -9,10 +9,10 @@ MESSAGE, WAKE, ALARM, IMAGE, ART = range(3,8)
 
 class Clock(BotFunc):
     """pass on commands to clock-module"""
-    def __init__(self, prst, clock_module, art_api):
-        super().__init__(prst)
+    def __init__(self, db_utils, clock_module, art_api):
+        super().__init__(db_utils)
         self.clock = clock_module
-        self.api_art = art_api
+        self.art_api = art_api
 
     def create_handler(self):
         handler = ConversationHandler(
@@ -100,46 +100,36 @@ class Clock(BotFunc):
     def exec_wake_light(self, update: Update, context: CallbackContext) -> None:
         duration = update.message.text
 
-        def output(duration):
-            self.clock.set_brightness(value=1)
-            start_color = numpy.array([153, 0, 51])
-            end_color = numpy.array([255, 255, 0])
-            col_show = numpy.zeros((*self.clock.shape, 3))
-            col_show[:,:,...] = start_color
+        matrices = []
+        start_color = numpy.array([153, 0, 51])
+        end_color = numpy.array([255, 255, 0])
+        col_show = numpy.zeros((*self.clock.MOP.shape, 3))
+        col_show[:,:,...] = start_color
 
-            gradient = end_color - start_color
-            # 20 steps should be fine => sleep_time = duration / 20
-            for i in range(20):
-                ct = i/20 * gradient
-                col_show[:,:,...] = [int(x) for x in ct+start_color]
-                self.clock.IO.put(col_show)
-                time.sleep(int(duration) / 20)
+        gradient = end_color - start_color
+        # steps are shown at a frequency of ?? frames / second =>
+        for i in range(duration * 2): # / 0.5
+            ct = i/20 * gradient
+            col_show[:,:,...] = [int(x) for x in ct+start_color]
+            matrices.append(col_show)
 
-        self.clock.run(output,(duration,))
+        self.clock.out.queue.append({"matrices" : matrices})
         return ConversationHandler.END
 
 
     def exec_alarm_blink(self, update: Update, context: CallbackContext) -> None:
         duration = self.additional_argument
-        frequency = update.message.text
 
-        def output(duration, frequency):
-            self.clock.set_brightness(value=1)
-            duration =  int(duration)
-            frequency = int(frequency)
-            n = duration * frequency / 2
-            empty = numpy.zeros((*self.clock.shape,3))
-            red = empty.copy()
-            red[...,0] = 255
-            for i in range(int(n)):
-                self.clock.IO.put(red)
-                time.sleep(1/frequency)
-                self.clock.IO.put(empty)
-                time.sleep(1/frequency)
+        matrices = []
+        duration =  int(duration * 2)
+        empty = numpy.zeros((*self.clock.MOP.shape,3))
+        red = numpy.ones_like(empty) * 255
 
-        if not(duration == 0 or frequency == 0):
-            update.message.reply_text("Now blinking")
-            self.clock.run(output,(duration, frequency))
+        for _ in range(int(duration / 2)):
+            matrices.append(red)
+            matrices.append(empty)
+
+        self.clock.out.queue.append({"matrices": matrices})
         return ConversationHandler.END
         
 
@@ -166,11 +156,9 @@ class Clock(BotFunc):
         t = img.resize((width, height),box=(0,0,width*scale,height*scale))
         a = numpy.asarray(t)
         
-        def output(image, duration):
-            self.clock.IO.put(image)
-            time.sleep(int(duration) * 60)
+        matrices = [a for _ in range(2*60*duration)]
 
-        self.clock.run(output,(a, duration))
+        self.clock.out.queue.append({"matrices": matrices})
         return ConversationHandler.END
 
 
@@ -187,7 +175,7 @@ class Clock(BotFunc):
         
         def output(number, duration):
             for i in range(number):
-                img = self.api_art.get_random_art() # returns an PIL.Image object
+                img = self.art_api.get_random_art() # returns an PIL.Image object
                 im_height = img.height
                 im_width = img.width
 
