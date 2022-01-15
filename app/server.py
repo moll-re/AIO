@@ -8,8 +8,8 @@ import logging
 import platform
 
 
-if platform.uname().node == "ArchSpectre":
-    # development
+import os
+if os.getenv("dockerized", "") == "true" or platform.uname().node == "ArchSpectre":
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
     )

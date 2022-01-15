@@ -7,8 +7,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-from . import keys
-dbk = keys.db_keys
+import os
+if os.getenv("dockerized", "") == "true":
+    import sys
+    sys.path.append("/keys")
+    import db_keys as keys
+else:
+    from . import keys
+dbk = keys.db_access
 
 
 

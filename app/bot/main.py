@@ -66,4 +66,4 @@ class ChatBot():
         self.telegram.start_polling(
             poll_interval=0.2,
         )
-        # self.telegram.idle()
+        self.telegram.idle()
