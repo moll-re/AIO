@@ -21,7 +21,7 @@ class BotFunc():
 
     def log_activity(self, **kwargs):
         # mark that a new command has been executed
-        self.db_utils.sensor_log(**kwargs)
+        self.db_utils.chat_log(**kwargs)
 
     def entry_point(self, update: Update, context: CallbackContext) -> None:
         if update.message.text:
