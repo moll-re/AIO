@@ -11,10 +11,10 @@ import os
 if os.getenv("dockerized", "") == "true":
     import sys
     sys.path.append("/keys")
-    import db_keys as keys
+    import db_keys as dbkeys
 else:
-    from . import keys
-dbk = keys.db_keys
+    from . import keys as dbkeys
+dbk = dbkeys.db_keys
 
 
 
