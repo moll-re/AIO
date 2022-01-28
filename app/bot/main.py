@@ -22,13 +22,13 @@ class ChatBot():
         self.version = version
         
         # Import apis
-        self.api_weather = api.weather.WeatherFetch(api.keys.weather_api)
-        self.api_reddit = api.reddit.RedditFetch(api.keys.reddit_api)
+        self.api_weather = api.weather.WeatherFetch(api.apikeys.weather_api)
+        self.api_reddit = api.reddit.RedditFetch(api.apikeys.reddit_api)
         self.api_search = api.search.WebSearch()
         self.api_art = api.metmuseum.ArtFetch()
         # and so on
 
-        self.telegram = Updater(api.keys.telegram_api, use_context=True)
+        self.telegram = Updater(api.apikeys.telegram_api, use_context=True)
         self.dispatcher = self.telegram.dispatcher
 
 
