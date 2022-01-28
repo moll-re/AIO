@@ -14,7 +14,7 @@ if os.getenv("dockerized", "") == "true":
     import db_keys as keys
 else:
     from . import keys
-dbk = keys.db_access
+dbk = keys.db_keys
 
 
 
