@@ -7,6 +7,6 @@ RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /app/requi
 
 COPY app/ /app/
 WORKDIR /app/
-ENV containterized true
+ENV containterized=true
 
 CMD ["python3", "server.py"]
