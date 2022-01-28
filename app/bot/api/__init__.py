@@ -7,6 +7,6 @@ import os
 if os.getenv("dockerized", "") == "true":
     import sys
     sys.path.append("/keys")
-    import api_keys as keys
+    import api_keys as apikeys
 else:
-    from . import keys
+    from . import apikeys
