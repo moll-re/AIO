@@ -63,7 +63,7 @@ class DatabaseUtils:
 
     @auto_connect_db
     def chat_log(self, **kwargs):
-        models.ChatMetric(**kwargs)
+        models.ChatMetric(**kwargs).save()
 
     @auto_connect_db
     def list_get(self, list_name=""):
